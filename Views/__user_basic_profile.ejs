@@ -1,0 +1,87 @@
+<link rel="stylesheet" href="/__user_basic_profile.css">
+
+<%
+    const { user = {}, token } = locals
+    const {
+        firstName, lastName, username, role = "Incognito",
+        mustChangePassword
+    } = user
+
+    //const { USER_TYPES = {} } = locals.config || {}
+
+    const userRole = role.toLowerCase()
+    const endPoint = `/${ userRole }`
+
+    const name = firstName || lastName || username || role
+    const greetingTitle = `Hey, ${ tools.smartCapitalize(name) }`
+%>
+
+
+<meta name="user-role" content="<%= userRole %>">
+
+
+<label id="profile_switch" for="profile_switcher">
+    <input type="checkbox" name="profile_switcher" id="profile_switcher" hidden />
+    <svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+</label>
+
+
+<section class="user-basic-profile">
+    <label id="secondary-close" for="profile_switcher">Close &times;</label>
+
+    <h1 class="main-title"><%= greetingTitle %></h1>
+
+    <ul class="user-data">
+        <% Object.entries(user).forEach(([k, v]) => { %>
+            <% if (k !== "_id" && k !== "allowUsePhone") { %>
+                <li data-type="<%= k %>">
+                    <strong><%= tools.splitOnUpperCase(k) %></strong>
+                    <data><%=
+                        tools.isValidDate(v)
+                            ? tools.localDateTime(v, "time")
+                            : v instanceof Object && !Array.isArray(v)
+                            ? Object.entries(v).map(([k1, v1]) => `${ k1 }: ${ v1 }`).join(", ")
+                            : v
+                    %></data>
+                </li>
+            <% } %>
+        <% }) %>
+    </ul>
+    
+    <form class="password-update standart-form" action="<%= endPoint %>/password-update" method="post" data-hasSubmit>
+        <h2>Update password</h2>
+
+        <label class="box" for="current_password">
+            <input type="password" name="current_password" id="current_password"
+                placeholder="Current password"
+                autocomplete="off"
+                autofocus
+            required/>
+
+            <%- include("__components/ShowHidePassword.ejs", { related: "current_password" }) %>
+
+        </label>
+
+        <label class="box" for="new_password">
+            <input type="password" name="new_password" id="new_password"
+                placeholder="New password"
+                autocomplete="off"
+                value=""
+            required />
+
+            <%- include("__components/ShowHidePassword.ejs", { related: "new_password" }) %>
+
+        </label>
+        
+        <button class="standart-btn" type="submit">Update</button>
+        
+        <ul class="errors"></ul>
+    </form>
+
+</section>
+
+
+<script type="module" src="/__user_basic_profile.js" defer></script>

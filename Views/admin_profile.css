@@ -1,0 +1,74 @@
+/* Table */
+
+main.admin-profile table#items thead {
+    position: sticky; top: 3.3rem;
+    /* z-index: 1; */
+}
+main.admin-profile table#items tr {
+    display: grid;
+    grid-auto-flow: column;
+    /* grid-template-columns: 4rem repeat(7, 1fr) 1.7fr; */
+}
+
+
+/* Pagination */
+
+main.admin-profile #pagination_menu {
+    padding-block: 0.5rem;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+
+    position: sticky; top: 0;
+    isolation: isolate;
+    /* z-index: 10; */
+}
+main.admin-profile #pagination_menu * {
+    font-size: 1.3rem;
+}
+
+main.admin-profile #pagination_menu svg {
+    width: 24px;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    stroke: #178ed9;
+}
+
+main.admin-profile #pagination_menu [data-active="false"] svg {
+    opacity: 0.3;
+    stroke: #333;
+}
+
+main.admin-profile #pagination_menu strong {
+    font-size: inherit;
+    font-weight: 700;
+}
+
+
+
+
+/* Hidden */
+main.admin-profile table#items tbody tr {
+    /* interpolate-size: allow-keywords; */
+    transition: opacity, height;
+    transition-duration: 0.25s;
+    transition-timing-function: ease-out;
+
+    overflow: hidden; /* Important for height transitions */
+}
+main.admin-profile table#items tbody tr.-hidden,
+main.admin-profile table#items tbody tr.-hidden-sort,
+main.admin-profile table#items tbody tr.hidden,
+main.admin-profile table#items tbody tr.hidden1,
+main.admin-profile table#items tbody tr.hidden2,
+main.admin-profile table#items tbody tr.hidden3 {
+    height: 0;
+    opacity: 0.2;
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+}

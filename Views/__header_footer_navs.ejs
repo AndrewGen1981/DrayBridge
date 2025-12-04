@@ -1,0 +1,19 @@
+<% const { main_menu = [], role, isAuthenticated } = locals %>
+
+<nav>
+
+    <% main_menu.forEach(({
+            route = "/", title = "?", emoji = "🟡",
+            authSensitive, roleSensitive
+        }) => { %>
+
+        <% if ((!authSensitive || isAuthenticated) && (!roleSensitive || role === roleSensitive)) { %>
+            <a href="<%= route %>" title="<%= title %>">
+                <dt><%= title %></dt>
+                <dd><%= emoji %></dd>
+            </a>
+        <% } %>
+
+    <% }) %>
+
+</nav>

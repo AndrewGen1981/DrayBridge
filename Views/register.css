@@ -1,0 +1,151 @@
+/* .grecaptcha-badge {
+    bottom: 1rem !important;
+} */
+
+main.register form {
+    padding: 2.4rem;
+    width: min(45.5rem, 100%);
+
+    display: grid;
+    gap: 1.6rem;
+
+    background-color: var(--main-color1);
+    border-radius: 3px;
+}
+
+
+/* Pasword + Label */
+
+main.register form .password-box {
+    position: relative;
+}
+main.register form input#password:placeholder-shown + label {
+    display: none;
+}
+
+
+/* Online Validation Errors */
+/* Помилки, які проявляються одразу при заповненні поля */
+
+main.register form input#password[data-ok="false"] {
+    border-color: #f94f6f;
+    color: #f94f6f;
+}
+
+
+main.register form ul.errors {
+    display: none;
+}
+
+main.register form ul.errors[data-hidden="false"] {
+    display: block;
+    margin-inline: 2rem;
+}
+
+main.register form ul.errors li {
+    font-size: 1.25rem;
+    font-weight: 300;
+    color: #f79921b3;
+    text-wrap: pretty;
+    
+    margin-bottom: 0.35rem;
+}
+
+main.register form .links {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+
+/* Server Validation Errors - for __formTracker */
+/* підсвічує поля, які повернулися з помилкою після попереднього сабміту */
+main.register form input[data-invalid="true"]:not(.modified) {
+    border-color: #f94f6f;
+    color: #f94f6f;
+}
+
+
+/* Phone opt-in */
+
+main.register form input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+}
+
+main.register form label[for="allowUsePhone"] {
+    font-size: 1.2rem;
+    color: var(--font-color-300);
+    font-weight: 300;
+    text-align: justify;
+}
+main.register form label[for="allowUsePhone"] strong {
+    font-size: inherit;
+    font-weight: 500;
+}
+
+
+/* Privacy Policy + Terms of Service */
+
+main.register article {
+    margin: 3.2rem auto;
+    padding: 4.5rem;
+    
+    width: min(75rem, 95%);
+
+    gap: 2rem;
+    display: none;
+
+    opacity: 0;
+    transition: opacity 0.2s;
+
+    position: relative;
+    z-index: 0;
+}
+main.register article.shown {
+    display: grid;
+    opacity: 1;
+}
+
+main.register article * {
+    font-size: 1.5rem;
+    line-height: 1.5;
+}
+
+main.register article h2 {
+    font-size: 3.2rem;
+    font-weight: 900;
+    line-height: 1.20;
+    
+    font-style: italic;
+    text-align: center;
+    text-transform: uppercase;
+    
+    color: var(--accent-yellow);
+}
+
+main.register article h3,
+main.register article h3 time {
+    font-size: 1.25rem;
+}
+
+main.register article em {
+    text-align: center;
+    color: var(--accent-green);
+}
+main.register article strong {
+    color: var(--font-color-300);
+    font-weight: 300;
+}
+main.register article ol,
+main.register article ul {
+    list-style-position: inside;
+}
+main.register article ol > li {
+    margin-bottom: 1rem;
+}
+main.register article ol > li p,
+main.register article ul {
+    margin-left: 1.5rem;
+    text-wrap: pretty;
+}

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" view-transition>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>PartStop Signup</title>
+
+    <link rel="shortcut icon" href="/favico.png">
+
+    <link rel="stylesheet" href="/login.css">
+    <link rel="stylesheet" href="/register.css">
+
+
+    <!-- <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://www.gstatic.com https://www.google.com 'unsafe-inline'"> -->
+
+    <!-- reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>function onSubmit() { document.querySelector("main.register form").submit() }</script>
+    
+</head>
+<body class="entire-page">
+
+    <%
+        const { body, CAPTCHA_SITE_KEY, errors = [] } = locals
+        const today = tools.localDateTime(new Date())
+    %>
+
+
+    <%- include("__header.ejs") %>
+
+
+    <main class="login register">
+        <% if (!CAPTCHA_SITE_KEY) { %>
+            <h1 class="main-title error">reCAPTCHA is not setup properly</h1>
+        <% } else { %>
+
+            <form action="/user/register" method="post" name="registerForm" class="-glass-element">
+                <h2>Sign up</h2>
+                
+                <input type="text" name="username" id="username"
+                    value="<%= body?.username || '' %>"
+                    placeholder="Username"
+                    autocomplete="off"
+                    maxlength="20"
+                    minlength="3"
+                    autofocus
+                    required
+                />
+
+                <input type="email" name="email" id="email"
+                    value="<%= body?.email || '' %>"
+                    placeholder="Email"
+                    required
+                />
+
+                <div class="password-box">
+                    <input type="password" name="password" id="password"
+                        value="<%= body?.password || '' %>"
+                        autocomplete="new-password"
+                        placeholder="Password"
+                        required
+                    />
+                    <label class="box" for="password">
+                        <%- include("__components/ShowHidePassword.ejs", { related: "password" }) %>
+                    </label>
+                </div>
+
+                <input type="tel" name="phone" id="phone"
+                    value="<%= body?.phone || '' %>"
+                    placeholder="Phone"
+                    required
+                />
+
+                <ul class="errors"></ul>
+
+                <label for="allowUsePhone">
+                    <input type="checkbox" name="allowUsePhone" id="allowUsePhone" checked required />
+                    ** <strong>Please confirm</strong>. By providing your phone number, you consent to receive SMS messages <strong>only for account security purposes, such as password reset or login verification</strong>. You will not receive promotional or marketing messages. Message frequency: <strong>only when necessary, initiated by you</strong>. Standard message and data rates may apply. You can opt out anytime by replying <strong>STOP</strong>.
+                </label>
+
+                <div class="links">
+                    <a href="#privacy_policy" onclick="privacy_policy.classList.toggle('shown')">Privacy Policy</a>
+                    <span>|</span>
+                    <a href="#terms_of_services" onclick="terms_of_services.classList.toggle('shown')">Terms of Service</a>
+                </div>
+
+                <button type="submit" class="accent-button" disabled>Register</button>
+                <a href="/login" class="standart-button">Login</a>
+
+            </form>
+            
+            <!-- невидима reCAPTCHA -->
+            <div class="g-recaptcha"
+                style="position:absolute;"
+                data-sitekey="<%= CAPTCHA_SITE_KEY %>"
+                data-callback="onSubmit"
+                data-size="invisible">
+            </div>
+            
+            <!-- passing errors data to the "register-validation.js" -->
+            <div id="validation-errors" hidden><%= JSON.stringify(errors || []) %></div>
+
+
+            <article id="privacy_policy">
+                
+                <button type="button" class="accent-button -policy" onclick="privacy_policy.classList.toggle('shown')">Agree</button>
+
+                <h2>Privacy Policy</h2>
+                <h3>Effective Date <time datetime="<%= today %>"><%= today %></time></h3>
+                
+                <em>We value your privacy. This Privacy Policy explains how we collect, use, and protect your personal information when you use our service.</em>
+
+                <ol>
+                    <li>
+                        <strong>Information We Collect</strong>
+                        <p>We may collect your name, email, phone number, and other information you provide when registering or using our service.</p>
+                    </li>
+                    <li>
+                        <strong>How We Use Your Information</strong>
+                        <p>We use your information to:</p>
+                        <ul>
+                            <li>Provide and improve our services.</li>
+                            <li>Verify your identity and secure your account.</li>
+                            <li>Communicate with you about your account (<strong>e.g., password resets, important updates</strong>).</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>What We Don't Do</strong>
+                        <p>We do <strong>not</strong> sell, rent, or share your personal data with third parties for marketing purposes.</p>
+                    </li>
+                    <li>
+                        <strong>Data Security</strong>
+                        <p>We take reasonable measures to protect your information from unauthorized access, use, or disclosure.</p>
+                    </li>
+                    <li>
+                        <strong>Your Rights</strong>
+                        <p>You may request access, correction, or deletion of your personal information at any time by contacting with us</p>
+                    </li>
+                    <li>
+                        <strong>Changes to This Policy</strong>
+                        <p>We may update this Privacy Policy from time to time. The updated version will be posted on this page.</p>
+                    </li>
+                </ol>                
+            </article>
+
+            <article id="terms_of_services">
+
+                <button type="button" class="accent-button -policy" onclick="terms_of_services.classList.toggle('shown')">Agree</button>
+                
+                <h2>Terms of Service</h2>
+                <h3>Effective Date <time datetime="<%= today %>"><%= today %></time></h3>
+                
+                <em>By using our service, you agree to the following terms:</em>
+
+                <ol>
+                    <li>
+                        <strong>Eligibility</strong>
+                        <p>You must be at least 18 years old (or the legal age in your country) to use this service.</p>
+                    </li>
+                    <li>
+                        <strong>Account Responsibilities</strong>
+                        <p>You are responsible for maintaining the confidentiality of your account credentials. You agree to provide accurate information and notify us of any unauthorized use.</p>
+                    </li>
+                    <li>
+                        <strong>Use of Service</strong>
+                        <p>You may use our service only for lawful purposes. You may not misuse or interfere with the operation of the service.</p>
+                    </li>
+                    <li>
+                        <strong>Messaging</strong>
+                        <p>By registering, you agree that we may send you SMS messages only for account-related purposes (e.g., password reset, login verification). No marketing or promotional messages will be sent. Standard carrier rates may apply. You can opt out by replying STOP.</p>
+                    </li>
+                    <li>
+                        <strong>Termination</strong>
+                        <p>We may suspend or terminate your account if you violate these Terms.</p>
+                    </li>
+                    <li>
+                        <strong>Limitation of Liability</strong>
+                        <p>We are not liable for any damages resulting from your use of the service, to the fullest extent permitted by law.</p>
+                    </li>
+                    <li>
+                        <strong>Changes to Terms</strong>
+                        <p>We may update these Terms at any time. Continued use of the service means you accept the updated Terms.</p>
+                    </li>
+                </ol>
+            </article>
+
+        <% } %>
+    </main>
+
+    
+    
+    <%- include("__footer.ejs", { showContacts: false }) %>
+
+
+    <script type="module" src="/register.js" defer></script>
+    <script type="module" src="/register-validation.js" defer></script>
+    
+</body>
+</html>

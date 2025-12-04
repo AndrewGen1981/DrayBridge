@@ -1,0 +1,39 @@
+<link rel="stylesheet" href="/__header.css">
+
+<link rel="stylesheet" href="/sweetalert2/sweetalert2.min.css">
+<script src="/sweetalert2/sweetalert2.min.js"></script>
+
+
+<header>
+    <%- include("__header_footer_navs.ejs") %>
+</header>
+
+
+<!-- ✅ Підключення socket.io -->
+<% if (locals.sessionID && locals.isAuthenticated) { %>
+    <meta name="sessionID" content="<%= locals.sessionID %>" data-SESSION_LIFETIME="<%= locals.SESSION_LIFETIME %>" />
+    
+    <script src="/socket.io/socket.io.js"></script>
+    <script defer>
+        const socket = io() // автоматично підключиться до того ж origin
+        
+        const sessionEl = document.querySelector('meta[name="sessionID"]')
+        if (sessionEl) {
+            const sessionID = sessionEl.content || "NA"
+            const SESSION_LIFETIME = sessionEl.dataset.session_lifetime
+
+            // timeout to omit fire-up on manual logouts
+            socket.on("session-destroyed", deletedId => {
+                if (deletedId === sessionID) {
+                    setTimeout(() => {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "⏳ Session expired",
+                            html: `The allowed idle time has been exceeded${ SESSION_LIFETIME ? ` (${ +SESSION_LIFETIME / 60000 } minutes)` : "" }. Further actions may not sync with the server.<br><b>Please log in again</b>.`,
+                        }).then(() => location.href = '/login')
+                    }, 1000)
+                }
+            })
+        }
+    </script>
+<% } %>

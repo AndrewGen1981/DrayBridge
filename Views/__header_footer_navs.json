@@ -1,0 +1,19 @@
+[
+    {
+        "route": "/profile",
+        "title": "Profile",
+        "emoji": "💼"
+    },
+    {
+        "route": "/admin/logs",
+        "title": "Logs",
+        "emoji": "🔑",
+        "roleSensitive": "ADMIN"
+    },
+    {
+        "route": "/logout",
+        "title": "Logout",
+        "emoji": "👋",
+        "authSensitive": true
+    }
+]

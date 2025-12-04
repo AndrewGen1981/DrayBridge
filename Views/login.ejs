@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" view-transition>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Welcome to DrayBridge</title>
+
+    <link rel="shortcut icon" href="/favico.png">
+    <link rel="stylesheet" href="/login.css">
+
+</head>
+<body class="entire-page">
+
+    <% const { requestBody, issue } = locals %>
+
+
+    <%- include("__header.ejs") %>
+
+
+    <main class="login">
+
+        <form action="/login" method="post" name="loginForm" class="-glass-element">
+
+            <h2><%= requestBody?.loginTitle || "Login" %></h2>
+
+            <input name="username" id="username"
+                value="<%= requestBody?.username || '' %>"
+                placeholder="Username or email"
+                autofocus
+                required
+            />
+
+            <input type="password" name="password" id="password"
+                value="<%= requestBody?.password || '' %>"
+                placeholder="Password"
+                autocomplete="off"
+                required
+            />
+
+            <label for="password_show">
+                <input type="checkbox" name="password_show" id="password_show"
+                    onclick="password.type = this.checked ? 'text' : 'password'"
+                />
+                <span>Show password</span>
+            </label>
+
+            <button type="submit" class="accent-button">Login</button>
+            <a href="/user/register" class="standart-button">Register</a>
+
+        </form>
+
+        <% if (issue) { %>
+            <p class="issue"><%= issue %></p>
+        <% } %>
+
+    </main>
+
+
+    <%- include("__footer.ejs") %>
+
+    
+</body>
+</html>

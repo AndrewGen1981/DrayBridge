@@ -1,0 +1,447 @@
+/* Update password */
+
+.sub-header #profile_switch {
+    all: unset;
+    aspect-ratio: 1;
+
+    background-color: var(--accent-green);
+    border-radius: 50%;
+}
+
+.sub-header #secondary-close {
+    --c: var(--accent-yellow);
+
+    padding: 3px 10px;
+    display: block;
+
+    font-size: 1.3rem;
+    color: var(--c);
+
+    border: 1px solid var(--c);
+    
+    opacity: 0.3;
+    transition: opacity 0.25s;
+
+    cursor: pointer;
+}
+.sub-header #secondary-close:hover {
+    opacity: 0.5;
+}
+
+.sub-header .user-basic-profile {
+    place-content: unset;
+
+    align-content: center;
+    justify-items: center;
+
+    background-color: var(--color3);
+    outline: 1px solid var(--accent-green);
+}
+
+.sub-header .user-basic-profile h1,
+.sub-header .user-basic-profile h2 {
+    font-family: "Druk", Arial, Helvetica, sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    font-style: italic;
+
+    line-height: 1.20;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+
+    margin-bottom: 1rem;
+}
+.sub-header .user-basic-profile h1 {
+    color: var(--accent-yellow);
+}
+.sub-header .user-basic-profile h2 {
+    text-align: center;
+    color: var(--font-color-300);
+}
+
+.sub-header .user-basic-profile ul.user-data li strong {
+    font-size: 1.5rem;
+    font-weight: 300;
+    text-transform: capitalize;
+    color: var(--font-color-300);
+}
+
+.sub-header .user-basic-profile form.password-update  {
+    padding: 2.2rem;
+
+    width: min(40rem, 95%);
+    max-width: unset;
+
+    gap: 1.6rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    
+    background-color: var(--color1);
+    border-radius: 3px;
+}
+
+.sub-header .user-basic-profile form.password-update input:not([type="checkbox"]) {
+    width: 100%;
+    padding: 1rem 1.2rem;
+
+    font-size: 1.6rem;
+    color: var(--font-color-400);
+    background-color: transparent;
+
+    border: 1px solid #555767;
+    border-radius: 1px;
+}
+.sub-header .user-basic-profile form.password-update input:not([type="checkbox"])::placeholder {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: #666a80ab;
+}
+
+.sub-header .user-basic-profile form.password-update input[data-ok="false"],
+.sub-header .user-basic-profile form.password-update ul.errors li {
+    border-color: #f94f6f;
+    color: #f94f6f;
+}
+
+
+.sub-header .user-basic-profile form.password-update button[type="submit"] {
+    margin: unset;
+    padding: 1rem;
+    width: 100%;
+
+    font-family: "Druk", Arial, Helvetica, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-style: italic;
+    
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    background-color: var(--accent-green);
+    border-radius: 1px;
+    border: unset;
+
+    user-select: none;
+    cursor: pointer;
+}
+
+
+/* Subheader toolbar */
+.sub-header menu[type="toolbar"] {
+    margin-left: auto;
+
+    display: flex;
+    gap: 1rem;
+}
+
+
+
+/* Logout */
+
+.sub-header #profile_switch,
+.sub-header .logout {
+    padding: 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.4rem;
+    text-decoration: none;
+
+    cursor: pointer;
+}
+.sub-header .logout {
+    padding-inline: 1.5rem;
+}
+
+/* Profile Tabs */
+
+main.user-profile .profile-tablist {
+    margin-block: 2rem 5rem;
+
+    display: grid;
+    grid-template-columns: 26.5rem 1fr;
+    gap: 1.6rem;
+}
+
+main.user-profile .profile-tablist nav[role="tablist"],
+main.user-profile .profile-tablist [role="tabpanel"] {
+    padding: 2.4rem;
+
+    display: grid;
+    align-content: start;
+    /* gap: 1.6rem; */
+    
+    background-color: var(--color3);
+    border-radius: 3px;
+}
+
+
+main.user-profile .profile-tablist [role="tabpanel"] {
+    min-height: 25dvh;
+    gap: 3.2rem;
+}
+
+main.user-profile .profile-tablist [role="tabpanel"][hidden],
+main.user-profile .profile-tablist [role="tab"] {
+    display: none;
+}
+
+main.user-profile .profile-tablist nav[role="tablist"] label {
+    margin-block: 0.8rem;
+    padding-block: 0.8rem;
+
+    font-size: 2rem;
+    font-weight: 300;
+    text-transform: capitalize;
+
+    transition: border 0.25s;
+    border-right: 2px solid transparent;
+    cursor: pointer;
+}
+
+main.user-profile .profile-tablist nav[role="tablist"] label:has(input[role="tab"]:checked) {
+    border-color: #F7E821;
+}
+main.user-profile .profile-tablist nav[role="tablist"] label:not(:has(input[role="tab"]:checked)):is(:hover, :focus-within) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: #b3a813;
+}
+
+
+/* Панелі [role="tabpanel"] */
+main.user-profile .profile-tablist [role="tabpanel"] h2 {
+    font-family: "Druk", Arial, Helvetica, sans-serif;
+    font-size: 2.4rem;
+    font-weight: 900;
+    font-style: italic;
+    
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid #2A2A2A;
+}
+
+main.user-profile .profile-tablist [role="tabpanel"] li {
+    padding-block: 1rem;
+
+    display: grid;
+    grid-template-columns: 0.5fr 1fr;
+    gap: 1rem;
+
+    position: relative;
+}
+main.user-profile .profile-tablist [role="tabpanel"] li label {
+    margin-block: auto;
+    display: block;
+
+    font-size: 1.3rem;
+    color: var(--font-color-300);
+    text-transform: uppercase;
+    
+    opacity: 0.6;
+}
+main.user-profile .profile-tablist [role="tabpanel"] li input {
+    padding: 1rem 1.2rem;
+
+    font-size: 1.6rem;
+    color: #666A80;
+    opacity: 0.6;
+
+    transition: color 0.25s, opacity 0.25s;
+
+    background-color: transparent;
+    border: 1px solid #555767;
+}
+main.user-profile .profile-tablist [role="tabpanel"] li input.modified {
+    color: var(--font-color-400);
+    font-weight: 300;
+    opacity: 1;
+    border-color: var(--accent-yellow);
+}
+main.user-profile .profile-tablist [role="tabpanel"] li em {
+    color: var(--accent-yellow);
+    position: absolute;
+    top: 1.1rem; right: 4px;
+}
+
+main.user-profile .profile-tablist small {
+    font-size: 1.2rem;
+    color: #666A80;
+}
+
+
+/* Panel Orders */
+
+main.user-profile #my_orders_tab thead tr, 
+main.user-profile #my_orders_tab tr.order-data {
+    display: grid;
+    grid-template-columns: 1fr 1fr 0.5fr 0.5fr 1.5fr 0.5fr;
+    place-items: center;
+}
+main.user-profile #my_orders_tab tr.order-data {
+    padding-top: 1rem;
+    border-top: 1px solid #303240;
+
+    margin-block: 1rem;
+}
+main.user-profile #my_orders_tab tr.order-data * {
+    font-size: 1.3rem;
+}
+
+main.user-profile #my_orders_tab thead tr {
+    padding-bottom: 1rem;
+}
+main.user-profile #my_orders_tab thead tr th {
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: var(--font-color-300);
+}
+
+main.user-profile #my_orders_tab .order-id,
+main.user-profile #my_orders_tab time.diminished,
+main.user-profile #my_orders_tab .details {
+    color: var(--font-color-300);
+    opacity: 0.6;
+}
+main.user-profile #my_orders_tab .paid {
+    color: #028574;
+}
+main.user-profile #my_orders_tab .payment-status svg {
+    width: 20px;
+    height: 20px;
+}
+main.user-profile #my_orders_tab .payment-status[data-status="succeeded"] svg {
+    stroke: #028574;
+}
+
+/* Order items */
+
+main.user-profile #my_orders_tab .order-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(35rem, 100%), 1fr));
+    gap: 1rem;
+    padding-bottom: 5px;
+}
+
+main.user-profile #my_orders_tab .order-items .items-data {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: 0.5rem;
+
+    background-color: #252426;
+    border-radius: 3px;
+}
+main.user-profile #my_orders_tab .order-items .items-data .img-box {
+    width: 100%;
+    aspect-ratio: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #fff;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+    overflow: hidden;
+}
+
+main.user-profile #my_orders_tab .order-items .item-info {
+    padding-block: 2px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+main.user-profile #my_orders_tab .order-items .item-info * {
+    font-size: 1.2rem;
+    font-weight: 200;
+    opacity: 0.8;
+}
+main.user-profile #my_orders_tab .order-items .subtotal em {
+    color: #07d1b7;
+}
+
+/* Addresses + Payments */
+main.user-profile #addresses_tab .order-brief,
+main.user-profile #payment_methods_tab .order-brief {
+    margin-bottom: 0.5rem;
+}
+main.user-profile #addresses_tab .order-brief *,
+main.user-profile #payment_methods_tab .order-brief * {
+    font-size: 1.3rem;
+    opacity: 0.8;
+}
+main.user-profile #addresses_tab .order-brief .order-tag,
+main.user-profile #payment_methods_tab .order-brief .order-tag {
+    margin-right: 0.5rem;
+    color: #AFAFAF;
+}
+main.user-profile #addresses_tab .order-brief .total,
+main.user-profile #payment_methods_tab .order-brief .total {
+    color: #028574;
+}
+
+main.user-profile #addresses_tab .address-details *,
+main.user-profile #payment_methods_tab .payment-details * {
+    font-size: 1.8rem;
+}
+main.user-profile #addresses_tab .address-details .store-pick-up,
+main.user-profile #addresses_tab .address-details .shipping-details,
+main.user-profile #payment_methods_tab .payment-details .payment_info {
+    color: var(--font-color-300);
+    font-weight: 200;
+    opacity: 0.8;
+}
+main.user-profile #addresses_tab .address-details .store-pick-up b {
+    margin-right: 0.5rem;
+    color: var(--accent-yellow);
+    font-weight: 200;
+}
+
+
+/* Wishlist */
+
+main.user-profile #wishlist h2.wishlist {
+    display: none;
+}
+main.user-profile #wishlist .favourites-box {
+    padding-inline: unset;
+    display: unset;
+    margin-bottom: unset;
+}
+main.user-profile #wishlist #favourites {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(24.5rem, 1fr));
+}
+main.user-profile #wishlist #favourites .fav-card {
+    width: unset;
+    min-width: unset;
+}
+
+
+@media (max-width: 1200px) {
+    main.user-profile .profile-tablist {
+        grid-template-columns: 1fr;
+    }
+    main.user-profile .profile-tablist .profile-togglers {
+        max-width: 40rem;
+    }
+}
+@media (max-width: 900px) {
+    main.user-profile #wishlist #favourites {
+        grid-template-columns: repeat(auto-fill, minmax(18.5rem, 1fr));
+    }
+}
+@media (max-width: 600px) {
+    main.user-profile .profile-tablist [role="tabpanel"] li {
+        grid-template-columns: 1fr;
+    }
+}

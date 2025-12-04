@@ -1,0 +1,22 @@
+{
+    "defaultCurrency": "USD",
+    "defaultMoneySign": "$",
+
+    "Company": "DrayBridge",
+    "Address": "1616 E 26th St, Tacoma, WA 98421",
+    "Representative": "STEFAN ZGARBUR",
+    "Website": "https://partstop.net",
+    "Email": "retail@partstop.net",
+    "Phone": "+1 (253) 600-1351",
+    "PhoneLink": "+12536001351",
+
+    "appDomain": "https://partstop-e8e918ee7b4f.herokuapp.com/",
+
+    "MAX_FILES_ALLOWED_TO_UPLOAD": 10,
+    "MAX_BYTES_PER_FILE": 5242880,
+    
+    "smsPhone": "+12532004809",
+    "canUsePhoneForVerification": true,
+    
+    "timeZone": "America/Los_Angeles"
+}

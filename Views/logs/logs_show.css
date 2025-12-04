@@ -1,0 +1,36 @@
+main.logs .logs-table tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr 3fr;
+}
+main.logs .logs-table * {
+    font-size: 1.2rem;
+}
+main.logs .logs-table tbody * {
+    color: var(--font-col-400);
+}
+
+main.logs .logs-table .message * {
+    display: block;
+    max-width: 105ch;
+    text-align: left;
+    text-wrap: pretty;
+    word-wrap: break-word;
+}
+
+main.logs .logs-table tr[data-type="❌"] * {
+    color: #9b0c0c;
+}
+main.logs .logs-table tr[data-type="🧪"] * {
+    color: #4662f5;
+}
+main.logs .logs-table tr[data-type="🟢"] * {
+    color: #0a9902;
+}
+main.logs .logs-table tr[data-type="🚀"] * {
+    color: #002c6b;
+}
+
+main.logs .logs-table pre {
+    font-size: 1.1rem;
+    color: var(--font-col-300) !important;
+}

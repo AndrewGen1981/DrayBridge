@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" view-transition>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DrayBridge User Profile</title>
+
+    <link rel="shortcut icon" href="/favico.png">
+    <link rel="stylesheet" href="/user_profile.css">
+    
+</head>
+<body class="entire-page">
+
+    <%
+        const { user = {}, role } = locals
+    %>
+
+
+    <%- include("__header.ejs") %>
+
+
+    <main class="main-container user-profile">
+
+        <menu type="toolbar">
+            <a href="/logout" class="logout accent-button">Logout</a>
+            <%- include("__user_basic_profile.ejs") %>
+        </menu>
+
+        <form id="person" action="/<%= role %>/update-user/<%= user._id %>" method="post">
+            <input type="text" name="firstName" id="firstName" value="<%= user.firstName %>" placeholder="First name" />
+            <input type="text" name="lastName" id="lastName" value="<%= user.lastName %>" placeholder="Last name" />
+            <input type="phone" name="phone" id="phone" value="<%= user.phone %>" placeholder="Phone" />
+            <input type="email" name="email" id="email" value="<%= user.email %>" placeholder="email" readonly />
+            <button type="submit">Save</button>
+        </form>
+
+    </main>
+
+    
+    <%- include("__footer.ejs") %>
+
+
+    <script type="module" src="/user_profile.js" defer></script>
+    
+</body>
+</html>

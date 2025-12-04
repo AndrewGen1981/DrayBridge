@@ -1,0 +1,142 @@
+#secondary-close {
+    display: none;
+}
+
+#profile_switch {
+    --size: var(--header_height, 4.5rem);
+
+    position: fixed;
+    top: 0; right: 0;
+    width: var(--size);
+    height: var(--size);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: lightcoral;
+    border-radius: 50%;
+
+    transform-origin: center;
+    transition: transform 250ms;
+
+    cursor: pointer;
+    z-index: 110;
+}
+
+#profile_switch svg {
+    stroke: #fff;
+}
+
+.user-basic-profile {
+    position: fixed;
+    top: 0; right: 0;
+    width: min(50rem, 95%);
+    height: 100dvh;
+
+    display: none;
+    place-content: center;
+    gap: 2rem;
+
+    background: linear-gradient( to right, #fff, var(--main-color1));
+    outline: 1px solid #a4b9d7;
+
+    opacity: 0;
+    transition: opacity 250ms;
+
+    z-index: -1;
+}
+
+#profile_switch:has(#profile_switcher:checked) {
+    transform: rotate(45deg);
+}
+#profile_switch:has(#profile_switcher:checked) + .user-basic-profile {
+    display: grid;
+    opacity: 1;
+
+    isolation: isolate;
+    z-index: 100;
+}
+
+body:has(#profile_switcher:checked) {
+    overflow: hidden;
+}
+body:has(#profile_switcher:checked)::after {
+    content: "";
+    
+    position: fixed;
+    inset: 0;
+
+    background-color: #0e0e0eb8;
+    z-index: 1;
+}
+
+
+/* User data section */
+
+.user-basic-profile ul.user-data li {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: 0.5rem;
+
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+}
+
+.user-basic-profile ul.user-data li > * {
+    font-size: inherit;
+    color: var(--font-col-500);
+}
+.user-basic-profile ul.user-data li data {
+    letter-spacing: 0.5px;
+    color: var(--font-col-400);
+}
+
+.user-basic-profile strong {
+    text-transform: lowercase;
+    font-weight: bolder;
+}
+
+
+/* Password update form */
+
+.user-basic-profile form.password-update {
+    max-width: 28.5rem;
+    grid-template-columns: 1fr;
+    background-color: #dfeef7;
+}
+
+.user-basic-profile form.password-update label.box {
+    display: inline-block;
+    position: relative;
+}
+
+.user-basic-profile form.password-update label.box:has(input:placeholder-shown) label.toggle {
+    display: none;
+}
+
+.user-basic-profile form.password-update [data-ok="false"] {
+    background-color: var(--notOk-color);
+}
+.user-basic-profile form.password-update [data-ok="true"] {
+    background-color: var(--ok-color);
+}
+
+.user-basic-profile form.password-update ul.errors {
+    display: none;
+}
+.user-basic-profile form.password-update ul.errors[data-hidden="false"] {
+    display: block;
+    margin: 1rem 2rem;
+}
+
+.user-basic-profile form.password-update ul.errors li {
+    text-wrap: pretty;
+    color: crimson;
+    margin-bottom: 0.75rem;
+}
+
+.user-basic-profile form.password-update button {
+    margin-top: 1rem;
+    justify-self: center;
+}

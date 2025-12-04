@@ -1,0 +1,109 @@
+header, footer {
+    display: none;
+}
+
+main.login {
+    margin-block: 5rem;
+    flex-grow: 1;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+main.login form[name="loginForm"] {
+    padding: 2.5rem;
+    width: min(45.5rem, 95%);
+
+    display: flex;
+    flex-direction: column;
+    gap: 1.8rem;
+
+    background-color: var(--main-color1);
+    border-radius: 2px;
+}
+
+main.login form h2 {
+    font-size: 3.2rem;
+    font-weight: 900;
+    line-height: 1;
+    font-style: italic;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.4rem;
+}
+
+main.login form input:not([type="checkbox"]) {
+    width: 100%;
+    padding: 1rem 1.2rem;
+
+    font-size: 1.6rem;
+    color: var(--font-color-400);
+    background-color: transparent;
+
+    border: 1px solid #555767;
+    border-radius: 1px;
+}
+main.login form input:not([type="checkbox"])::placeholder {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: #666A80;
+}
+
+main.login form label[for="password_show"] {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 1rem;
+}
+
+main.login form input[type="checkbox"] {
+    accent-color: var(--accent-green);
+    width: 2.4rem; aspect-ratio: 1;
+    border: 1px solid #555767;
+    border-radius: unset;
+}
+
+main.login form label[for="password_show"] span {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--font-color-400);
+}
+
+main.login form button,
+main.login form .standart-button {
+    padding: 1rem;
+    width: 100%;
+
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-style: italic;
+    
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    border-radius: 1px;
+    cursor: pointer;
+}
+
+main.login form .standart-button {
+    background-color: transparent;
+    border: 1px solid #AFAFAF;
+}
+
+main.login .issue {
+    font-size: 1.4rem;
+    font-weight: 200;
+    color: #e99191;
+}
+
+@media (max-width: 1000px) {
+    main.login {
+        min-height: 60dvh;
+    }
+}

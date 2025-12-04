@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" view-transition>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>An error occurred</title>
+
+    <link rel="shortcut icon" href="/favico.png">
+    <link rel="stylesheet" href="/__errors/errors.css">
+    
+</head>
+<body class="entire-page">
+
+    <%
+        const {
+            error = {},
+            statusCode = 500,
+            statusMeaning = "Internal Server Error",
+            message = "Unknown error",
+            isProduction = false
+        } = locals
+
+        const { stack } = error
+
+        const { localDateTime } = locals.tools
+    %>
+
+    <%- include("../__header.ejs") %>
+
+    <main class="standard-template error">
+        
+        <h1 class="main-title"><%= message %></h1>
+        <h2><strong><%= statusCode %></strong>. <%= statusMeaning %> 🤦‍♂️</h2>
+        <h3>mode: <strong><%= isProduction ? "Production" : "Dev" %></strong>. Already working on it...</h3>
+        <h4><%- localDateTime(new Date, "html") %></h4>
+
+        <% if (stack) { %>
+            <details open>
+                <summary>Error stack</summary>
+                <pre><%= stack %></pre>
+            </details>
+        <% } %>
+        
+    </main>
+
+
+    <%- include("../__footer.ejs") %>
+
+    
+</body>
+</html>

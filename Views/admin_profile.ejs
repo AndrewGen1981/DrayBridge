@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" view-transition>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Profile</title>
+
+    <link rel="shortcut icon" href="/favico.png">
+    <link rel="stylesheet" href="/admin_profile.css">
+    
+</head>
+<body class="entire-page">
+
+
+    <%
+        const { containers = [], pagination = {}, paginationData = {}, filters = {} } = locals
+
+        // Фільтри
+        const areFilters = Object.keys(query).filter(f => f !== "page" && f !== "reset").length > 0
+        const areAdvFilters = Object.keys(filters).some(k => k !== "query" && filters[k].length)
+
+        // Пагінація. Парамерти попереднього запиту, щоб можна було перелистувати сторінки в рамках
+        // конкретного запиту paginationData додаються до посилань "горталки" в menu type="toolbar"
+        const { totalDocs = containers.length, totalPages = 1, currentPage = 1 } = pagination
+        const {
+            first, prev, curr, next, last,
+            baseUrl,        //  поки не використовую - чиста строка baseURL: /admin/profile
+            //queryString,    //  поки не використовую - строка запиту БЕЗ параметру "page": make=KW%2CPT%2CFR
+            queryParams,    //  baseUrl + queryString, т.т. БЕЗ параметру "page": /admin/profile?make=KW%2CPT%2CFR
+        } = paginationData
+
+        // Edge-case - це остання сторінка, яка відображає решту елементів; filter відсікає "нереальні" варіанти
+        const maxOnPage = [ 30, 60, 100 ].filter(m => next.isActive || m < containers.length)
+        const itemsOnPage = [ ...new Set([ containers.length, ...maxOnPage ]) ].sort((a,b) => a - b)
+    %>
+
+
+    <%- include("__header.ejs") %>
+
+
+    <main class="standard-template admin-profile">
+
+        <!-- Базовий профайл -->
+        <%- include("__user_basic_profile.ejs") %>
+
+        <h2 class="main-title">
+            <select id="items-on-page">
+                <% itemsOnPage.forEach(iop => { %>
+                    <option value="<%= iop %>" <% if(containers.length === iop) { %> selected <% } %> ><%= iop %></option>
+                <% }) %>
+            </select>
+            <b id="storage-qty"><%= totalDocs %></b>
+        </h2>
+
+        
+        <menu type="toolbar" id="pagination_menu">
+            <a <% if(first.isActive) { %> href="<%= first.href %>#nav_pages" <% } %> data-active="<%= first.isActive %>">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="11 17 6 12 11 7" />
+                    <polyline points="18 17 13 12 18 7" />
+                </svg>
+            </a>
+            <a <% if(prev.isActive) { %> href="<%= prev.href %>#nav_pages" <% } %> data-active="<%= prev.isActive %>">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+            </a>
+
+            <!--    << < 1 of 10 > >>   -->
+            <span class="current-page">
+
+                <% if (totalPages === 1) { %>
+                    <strong><%= currentPage %></strong>
+                <% } else { %>
+                    <select id="nav_pages" onchange="location.replace(this.value)">
+                        <% for (let _page = 1; _page <= totalPages; _page++) { %>
+                            <option value="<%= queryParams %>&page=<%= _page %>#nav_pages"
+                                <% if (_page === currentPage) { %> selected <% } %>
+                            ><%= _page %></option>
+                        <% } %>
+                    </select>
+                <% } %>
+
+                of <%= totalPages %> page<%= totalPages > 1 ? "s" : "" %>
+            </span>
+            
+            <a <% if(next.isActive) { %> href="<%= next.href %>#nav_pages" <% } %> data-active="<%= next.isActive %>">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                </svg>
+            </a>
+            <a <% if(last.isActive) { %> href="<%= last.href %>#nav_pages" <% } %> data-active="<%= last.isActive %>">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="13 17 18 12 13 7" />
+                    <polyline points="6 17 11 12 6 7" />
+                </svg>
+            </a>
+        </menu>
+        
+        <aside>
+            <input type="search" name="criteria_search" id="criteria_search" placeholder="Containers search" />
+            <div id="found-results" class="closed" hidden>searching...</div>
+        </aside>
+        
+        <!-- Items -->
+        <table id="items">
+            <thead>
+                <tr>
+                    <th scope="col">Container</th>
+                    <th scope="col">Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for (let i = 0; i < containers.length; i++) {
+
+                    const {
+                        _id, number, description = ""
+                    } = containers[i]
+
+                    const desc = description.length < 200 ? description : `${ description.slice(0, 200) }...`
+
+                    %>
+
+                    <tr data-id="<%= _id%>">
+                        <td class="number"><%= number %></td>
+                        <td class="description"><%= desc %></td>
+                    </tr>
+
+                <% } %>
+            </tbody>
+        </table>
+
+        
+    </main>
+
+
+    <%- include("__footer.ejs") %>
+
+
+    <script type="module" src="/admin_profile.js" defer></script>
+
+    
+</body>
+</html>
