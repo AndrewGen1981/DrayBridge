@@ -103,13 +103,17 @@ app.use((req, res, next) => {
 
 // *** Глобальні раути
 app.get("/", async (req, res) => {
-    res.send(`
-        <ul>
-            <li>
-                <a href="/profile">Profile</a>
-            </li>
-        </ul>
-    `)
+    
+    const { role } = req.session || {}
+    res.redirect(role ? "/profile" : "/login")
+
+    // res.send(`
+    //     <ul>
+    //         <li>
+    //             <a href="/profile">Profile</a>
+    //         </li>
+    //     </ul>
+    // `)
 })
 
 
