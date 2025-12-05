@@ -44,8 +44,24 @@
 
     /* Table */
     --table_header_color: #667781;
+    --table_header_color: #667781;
 
     --header_height: 47px;
+
+    /* Depth shadows */
+    --shadow: 0 4px 30px #0000001a;
+    
+    --shadow-s: inset 0 1px 2px #ffffff30,
+    0 1px 2px #00000030,
+    0 2px 4px #00000015;
+
+    --shadow-m: inset 0 1px 2px #ffffff50,
+    0 2px 4px #00000030,
+    0 4px 8px #00000015;
+
+    --shadow-l: inset 0 1px 2px #ffffff70,
+    0 4px 6px #00000030,
+    0 6px 10px #00000015;
     
     font-size: 10px;
 }
@@ -65,7 +81,7 @@
 
 html, body {
     background: linear-gradient(
-        to right,
+        135deg,
         var(--main-color1),
         var(--main-color3),
         var(--main-color2)
@@ -216,7 +232,7 @@ table thead tr:nth-child(1) th:nth-last-child(1) {
 } */
 :where(table tbody tr:nth-child(odd)) {
     background-color: var(--main-color1);
-    border-bottom: 1px solid #b3daf9;
+    border-bottom: 1px solid var(--main-color3);
 }
 :where(table tbody tr:nth-child(even)) {
     background-color: var(--main-color2);
@@ -292,7 +308,7 @@ table thead tr:nth-child(1) th:nth-last-child(1) {
     background-color: var(--main-grad-color3);
     border: 1px solid var(--log-color1);
 
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-m);
     border-radius: var(--form-radius);
 }
 @supports(backdrop-filter: blur(5px)) {

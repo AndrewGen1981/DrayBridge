@@ -11,6 +11,11 @@ main.login {
     align-items: center;
     justify-content: center;
     gap: 1rem;
+
+    background-image: url(/logo.png);
+    background-repeat: no-repeat;
+    background-position-x: 95%;
+    background-position-y: bottom;
 }
 
 main.login form[name="loginForm"] {
@@ -102,8 +107,13 @@ main.login .issue {
     color: #e99191;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1150px) {
+    [name="loginForm"] {
+        transform: translateY(-33%);
+    }
+}
+/* @media (max-width: 1000px) {
     main.login {
         min-height: 60dvh;
     }
-}
+} */
