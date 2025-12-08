@@ -1,0 +1,31 @@
+{
+  "version": "tough-cookie@6.0.0",
+  "storeType": "MemoryCookieStore",
+  "rejectPublicSuffixes": true,
+  "enableLooseMode": false,
+  "allowSpecialUseDomain": true,
+  "prefixSecurity": "silent",
+  "cookies": [
+    {
+      "key": "JSESSIONID",
+      "value": "A7317705F5F4944A87DDDDC48C257D1F",
+      "domain": "t18.tideworks.com",
+      "path": "/fc-T18",
+      "httpOnly": true,
+      "hostOnly": true,
+      "creation": "2025-12-08T17:54:42.651Z",
+      "lastAccessed": "2025-12-08T17:54:43.062Z"
+    },
+    {
+      "key": "BNI_JSESSIONID",
+      "value": "mWosMiRnWX6pVZTNUbIl6fZPEeIZI8tgZnwAlAHtoUqJ9_mvmI1NfBfdgNJN2qVayT56SqDyR5pzQClAFf_jsw==",
+      "domain": "t18.tideworks.com",
+      "path": "/",
+      "secure": true,
+      "httpOnly": true,
+      "hostOnly": true,
+      "creation": "2025-12-08T17:54:42.651Z",
+      "lastAccessed": "2025-12-08T17:54:43.062Z"
+    }
+  ]
+}

@@ -6,63 +6,81 @@
 
 
 const fs = require("fs")
-const nodeFetch = require("node-fetch")     // ✅ v2 нативний fetch через node-fetch, новіші версії дають помилку з fetchCookie та CookieJar
-const { setTimeout } = require("node:timers/promises")
-
 const cheerio = require("cheerio")
 
-const fetchCookie = require("fetch-cookie").default
-const COOKIE_FILE = "cookies.json"
-
+// тут це потрібно, бо використовую метод fromJSON даного класу
 const { CookieJar } = require("tough-cookie")
 
-let jar = new CookieJar()
-const fetchWithJar = fetchCookie(nodeFetch, jar)    // 🔹 fetch з cookie-jar
-
-
+const { setTimeout } = require("node:timers/promises")
 const { AppError } = require("../Utils/AppError")
 
 
 
 // --- Утиліти для роботи з сесією та логіном
 
+
+const getBaseURL = (url) => {
+    const _url = url.trim()
+    return `${ _url }${ _url.endsWith("/") ? "" : "/" }`
+}
+
+
+
 // Завантажити cookie сесії з файлу
-function loadCookies_ForSeattleTerminal() {
-    if (!fs.existsSync(COOKIE_FILE)) return
+function loadCookies_ForSeattleTerminal(terminal) {
+    const { cookieFile } = terminal || {}
+    
+    if (!cookieFile) throw new AppError("Wrong terminal setup", 500)
+    if (!fs.existsSync(cookieFile)) return
+
     try {
-        const data = fs.readFileSync(COOKIE_FILE, "utf8")
-        jar = CookieJar.fromJSON(JSON.parse(data))
-        console.log("🔁 Cookies restored from file")
+        const data = fs.readFileSync(cookieFile, "utf8")
+        terminal.jar = CookieJar.fromJSON(JSON.parse(data))
+        console.log(`🔁 Cookies for ${ terminal.key } restored from file`)
     } catch (err) {
-        console.warn("⚠️ Failed to load cookies:", err.message)
+        console.warn(`⚠️ Failed to load cookies for ${ terminal.key }:`, err.message)
     }
 }
 
+
 // Зберегти cookie сесії у файл
-function saveCookies() {
-    fs.writeFileSync(COOKIE_FILE, JSON.stringify(jar.toJSON(), null, 2), "utf8")
+function saveCookies(terminal) {
+    if (!terminal?.cookieFile || !terminal?.jar) throw new AppError("Wrong terminal setup", 500)
+
+    fs.writeFileSync(terminal.cookieFile, JSON.stringify(terminal.jar.toJSON(), null, 2), "utf8")
     console.log("💾 Cookies saved")
 }
 
+
 // Логін на латформу терміналу, у Tideworks (фізичний логін, на рівні http)
-async function loginTideworks(url, username, password) {
+async function loginTideworks(terminal) {
+    const { url, env_login, env_passowrd, fetchWithMyJar } = terminal || {}
 
-    if (!url?.trim()) throw new Error("❌ Login failed: URL is required")
-    if (!username?.trim() || !password?.trim()) throw new Error("❌ Login failed: credentials are required")
+    if (!url?.trim()) throw new AppError("❌ Login failed: URL is required", 404)
+    if (!fetchWithMyJar) throw new AppError("Wrong terminal setup", 500)
+            
+    if (!env_login?.trim() || !env_passowrd?.trim()) 
+        throw new AppError("❌ Login failed: credentials are required", 403)
+    
+    const LOGIN = process.env[env_login]
+    const PASSWORD = process.env[env_passowrd]
+    if (!LOGIN || !PASSWORD) throw new AppError("Credentials are required", 403)
 
-    console.log("🔄 Logging in...")
+    console.log(`🔄 Logging in to ${ terminal.label }...`)
+
+    const fetchURL = getBaseURL(url.trim())
 
     // GET стартової сторінки для ініціалізації cookie
-    await fetchWithJar(`${ url }default.do`, {
+    await fetchWithMyJar(`${ fetchURL }default.do`, {
         headers: { "User-Agent": "Mozilla/5.0" },
     })
 
     const params = new URLSearchParams({
-        j_username: username,
-        j_password: password,
+        j_username: LOGIN,
+        j_password: PASSWORD,
     })
 
-    const resp = await fetchWithJar(`${ url }j_spring_security_check`, {
+    const resp = await fetchWithMyJar(`${ fetchURL }j_spring_security_check`, {
         method: "POST",
         headers: {
             "User-Agent": "Mozilla/5.0",
@@ -74,14 +92,21 @@ async function loginTideworks(url, username, password) {
 
     console.log("Login status:", resp.status, resp.headers.get("location"))
 
-    if (resp.status === 302) saveCookies()
-    else throw new Error("❌ Login failed")
+    if (resp.status === 302) saveCookies(terminal)
+    else throw new AppError("❌ Login failed", 500)
 }
 
 // Перевірка активності сесії
-async function isSessionAlive(url) {
-    if (!url?.trim()) return false
-    const resp = await fetchWithJar(`${ url }home/default.do`, { redirect: "manual" })
+async function isSessionAlive(terminal) {
+    const { url, fetchWithMyJar } = terminal || {}
+
+    
+    if (!url?.trim()) throw new AppError("❌ Login failed: URL is required", 404)
+    if (!fetchWithMyJar) throw new AppError("Wrong terminal setup", 500)
+            
+    const fetchURL = getBaseURL(url.trim())
+    const resp = await fetchWithMyJar(`${ fetchURL }home/default.do`, { redirect: "manual" })
+
     return resp.status === 200
 }
 
@@ -89,35 +114,24 @@ async function isSessionAlive(url) {
 // Підключення CookieJar до конкретного терміналу
 const connectSeattleTerminal = async (terminal, { shouldloadCookies = false } = {}) => {
     try {
-        const { label, url, env_login = "", env_passowrd = "" } = terminal || {}
-    
-        if (!label) throw new AppError("Terminal is not defined", 400)
-        if (!url) throw new AppError(`Endpoints are not defined for the terminal "${ label }"`, 400)
-    
-        const LOGIN = process.env[env_login]
-        const PASSWORD = process.env[env_passowrd]
-        if (!LOGIN || !PASSWORD) throw new AppError("Credentials are required", 403)
-    
         // --- Під*єднуюся до терміналу
+        if (shouldloadCookies) loadCookies_ForSeattleTerminal(terminal)    // не завжди потрібно, наприклад, якщо це спискове оновлення, то достатньо раз обновити для всіх терміналів
         
-        if (shouldloadCookies) loadCookies_ForSeattleTerminal()    // не завжди потрібно, наприклад, якщо це спискове оновлення, то достатньо раз обновити для всіх терміналів
-        const baseURL = url + (url.endsWith("/") ? "" : "/")
-    
         // #1 перевіряю чи "жива" ще сесія (читаю з файлу COOKIE_FILE)
-        const alive = await isSessionAlive(baseURL)
-    
-        // #2 якщо ні, то наново під*єднуюся і записую сесія в файл COOKIE_FILE
+        const alive = await isSessionAlive(terminal)
+        
+        // #2 якщо ні, то наново під*єднуюся і записую сесію в файл COOKIE_FILE
         if (alive) {
             console.log("✅ Using existing session")
         } else {
-            await loginTideworks(baseURL, LOGIN, PASSWORD)
+            await loginTideworks(terminal)
             console.log("New session was created")
         }
 
-        return baseURL
+        return true
 
     } catch (error) {
-        console.error(`Connect to Seattle terminal "${ label }" issue: ${ error }`)
+        console.error(`Connect to Seattle terminal "${ terminal.label || 'NA' }" issue: ${ error }`)
     }
 }
 
@@ -150,15 +164,18 @@ const seattlePerItemtAvailabilityFetch = async (fetchContainerURL, selector = "b
 // * додаткова інформація - через /equipment/default.do?method=OSRAComplianceInformation&equipmentNumber=NWRU3635205 (приклад)
 const seattlePerItemtAvailabilityCheck = async (terminal, containers, options) => {
     try {
-        const baseURL = await connectSeattleTerminal(terminal, options)
-        if (!baseURL) throw new AppError("Cannot connect to the Terminal.", 500)
+        if (!terminal?.url) throw new AppError("Terminal is not defined.", 400)
         if (!containers?.length) throw new AppError("Empty containers set.", 422)
+
+        const isConnected = await connectSeattleTerminal(terminal, options)
+        if (!isConnected) throw new AppError("Cannot connect to the Terminal.", 500)            
 
         const {
             pause = 1000,   // пауза, щоб уникнути rate limit, можна змінити в опціях; "0/false" - відміняє паузу
             isMapResults = false    // результати можна повернути як Map, якщо далі необхідно проводити співсталення даних з базою
         } = options
         
+        const baseURL = getBaseURL(terminal.url.trim())
         const results = isMapResults ? {} : []
 
         for (const container of [ ...new Set(containers) ]) {
@@ -208,9 +225,10 @@ const seattlePerItemtAvailabilityCheck = async (terminal, containers, options) =
 // Перевіряє приналежність списку контейнерів до конкретного терміналу
 async function seattleBulkAvailabilityCheck(terminal, containers) {
     try {
-        const { url } = terminal || {}
+        const { url, fetchWithMyJar } = terminal || {}
+        const URL = url?.trim()
 
-        if (!url?.trim()) {
+        if (!URL || !fetchWithMyJar) {
             console.warn("No terminal/url provided")
             return []
         }
@@ -219,8 +237,7 @@ async function seattleBulkAvailabilityCheck(terminal, containers) {
         let nums = Array.isArray(containers) ? [...new Set(containers)] : []
         if (!nums.length) return []
 
-        const lastSlash = url.endsWith("/") ? "" : "/"
-        const baseURL = `${ url }${ lastSlash }import/default.do?method=defaultSearch`
+        const baseURL = `${ getBaseURL(URL) }import/default.do?method=defaultSearch`
 
         const clean = v => (v || "").replace(/\s+/g, " ").trim()
 
@@ -233,7 +250,7 @@ async function seattleBulkAvailabilityCheck(terminal, containers) {
             if (!chunk.length) continue
 
             // availabilityCheckFunc should accept (baseURL, chunk)
-            const res = await fetchWithJar(
+            const res = await fetchWithMyJar(
                 baseURL,
                 {
                     method: "POST",

@@ -55,11 +55,11 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
         for (const terminal of terminals) {
             if (!containers.length) break
             
-            console.log(`Checking terminal: ${ terminal.key } ...`)
+            console.log(`Checking "${ terminal.label }" | ${ terminal.key }:`)
 
             // Seattle group
             if (terminal.group === "Seattle") {
-                loadCookies_ForSeattleTerminal()   //  перевіряю доступ до терміналу тут (+CookieJar) - раз на всі чанки, щоб не перелогінюватися за кожним чанком
+                loadCookies_ForSeattleTerminal(terminal)   //  перевіряю доступ до терміналу тут (+CookieJar) - раз на всі чанки, щоб не перелогінюватися за кожним чанком
                 if (await connectSeattleTerminal(terminal)) {
                     const thisTerminalContainers = await seattleBulkAvailabilityCheck(terminal, containers)
                     

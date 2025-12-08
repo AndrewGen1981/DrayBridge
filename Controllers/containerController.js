@@ -292,6 +292,23 @@ function normalizeContainerNumbers(input) {
 
 
 
+// Створюю єдину процедуру перевірки наявності контейнерів. Наприклад, існуючими вважаються такі,
+// які вже є в базі + їх статус не "missing". Правила валідації можна доповнювати, змінювати, але
+// вони повинні бути уніфіковані, оскільки використовуються в інших методах
+
+async function validateExisting(numbers) {
+    if (!numbers?.length) return []
+    return await Container.find(
+        {
+            number: { $in: numbers },
+            status: { $ne: "missing" }
+        },
+        { number: 1, _id: 0 }
+    ).lean()
+}
+
+
+
 exports.validateNumbers = async (req, res, next) => {
     try {
 
@@ -301,14 +318,7 @@ exports.validateNumbers = async (req, res, next) => {
         const result = normalizeContainerNumbers(numbers)
 
         if (result?.valid?.length && options.isExists) {
-            const existingContainers = await Container.find(
-                {
-                    number: { $in: result.valid },
-                    status: { $ne: "missing" }
-                },
-                { number: 1, _id: 0 }
-            ).lean()
-
+            const existingContainers = await validateExisting(result.valid)
             result.existing = existingContainers.map(c => c.number)
         }
 
@@ -345,13 +355,7 @@ exports.addContainers = async (req, res, next) => {
         }
 
         // Шукаю вже існуючі з переданого переліку, дозволяю перезаписувати статус "missing"
-        const existingContainers = await Container.find(
-            {
-                number: { $in: valid },
-                status: { $ne: "missing" }
-            },
-            { number: 1, _id: 0 }
-        ).lean()
+        const existingContainers =  await validateExisting(valid)
 
         // Найшвидший спосіб видалення вже існуючих
         const setOfValid = new Set(valid)
