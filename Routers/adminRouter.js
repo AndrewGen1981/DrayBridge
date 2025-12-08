@@ -30,6 +30,8 @@ const { cloudinaryMonitoring, deleteFromCloudinary } = require("../Controllers/c
 // Маршрутизатори
 const sharedUserAdminRoutes = require('./sharedUserAdminRoutes')
 
+const { updateTerminalsData } = require("../Controllers/_seattleTerminalsController.js")
+
 
 
 const adminRouter = express.Router()
@@ -38,7 +40,7 @@ const adminRouter = express.Router()
 
 
 // Специфічні раути для Адміна, в т.ч. Інжекти
-adminRouter.post("/test-container-number", containersController.testContainerNumber)
+adminRouter.post("/test-container-number", containersController.testContainerExists)
 adminRouter.post("/get-container-by-id", containersController.getContainerById)
 
 // adminRouter.post("/add-new-item",
@@ -63,6 +65,10 @@ adminRouter.get("/logs", logsController.viewLogs)
 // adminRouter.post("/cloud", deleteFromCloudinary)
 
 
+// робота з контейнерами
+adminRouter.use("/containers", require("./containersRouter.js"))
+
+
 // Інжект - перед рендером профайлу
 const beforeProfileRender = async (req, res, next) => {
     try {
@@ -73,6 +79,10 @@ const beforeProfileRender = async (req, res, next) => {
             // revealCats: true,
             // revealSubCats: true,
         }))
+
+        // updateTerminalsData()
+        // const results = await updateTerminalsData()
+        // console.log(results)
 
         next()
     } catch (error) {

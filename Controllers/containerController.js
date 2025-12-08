@@ -24,12 +24,28 @@ const { AppError } = require("../Utils/AppError.js")
 const {
     cleanBodyCopy,
     fulfillPerSchema
-} = require("../Utils/mongoose_utils.js");
+} = require("../Utils/mongoose_utils.js")
+
+
+// Створюю аналог fulfillPerSchema для bulk операцій
+const allowed = new Set(Object.keys(Container.schema.paths))
+const fulfillPerContainer = (obj) => {
+    const result = {}
+    for (const k of Object.keys(obj)) {
+        if (allowed.has(k) && obj[k] != null) {
+            result[k] = obj[k]
+        }
+    }
+    return result
+}
 
 
 
 // ***  Configs and Catalogs
 const { appDomain } = require("../Config/__config.json")
+const { TERMINALS_LABELS } = require("../Config/terminalsCatalog.js")
+const { bulkAvailabilityCheck } = require("./_terminalsController.js")
+
 
 
 
@@ -230,7 +246,163 @@ exports.getContainers = async (req, options = {}) => {
 // --- Middleware
 
 
-exports.testContainerNumber = async (req, res, next) => {
+exports.index = async (req, res, next) => {
+    res.render("../Views/containers/containers_main.ejs", {
+        TERMINALS_LABELS
+    })
+}
+
+
+
+function normalizeContainerNumbers(input) {
+    if (!input) return { valid: [], invalid: [] }
+
+    // 1) конвертуємо у рядок
+    const numbersStr = Array.isArray(input) ? input.join(" ") : String(input)
+
+    // 2) замінюємо все, що не латинська буква або цифра, на пробіл
+    const cleaned = numbersStr
+        .toUpperCase()
+        .replace(/[^A-Z0-9]+/g, " ")
+        .trim()
+
+    if (!cleaned) return { valid: [], invalid: [] }
+
+    // 3) розбиваємо по пробілу (один або група)
+    const tokens = cleaned.split(/\s+/)
+
+    // 4) паттерн: 4 літери + 7 цифр
+    const re = /^[A-Z]{4}\d{7}$/
+
+    const seen = new Set()
+    
+    const valid = []
+    const invalid = []
+
+    for (const t of tokens) {
+        if (seen.has(t)) continue
+        seen.add(t)
+
+        if (re.test(t)) valid.push(t)
+        else invalid.push(t)
+    }
+
+    return { valid, invalid, tokens }
+}
+
+
+
+exports.validateNumbers = async (req, res, next) => {
+    try {
+
+        const { numbers, options = {} } = req.body || {}
+        if (!numbers) throw new AppError("Container numbers are required", 400)
+
+        const result = normalizeContainerNumbers(numbers)
+
+        if (result?.valid?.length && options.isExists) {
+            const existingContainers = await Container.find(
+                {
+                    number: { $in: result.valid },
+                    status: { $ne: "missing" }
+                },
+                { number: 1, _id: 0 }
+            ).lean()
+
+            result.existing = existingContainers.map(c => c.number)
+        }
+
+        res.json({ result })
+        
+    } catch (error) {
+        console.error(error)
+        const status = error.status || 500
+        const message = error.message || String(error)
+        res.status(status).json({ result: false, issue: message })
+    }
+}
+
+
+
+// Створює нові контейнери за списком (bulk-adding).
+// Отримує також параметр "terminalsChoice", який один або перелік терміналів, де потрібно першочергово 
+// перевірити наявність контейнерів. Може містити "auto" і тоді перевірять всі інуючі в системі термінали, 
+// якщо ж передається визначений перелік терміналів, то інші перевірятися не будуть. Незнайдені матимуть 
+// статус "missing"
+exports.addContainers = async (req, res, next) => {
+    try {
+
+        const { new_containers, terminals: terminalsChoice } = req.body || {}
+        
+        if (!new_containers) {
+            throw new AppError("Container numbers are required.", 400)
+        }
+
+        const { valid, invalid } = normalizeContainerNumbers(new_containers)
+
+        if (!Array.isArray(valid) || valid.length === 0) {
+            throw new AppError("No valid container numbers were found.", 422)
+        }
+
+        // Шукаю вже існуючі з переданого переліку, дозволяю перезаписувати статус "missing"
+        const existingContainers = await Container.find(
+            {
+                number: { $in: valid },
+                status: { $ne: "missing" }
+            },
+            { number: 1, _id: 0 }
+        ).lean()
+
+        // Найшвидший спосіб видалення вже існуючих
+        const setOfValid = new Set(valid)
+        for (const existingContainer of existingContainers) {
+            setOfValid.delete(existingContainer.number)
+        }
+
+        const brandNew = [...setOfValid]    //  тільки нові контейнери
+        if (brandNew.length === 0) {
+            throw new AppError("All provided containers already exist.", 422)
+        }
+
+        // Perform terminal search
+        const { found = [], missing = [] } = await bulkAvailabilityCheck(brandNew, terminalsChoice) || {}
+
+        // Build upsert operations
+        const operations = [...found, ...missing]
+            .filter(Boolean)
+            .map(container => ({
+                updateOne: {
+                    filter: { number: container.number },
+                    update: { $set: fulfillPerContainer(container) },
+                    upsert: true
+                }
+            }))
+
+        if (operations.length === 0) {
+            throw new AppError("No containers could be created.", 422)
+        }
+
+        const result = await Container.bulkWrite(operations)
+
+        res.json({
+            valid,
+            invalid,
+            existingContainers,
+            modifiedCount: result.modifiedCount,
+            upsertedCount: result.upsertedCount
+        })
+        
+    } catch (error) {
+        console.error(error)
+        const status = error.status || 500
+        const message = error.message || String(error)
+        res.status(status).json({ result: false, issue: message })
+    }
+}
+
+
+
+exports.testContainerExists = async (req, res, next) => {
     try {
 
         const { number } = req.body || {}

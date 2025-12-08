@@ -5,6 +5,11 @@
         "emoji": "💼"
     },
     {
+        "route": "/admin/containers",
+        "title": "Containers",
+        "emoji": "🧱"
+    },
+    {
         "route": "/admin/logs",
         "title": "Logs",
         "emoji": "🔑",

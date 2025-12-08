@@ -43,8 +43,7 @@
     --accent-gray-border: #9e9e9e;
 
     /* Table */
-    --table_header_color: #667781;
-    --table_header_color: #667781;
+    --table_header_color: #019679;
 
     --header_height: 47px;
 
@@ -213,15 +212,15 @@ table thead.-sticky::before {
 }
 
 table tr th {
-    padding-block: 4px;
-    font-size: 1.2rem;
-    font-weight: 300;
+    padding-block: 0.75rem;
+    /* font-size: 1.2rem; */
+    /* font-weight: 300; */
     color: #fff;
     background-color: var(--table_header_color);
     user-select: none;
 }
 table tr td {
-    padding-block: 0.35rem;
+    padding-block: 0.75rem;
     text-align: center;
 }
 /* table thead tr:nth-child(1) th:nth-child(1) {
@@ -232,7 +231,7 @@ table thead tr:nth-child(1) th:nth-last-child(1) {
 } */
 :where(table tbody tr:nth-child(odd)) {
     background-color: var(--main-color1);
-    border-bottom: 1px solid var(--main-color3);
+    border-bottom: 1px solid #b6ded8;
 }
 :where(table tbody tr:nth-child(even)) {
     background-color: var(--main-color2);

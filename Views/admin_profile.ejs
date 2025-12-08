@@ -54,6 +54,76 @@
         </h2>
 
         
+        
+        
+        <aside>
+            <input type="search" name="criteria_search" id="criteria_search" placeholder="Containers search" />
+            <div id="found-results" class="closed" hidden>searching...</div>
+        </aside>
+        
+        <!-- Items -->
+        <table id="items">
+            <thead>
+                <tr>
+                    <th scope="col">Container</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Size/Type</th>
+                    <th scope="col">Customs</th>
+                    <th scope="col">Line Release</th>
+                    <th scope="col">Holds/Fees</th>
+                    <th scope="col">Additional Information</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for (let i = 0; i < containers.length; i++) { %>
+
+                    <tr data-id="<%= containers[i]._id%>">
+                        <td class="number"><%= containers[i].number %></td>
+                        <td class="status"><%= containers[i].status %></td>
+                        <td class="type">
+                            <p><%= containers[i].type %></p>
+                            <i><%= containers[i].typeLabel %></i>
+                        </td>
+                        <td class="customs">
+                            <p><%= containers[i].customStatus %></p>
+                            <i><%= containers[i].customTimestamp %></i>
+                        </td>
+                        <td class="lineRelease">
+                            <p><%= containers[i].lineReleaseStatus %></p>
+                            <i><%= containers[i].lineReleaseTimestamp %></i>
+                        </td>
+                        <td class="holds">
+                            <p><%= containers[i].holds %></p>
+                            <% if (containers[i].satisfiedThru) { %>
+                                <i>Satisfied Thru: <%= containers[i].satisfiedThru %></i><br>
+                            <% } %>
+                            <b><%= containers[i].totalFees %></b>
+                        </td>
+                        <td class="aditional">
+                            <% if (containers[i].location) { %>
+                                <address>Location: <%= containers[i].location %></address>
+                            <% } %>
+                            <% if (containers[i].vesselVoy) { %>
+                                <p>Vessel/Voyager: <%= containers[i].vesselVoy %></p>
+                            <% } %>
+                            <% if (containers[i].line) { %>
+                                <p>Line: <%= containers[i].line %></p>
+                            <% } %>
+                            <% if (containers[i].trucker) { %>
+                                <p>Trucker: <%= containers[i].trucker %></p>
+                            <% } %>
+                            <% if (containers[i].requiredAccessory) { %>
+                                <p>Required Accessory: <%= containers[i].requiredAccessory %></p>
+                            <% } %>
+                        </td>
+                    </tr>
+
+                <% } %>
+            </tbody>
+        </table>
+
+
+        <!-- Pagination -->
         <menu type="toolbar" id="pagination_menu">
             <a <% if(first.isActive) { %> href="<%= first.href %>#nav_pages" <% } %> data-active="<%= first.isActive %>">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -97,39 +167,6 @@
                 </svg>
             </a>
         </menu>
-        
-        <aside>
-            <input type="search" name="criteria_search" id="criteria_search" placeholder="Containers search" />
-            <div id="found-results" class="closed" hidden>searching...</div>
-        </aside>
-        
-        <!-- Items -->
-        <table id="items">
-            <thead>
-                <tr>
-                    <th scope="col">Container</th>
-                    <th scope="col">Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% for (let i = 0; i < containers.length; i++) {
-
-                    const {
-                        _id, number, description = ""
-                    } = containers[i]
-
-                    const desc = description.length < 200 ? description : `${ description.slice(0, 200) }...`
-
-                    %>
-
-                    <tr data-id="<%= _id%>">
-                        <td class="number"><%= number %></td>
-                        <td class="description"><%= desc %></td>
-                    </tr>
-
-                <% } %>
-            </tbody>
-        </table>
 
         
     </main>

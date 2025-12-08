@@ -102,18 +102,11 @@ app.use((req, res, next) => {
 
 
 // *** Глобальні раути
-app.get("/", async (req, res) => {
-    
-    const { role } = req.session || {}
-    res.redirect(role ? "/profile" : "/login")
 
-    // res.send(`
-    //     <ul>
-    //         <li>
-    //             <a href="/profile">Profile</a>
-    //         </li>
-    //     </ul>
-    // `)
+app.get("/", async (req, res) => {
+    // Тимчасове рішення, залишаю місце для стартової сторінки, якщо потрібно
+    const { role } = req.session || {}
+    res.redirect(role ? "/profile" : "/login")      // мінімізую редіректи
 })
 
 

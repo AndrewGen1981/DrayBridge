@@ -1,0 +1,6 @@
+{
+  "ignore": [
+    "cookies.json",
+    "test_terminals.html"
+  ]
+}

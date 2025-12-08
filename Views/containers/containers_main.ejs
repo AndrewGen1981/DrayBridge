@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" view-transition>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Containers</title>
+
+    <link rel="shortcut icon" href="/favico.png">
+    <link rel="stylesheet" href="/containers/containers_main.css">
+
+</head>
+<body class="entire-page">
+
+    <%
+        const { TERMINALS_LABELS } = locals
+    %>
+
+    <%- include("../__header.ejs") %>
+
+
+    <main class="standard-template containers">
+        <h1 class="main-title">Containers</h1>
+        <form action="/admin/containers/add-containers" method="post" id="add_containers">
+            <div class="textarea-box">
+                <textarea name="new_containers" id="new_containers" placeholder="Place container numbers to be added" required></textarea>
+                <div class="validation-results-box">
+                    <h2>Validation results <span id="indicator" hidden>⏳️</span></h2>
+                    <ul id="validation_results" hidden></ul>
+                </div>
+            </div>
+            <div class="controls">
+                <select name="terminals" id="terminals" multiple>
+                    <option value="auto" selected>Auto define</option>
+                    <% for (const [k, v] of Object.entries(TERMINALS_LABELS)) { %>
+                        <option value="<%= k %>"><%= v %></option>
+                    <% } %>
+                </select>
+                <button type="submit" class="color-button -green">Add New</button>
+            </div>
+        </form>
+    </main>
+
+
+    <%- include("../__footer.ejs") %>
+
+
+    <script type="module" src="/containers/containers_main.js" defer></script>
+
+
+</body>
+</html>

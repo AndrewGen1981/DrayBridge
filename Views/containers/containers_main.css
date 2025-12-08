@@ -1,0 +1,61 @@
+main.containers form#add_containers {
+    --w: min(45rem, 100%);
+
+    padding: 1rem;
+
+    display: grid;
+    gap: 2rem;
+
+    outline: 1px solid var(--main-color3);
+}
+main.containers #add_containers .textarea-box {
+
+    display: grid;
+    grid-template-columns: var(--w) 1fr;
+    gap: 2rem;
+}
+main.containers #add_containers .textarea-box .validation-results-box,
+main.containers #add_containers textarea#new_containers,
+main.containers #add_containers select#terminals {
+    padding: 1rem;
+    border: 1px solid #aaa;
+}
+
+main.containers #add_containers textarea#new_containers {
+    aspect-ratio: 2 / 1;
+    resize: none;
+}
+
+main.containers .validation-results-box h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+main.containers .validation-results-box ul#validation_results {
+    list-style-position: inside;
+}
+main.containers .validation-results-box ul#validation_results li {
+    text-wrap: balance;
+    margin-bottom: 0.5rem;
+}
+main.containers .validation-results-box ul#validation_results li b {
+    font-weight: 500;
+    text-transform: capitalize;
+}
+main.containers .validation-results-box ul#validation_results li[data-valid] b {
+    color: darkgreen;
+}
+main.containers .validation-results-box ul#validation_results li[data-existing] b {
+    color: darkblue;
+}
+main.containers .validation-results-box ul#validation_results li[data-invalid] b {
+    color: darkred;
+}
+
+
+
+main.containers #add_containers .controls {
+    display: grid;
+    grid-template-columns: var(--w) 10rem;
+    align-items: start;
+    gap: 2rem;    
+}
