@@ -87,7 +87,7 @@ async function isSessionAlive(url) {
 
 
 // Підключення CookieJar до конкретного терміналу
-const connectSeattleTerminal = async (terminal, { shouldloadCookies_ForSeattleTerminal = false } = {}) => {
+const connectSeattleTerminal = async (terminal, { shouldloadCookies = false } = {}) => {
     try {
         const { label, url, env_login = "", env_passowrd = "" } = terminal || {}
     
@@ -100,7 +100,7 @@ const connectSeattleTerminal = async (terminal, { shouldloadCookies_ForSeattleTe
     
         // --- Під*єднуюся до терміналу
         
-        if (shouldloadCookies_ForSeattleTerminal) loadCookies_ForSeattleTerminal()    // не завжди потрібно, наприклад, якщо це спискове оновлення, то достатньо раз обновити для всіх терміналів
+        if (shouldloadCookies) loadCookies_ForSeattleTerminal()    // не завжди потрібно, наприклад, якщо це спискове оновлення, то достатньо раз обновити для всіх терміналів
         const baseURL = url + (url.endsWith("/") ? "" : "/")
     
         // #1 перевіряю чи "жива" ще сесія (читаю з файлу COOKIE_FILE)
