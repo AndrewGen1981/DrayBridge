@@ -43,7 +43,7 @@ const fulfillPerContainer = (obj) => {
 
 // ***  Configs and Catalogs
 const { appDomain } = require("../Config/__config.json")
-const { TERMINALS_LABELS } = require("../Config/terminalsCatalog.js")
+const { TERMINALS_LABELS, TERMINALS } = require("../Config/terminalsCatalog.js")
 const { bulkAvailabilityCheck } = require("./_terminalsController.js")
 
 
@@ -183,6 +183,8 @@ exports.getContainers = async (req, options = {}) => {
         saveParams = req.headers.referer?.includes('/admin/profile'),
         // можна переключити логіку побудови фітрів OR/AND (по-замовчуванню OR)
         useAndFilters = false,
+        // замінити Terminal key на label
+        revealTerminals = false,
     } = options
 
     let query = req.query || {}
@@ -225,6 +227,12 @@ exports.getContainers = async (req, options = {}) => {
     // *** Оптимізую поля, щоб не робити в шаблоні
     for (let container of containers) {
         container._id = String(container._id)
+
+        if (revealTerminals) {
+            container.terminal = TERMINALS[container?.terminal || ""]?.label
+                || container.terminal
+                || "NA"
+        }
         // ... ще операції
     }
 
@@ -370,6 +378,14 @@ exports.addContainers = async (req, res, next) => {
 
         // Perform terminal search
         const { found = [], missing = [] } = await bulkAvailabilityCheck(brandNew, terminalsChoice) || {}
+
+
+        // return res.json({
+        //     invalid,
+        //     existingContainers,
+        //     operations: [...found, ...missing],
+        // })
+
 
         // Build upsert operations
         const operations = [...found, ...missing]

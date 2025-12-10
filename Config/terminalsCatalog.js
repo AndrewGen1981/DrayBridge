@@ -41,6 +41,17 @@ const TERMINALS = {
 
     // WUT - WASHINGTON UNITED TERMINAL MARINE
 
+    "wut": {
+        key: "wut",
+        group: "USWUT",
+        label: "Washington United Terminals",
+        url: "http://tns.uswut.com/",
+        env_login: "WUT_LOGIN",
+        env_passowrd: "WUT_PASSWORD",
+        cookieFile: "Cookies/cookies.uswut.json",
+        jar: new CookieJar()
+    },
+
     // HUSKY TERMINAL & STEVEDORING
 }
 
@@ -48,14 +59,31 @@ const TERMINALS = {
 const TERMINALS_ENUM = Object.keys(TERMINALS)
 
 
-// Кожен термінал працює зі своєю сесією. Додавати їх потрібно тут, не при оголошенні TERMINALS
+
+// Init: кожен термінал працює зі своєю сесією.
+// Додавати їх потрібно тут, не при оголошенні TERMINALS
 for (const t of Object.values(TERMINALS)) {
     t.fetchWithMyJar = fetchCookie(nodeFetch, t.jar)
+}
+
+
+// Утиліта: повертає path, використовуючи terminal.url
+const getURL = (terminal, path = "") => {
+    const _url = (terminal?.url || "").trim()
+    const slash = _url.endsWith("/") ? "" : "/"
+    const _path = path.trim()
+
+    return (`${ _url }${ slash }${ _path }`).replace(/\/+/g, "/")
 }
 
 
 module.exports = {
     TERMINALS,
     TERMINALS_ENUM,
-    TERMINALS_LABELS: Object.fromEntries(TERMINALS_ENUM.map(t => [t, TERMINALS[t]?.label] || "NA")),
+    TERMINALS_LABELS: Object.fromEntries(
+        TERMINALS_ENUM.map(t => [t, TERMINALS[t]?.label] || "NA")
+    ),
+
+    // утиліти
+    getURL,
 }

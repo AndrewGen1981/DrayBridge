@@ -1,0 +1,20 @@
+{
+  "version": "tough-cookie@6.0.0",
+  "storeType": "MemoryCookieStore",
+  "rejectPublicSuffixes": true,
+  "enableLooseMode": false,
+  "allowSpecialUseDomain": true,
+  "prefixSecurity": "silent",
+  "cookies": [
+    {
+      "key": "APPJSESSIONID",
+      "value": "H8oDy2-rKJen5ywsJkGQaXYh2tzFHcrVGV-fY2ivbHfV1zLgVLVQ!1954654219!-1370544142",
+      "domain": "tns.uswut.com",
+      "path": "/",
+      "httpOnly": true,
+      "hostOnly": true,
+      "creation": "2025-12-09T15:47:02.502Z",
+      "lastAccessed": "2025-12-09T15:47:02.507Z"
+    }
+  ]
+}

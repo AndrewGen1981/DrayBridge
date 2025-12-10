@@ -8,8 +8,12 @@ const { TERMINALS_ENUM } = require("../Config/terminalsCatalog.js")
 
 
 const containerSchema = new mongoose.Schema({
+
+    // 1️⃣ Container (основна ідентифікація та статус)
+    // стандартна інформація про контейнер, приналежність і т.д.
+
     number: {
-        type: String,
+        type: String,       //  WUT "cntrNo"
         require: true,
         unique: true,
         index: true
@@ -21,26 +25,44 @@ const containerSchema = new mongoose.Schema({
         lowercase: true,
     },
 
-    status: String,
+    // уніфіковані поля для відображення доступності контейнера
+    status: String,     // WUT "avlbFlg"
+    statusDesc: String,     // WUT "avlbDesc", Seattle "OSRA. Container Available"
 
-    type: String,
-    typeLabel: String,
+    // характеристики, тип та розмір контейнера
+    containerTypeSize: String,      // WUT "tmlPrivCntrTpszCdNm"
+    containerTypeSizeLabel: String,     //  Seattle only
 
-    customStatus: String,
-    customTimestamp: String,
+    lastFreeDate: String,   // WUT "lstFreeDt", Seattle "OSRA. Line Last Free Day"
+    appointmentDate: String,    // WUT "exstApntDt", Seattle "satisfiedThru"
 
-    lineReleaseStatus: String,
-    lineReleaseTimestamp: String,
+    // 2️⃣ Customs
+    // митниці можуть накладати холди на контейнер/товар, холди найвищого пріоритету
 
-    holds: String,
-    totalFees: String,
-    satisfiedThru: String,
+    // Customs hold & hold status
+    customStatus: String,   // WUT "cusmHold"
+    customTimestamp: String,    //  Seattle only
 
-    location: String,
-    vesselVoy: String,
-    line: String,
-    trucker: String,
-    requiredAccessory: String,
+    // 3️⃣ Customer/Carrier/Line
+    // власник або його агент може також накласти холд, холди середнього пріоритету
+
+    SSCO: String,   // WUT "oprCd", Seattle "line" — оператор, який контролює контейнер
+    customerStatus: String,     // WUT "custHold", Seattle "lineReleaseTimestamp"
+    customerHoldReason: String,     // WUT "custHldRsn"
+    lineReleaseStatus: String,  // Seattle only
+    lineFirstFree: String,  // Seattle only - OSRA. Line First Free Day
+
+
+    // 4️⃣ Terminal
+    // термінали можуть накладати холди за demurrage, damage, OOG (“Out of Gauge”), простій
+    
+    dwellAmount: String,    // WUT "dwllAmt", Seattle "totalFees"
+    damageFeeOutstanding: String,   // WUT "dmgDueFlg", flag неоплачених зборів терміналу
+    terminalHold: String,   // WUT "tmnlHold" холд терміналу, Seattle "holds"
+    terminalHoldReason: String,     // WUT "tmnlHoldRsn"
+
+    origin: String,
+
 }, {
     timestamps: true,
     collection: "_CONTAINERS"

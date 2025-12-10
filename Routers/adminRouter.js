@@ -30,7 +30,6 @@ const { cloudinaryMonitoring, deleteFromCloudinary } = require("../Controllers/c
 // Маршрутизатори
 const sharedUserAdminRoutes = require('./sharedUserAdminRoutes')
 
-const { updateTerminalsData } = require("../Controllers/_seattleTerminalsController.js")
 
 
 
@@ -77,12 +76,8 @@ const beforeProfileRender = async (req, res, next) => {
         Object.assign(res.locals, await containersController.getContainers(req, {
             // stringifyFitments: true,
             // revealCats: true,
-            // revealSubCats: true,
+            revealTerminals: true,
         }))
-
-        // updateTerminalsData()
-        // const results = await updateTerminalsData()
-        // console.log(results)
 
         next()
     } catch (error) {

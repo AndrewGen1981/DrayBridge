@@ -66,56 +66,104 @@
             <thead>
                 <tr>
                     <th scope="col">Container</th>
+                    <th scope="col">Terminal</th>
                     <th scope="col">Status</th>
                     <th scope="col">Size/Type</th>
                     <th scope="col">Customs</th>
-                    <th scope="col">Line Release</th>
-                    <th scope="col">Holds/Fees</th>
-                    <th scope="col">Additional Information</th>
+                    <th scope="col">Customer/Carrier/Line</th>
+                    <th scope="col">Terminal</th>
                 </tr>
             </thead>
             <tbody>
                 <% for (let i = 0; i < containers.length; i++) { %>
 
                     <tr data-id="<%= containers[i]._id%>">
+
                         <td class="number"><%= containers[i].number %></td>
-                        <td class="status"><%= containers[i].status %></td>
-                        <td class="type">
-                            <p><%= containers[i].type %></p>
-                            <i><%= containers[i].typeLabel %></i>
+                        <td class="terminal"><%= containers[i].terminal %></td>
+
+                        <td class="status-desc">
+                            <p class="status"><%= containers[i].status %></p>
+                            <i class="status-desc"><%= containers[i].statusDesc %></i>
+                            <% if (containers[i].lastFreeDate) { %>
+                                <dl class="last-free-date">
+                                    <dl>Last Free Date</dl>
+                                    <dt><%= containers[i].lastFreeDate %></dt>
+                                </dl>
+                            <% } %>
+                            <% if (containers[i].appointmentDate) { %>
+                                <dl class="appointment-date">
+                                    <dl>Appointment Date</dl>
+                                    <dt><%= containers[i].appointmentDate %></dt>
+                                </dl>
+                            <% } %>
                         </td>
+
+                        <td class="type-size">
+                            <p><%= containers[i].containerTypeSize %></p>
+                            <i><%= containers[i].containerTypeSizeLabel %></i>
+                        </td>
+
                         <td class="customs">
                             <p><%= containers[i].customStatus %></p>
                             <i><%= containers[i].customTimestamp %></i>
                         </td>
-                        <td class="lineRelease">
-                            <p><%= containers[i].lineReleaseStatus %></p>
-                            <i><%= containers[i].lineReleaseTimestamp %></i>
+
+                        <td class="customer">
+                            <p><%= containers[i].SSCO %></p>
+                            <% if (containers[i].customerStatus) { %>
+                                <dl class="customer-status">
+                                    <dl>Customer Status</dl>
+                                    <dt><%= containers[i].customerStatus %></dt>
+                                </dl>
+                            <% } %>
+                            <% if (containers[i].customerHoldReason) { %>
+                                <dl class="customer-hold-reason">
+                                    <dl>Customer Hold Reason</dl>
+                                    <dt><%= containers[i].customerHoldReason %></dt>
+                                </dl>
+                            <% } %>
+                            <% if (containers[i].lineReleaseStatus) { %>
+                                <dl class="line-release-status">
+                                    <dl>Line Release Status</dl>
+                                    <dt><%= containers[i].lineReleaseStatus %></dt>
+                                </dl>
+                            <% } %>
+                            <% if (containers[i].lineFirstFree) { %>
+                                <dl class="line-first-free">
+                                    <dl>Line First Free</dl>
+                                    <dt><%= containers[i].lineFirstFree %></dt>
+                                </dl>
+                            <% } %>
                         </td>
-                        <td class="holds">
-                            <p><%= containers[i].holds %></p>
-                            <% if (containers[i].satisfiedThru) { %>
-                                <i>Satisfied Thru: <%= containers[i].satisfiedThru %></i><br>
+
+                        <td class="terminal">
+                            <% if (containers[i].dwellAmount) { %>
+                                <dl class="dwell-amount">
+                                    <dl>Dwell Amount</dl>
+                                    <dt><%= tools.money(containers[i].dwellAmount) %></dt>
+                                </dl>
                             <% } %>
-                            <b><%= containers[i].totalFees %></b>
+                            <% if (containers[i].damageFeeOutstanding) { %>
+                                <dl class="damage-fee-outstanding">
+                                    <dl>Damage Fee Outstanding</dl>
+                                    <dt><%= containers[i].damageFeeOutstanding %></dt>
+                                </dl>
+                            <% } %>
+                            <% if (containers[i].terminalHold) { %>
+                                <dl class="terminal-hold">
+                                    <dl>Terminal Hold</dl>
+                                    <dt><%= containers[i].terminalHold %></dt>
+                                </dl>
+                            <% } %>
+                            <% if (containers[i].terminalHoldReason) { %>
+                                <dl class="terminal-hold-reason">
+                                    <dl>Terminal Hold Reason</dl>
+                                    <dt><%= containers[i].terminalHoldReason %></dt>
+                                </dl>
+                            <% } %>
                         </td>
-                        <td class="aditional">
-                            <% if (containers[i].location) { %>
-                                <address>Location: <%= containers[i].location %></address>
-                            <% } %>
-                            <% if (containers[i].vesselVoy) { %>
-                                <p>Vessel/Voyager: <%= containers[i].vesselVoy %></p>
-                            <% } %>
-                            <% if (containers[i].line) { %>
-                                <p>Line: <%= containers[i].line %></p>
-                            <% } %>
-                            <% if (containers[i].trucker) { %>
-                                <p>Trucker: <%= containers[i].trucker %></p>
-                            <% } %>
-                            <% if (containers[i].requiredAccessory) { %>
-                                <p>Required Accessory: <%= containers[i].requiredAccessory %></p>
-                            <% } %>
-                        </td>
+
                     </tr>
 
                 <% } %>

@@ -5,51 +5,23 @@
 // всі ці термінали вимагають єдиного підходу до логіну, перевірки активності сесії та використовують однакові http методи, endpoints
 
 
-const fs = require("fs")
+const { setTimeout } = require("node:timers/promises")
+
+
 const cheerio = require("cheerio")
 
-// тут це потрібно, бо використовую метод fromJSON даного класу
-const { CookieJar } = require("tough-cookie")
 
-const { setTimeout } = require("node:timers/promises")
 const { AppError } = require("../Utils/AppError")
+const { getURL } = require("../Config/terminalsCatalog")
 
 
-
-// --- Утиліти для роботи з сесією та логіном
-
-
-const getBaseURL = (url) => {
-    const _url = url.trim()
-    return `${ _url }${ _url.endsWith("/") ? "" : "/" }`
-}
+// --- Утиліти для роботи з сесіями терміналів
+const {
+    saveCookies,
+    connectTerminal
+} = require("./_terminalSessionsControlle")
 
 
-
-// Завантажити cookie сесії з файлу
-function loadCookies_ForSeattleTerminal(terminal) {
-    const { cookieFile } = terminal || {}
-    
-    if (!cookieFile) throw new AppError("Wrong terminal setup", 500)
-    if (!fs.existsSync(cookieFile)) return
-
-    try {
-        const data = fs.readFileSync(cookieFile, "utf8")
-        terminal.jar = CookieJar.fromJSON(JSON.parse(data))
-        console.log(`🔁 Cookies for ${ terminal.key } restored from file`)
-    } catch (err) {
-        console.warn(`⚠️ Failed to load cookies for ${ terminal.key }:`, err.message)
-    }
-}
-
-
-// Зберегти cookie сесії у файл
-function saveCookies(terminal) {
-    if (!terminal?.cookieFile || !terminal?.jar) throw new AppError("Wrong terminal setup", 500)
-
-    fs.writeFileSync(terminal.cookieFile, JSON.stringify(terminal.jar.toJSON(), null, 2), "utf8")
-    console.log("💾 Cookies saved")
-}
 
 
 // Логін на латформу терміналу, у Tideworks (фізичний логін, на рівні http)
@@ -66,13 +38,9 @@ async function loginTideworks(terminal) {
     const PASSWORD = process.env[env_passowrd]
     if (!LOGIN || !PASSWORD) throw new AppError("Credentials are required", 403)
 
-    console.log(`🔄 Logging in to ${ terminal.label }...`)
-
-    const fetchURL = getBaseURL(url.trim())
-
     // GET стартової сторінки для ініціалізації cookie
-    await fetchWithMyJar(`${ fetchURL }default.do`, {
-        headers: { "User-Agent": "Mozilla/5.0" },
+    await fetchWithMyJar(getURL(terminal, "/default.do"),{
+        headers: { "User-Agent": "Mozilla/5.0" }
     })
 
     const params = new URLSearchParams({
@@ -80,7 +48,7 @@ async function loginTideworks(terminal) {
         j_password: PASSWORD,
     })
 
-    const resp = await fetchWithMyJar(`${ fetchURL }j_spring_security_check`, {
+    const resp = await fetchWithMyJar(getURL(terminal, "/j_spring_security_check"), {
         method: "POST",
         headers: {
             "User-Agent": "Mozilla/5.0",
@@ -90,49 +58,21 @@ async function loginTideworks(terminal) {
         redirect: "manual",
     })
 
-    console.log("Login status:", resp.status, resp.headers.get("location"))
+    console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }`)
 
     if (resp.status === 302) saveCookies(terminal)
     else throw new AppError("❌ Login failed", 500)
 }
 
-// Перевірка активності сесії
-async function isSessionAlive(terminal) {
-    const { url, fetchWithMyJar } = terminal || {}
-
-    
-    if (!url?.trim()) throw new AppError("❌ Login failed: URL is required", 404)
-    if (!fetchWithMyJar) throw new AppError("Wrong terminal setup", 500)
-            
-    const fetchURL = getBaseURL(url.trim())
-    const resp = await fetchWithMyJar(`${ fetchURL }home/default.do`, { redirect: "manual" })
-
-    return resp.status === 200
-}
 
 
-// Підключення CookieJar до конкретного терміналу
-const connectSeattleTerminal = async (terminal, { shouldloadCookies = false } = {}) => {
-    try {
-        // --- Під*єднуюся до терміналу
-        if (shouldloadCookies) loadCookies_ForSeattleTerminal(terminal)    // не завжди потрібно, наприклад, якщо це спискове оновлення, то достатньо раз обновити для всіх терміналів
-        
-        // #1 перевіряю чи "жива" ще сесія (читаю з файлу COOKIE_FILE)
-        const alive = await isSessionAlive(terminal)
-        
-        // #2 якщо ні, то наново під*єднуюся і записую сесію в файл COOKIE_FILE
-        if (alive) {
-            console.log("✅ Using existing session")
-        } else {
-            await loginTideworks(terminal)
-            console.log("New session was created")
-        }
-
-        return true
-
-    } catch (error) {
-        console.error(`Connect to Seattle terminal "${ terminal.label || 'NA' }" issue: ${ error }`)
-    }
+// Підключення до конкретного терміналу Сіетлу
+const connectSeattleTerminal = async (terminal, options = {}) => {
+    return connectTerminal(terminal, {
+        ...options,
+        pingPath: "/home/default.do",
+        loginCallback: loginTideworks
+    })
 }
 
 
@@ -175,14 +115,14 @@ const seattlePerItemtAvailabilityCheck = async (terminal, containers, options) =
             isMapResults = false    // результати можна повернути як Map, якщо далі необхідно проводити співсталення даних з базою
         } = options
         
-        const baseURL = getBaseURL(terminal.url.trim())
         const results = isMapResults ? {} : []
 
         for (const container of [ ...new Set(containers) ]) {
             // шукаю базову інформацію про контейнер
-            const equipmentRequestURL = `${ baseURL }import/default.do?method=container&eqptNbr=${ container }`
+            const equipmentRequestURL = getURL(terminal, `/import/default.do?method=container&eqptNbr=${ container }`)
+
             // шукаю OSRA Compliance Information
-            const OSRAComplianceRequestURL = `${ baseURL }equipment/default.do?method=OSRAComplianceInformation&equipmentNumber=${ container }&soLineId=WSL`
+            const OSRAComplianceRequestURL = getURL(terminal, `/equipment/default.do?method=OSRAComplianceInformation&equipmentNumber=${ container }&soLineId=WSL`)
             
             const [ equipment, osra ] = await Promise.all([
                 seattlePerItemtAvailabilityFetch(equipmentRequestURL, "body > div.container"),
@@ -224,24 +164,23 @@ const seattlePerItemtAvailabilityCheck = async (terminal, containers, options) =
 
 // Перевіряє приналежність списку контейнерів до конкретного терміналу
 async function seattleBulkAvailabilityCheck(terminal, containers) {
+
+    const results = []
+    const clean = v => (v || "").replace(/\s+/g, " ").trim()    //  утиліта
+
     try {
         const { url, fetchWithMyJar } = terminal || {}
-        const URL = url?.trim()
 
-        if (!URL || !fetchWithMyJar) {
+        if (!url?.trim() || !fetchWithMyJar) {
             console.warn("No terminal/url provided")
-            return []
+            return results
         }
 
         // захищаю оригінальний вхідний масив контейнерів
         let nums = Array.isArray(containers) ? [...new Set(containers)] : []
-        if (!nums.length) return []
+        if (!nums.length) return results
 
-        const baseURL = `${ getBaseURL(URL) }import/default.do?method=defaultSearch`
-
-        const clean = v => (v || "").replace(/\s+/g, " ").trim()
-
-        const results = []
+        const bulkSearchURL = getURL(terminal, "/import/default.do?method=defaultSearch")
 
         // iterate chunks of 50 (обмеження Tideworks по 50шт per request)
         for (let i = 0; i < nums.length; i += 50) {
@@ -249,74 +188,83 @@ async function seattleBulkAvailabilityCheck(terminal, containers) {
             const chunk = nums.slice(i, i + 50)
             if (!chunk.length) continue
 
-            // availabilityCheckFunc should accept (baseURL, chunk)
-            const res = await fetchWithMyJar(
-                baseURL,
-                {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: new URLSearchParams({
-                        scac: "",
-                        searchBy: "CTR",
-                        numbers: chunk.join("\n"),
-                    })
-                }
-            )
+            const res = await fetchWithMyJar(bulkSearchURL, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                    scac: "",
+                    searchBy: "CTR",
+                    numbers: chunk.join("\n"),
+                })
+            })
+
+            if (res.status >= 400) {
+                // помилка запиту
+                throw new AppError(`Error fetching ${ bulkSearchURL }. ${ res.statusText }`, res.status)
+            }
 
             const $ = cheerio.load(await res.text())
-            const chunkResults = []
 
             for (const tr of $("#result table tbody tr")) {
                 const tds = $(tr).find("td")
 
-                // 1 — номер контейнера
+                // 1️⃣ Container
+                
                 const number = clean($(tds[0]).find("a").first().text())
                 if (!number || number.toLowerCase() === "check nearby locations") continue
 
                 const cData = { number, terminal: terminal.key }
 
-                // 2 — статус
                 cData.status = clean($(tds[1]).find("div").text())
+                // statusDesc - відсутній, пізніше читається з OSRA як "Container Available"
 
-                // 3 — тип контейнера (20DR, 40HC...)
-                cData.type = clean($(tds[2]).find("strong").first().text())
-                cData.typeLabel = clean($(tds[2]).find("small").first().text())
+                cData.containerTypeSize = clean($(tds[2]).find("strong").first().text())
+                cData.containerTypeSizeLabel = clean($(tds[2]).find("small").first().text())
 
-                // 4 — деталi (Customs, Line, Holds...)
                 const detailsTd = $(tds[3])
+                const locTd = $(tds[4])
+                
+                // lastFreeDate - тут відсутній, читається потім як "OSRA. Line Last Free Day"
+                cData.appointmentDate = clean(detailsTd.find("div:contains('Satisfied Thru') strong").text())
+
+                // 2️⃣ Customs
 
                 const customsEl = detailsTd.find("span:contains('Customs')").next()
                 cData.customStatus = clean(customsEl.text())
                 cData.customTimestamp = customsEl.attr("title")
 
+                // 3️⃣ Customer/Carrier/Line
+
+                cData.SSCO = clean(locTd.find("div:contains('Line:') strong").text())
+                
                 const lineReleaseEl = detailsTd.find("span:contains('Line Release Status')").next()
+                cData.customerStatus = lineReleaseEl.attr("title")
+                // customerHoldReason - тут відсутній, Seattle не надає даних
+
                 cData.lineReleaseStatus = clean(lineReleaseEl.text())
-                cData.lineReleaseTimestamp = lineReleaseEl.attr("title")
+                // lineFirstFree тут немає, читається пізжніше як OSRA. Line First Free Day
 
-                cData.holds = clean(detailsTd.find("div:contains('Holds')").text())
-                cData.totalFees = clean(detailsTd.find("div:contains('Total Fees') strong").text())
-                cData.satisfiedThru = clean(detailsTd.find("div:contains('Satisfied Thru') strong").text())
+                // 4️⃣ Terminal
 
-                // 5 — блок Location / Vessel etc.
-                const locTd = $(tds[4])
+                cData.dwellAmount = clean(detailsTd.find("div:contains('Total Fees') strong").text())
+                // damageFeeOutstanding тут немає
+                cData.terminalHold = clean(detailsTd.find("div:contains('Holds')").text())
+                // terminalHoldReason тут немає
+                
+                cData.origin = $(tr).text()
+                    .replace(/\s+/g, " ")
+                    .replace("Email me when container availability status changes More", "")
+                    .trim()
 
-                cData.location = clean(locTd.find("span:contains('Location')").parent().find("strong").first().text())
-                cData.vesselVoy = clean(locTd.find("div:contains('Ves/Voy') strong").text())
-                cData.line = clean(locTd.find("div:contains('Line:') strong").text())
-                cData.trucker = clean(locTd.find("div:contains('Trucker') strong").text())
-                cData.requiredAccessory = clean(locTd.find("div:contains('Required Accessory') strong").text())
-
-                chunkResults.push(cData)
+                results.push(cData)
             }
-
-            results.push(...chunkResults)
         }
 
         return results
 
     } catch (error) {
         console.error(`Updating terminal "${ terminal.label }" containers issue: ${ error }`)
-        return []
+        return results  //  якщо виникне помилка, то повернеться вже прочитана кількість
     }
 }
 
@@ -324,9 +272,7 @@ async function seattleBulkAvailabilityCheck(terminal, containers) {
 
 
 module.exports = {
-    loadCookies_ForSeattleTerminal,
     connectSeattleTerminal,
-
     seattlePerItemtAvailabilityCheck,
     seattleBulkAvailabilityCheck
 }

@@ -5,10 +5,16 @@
 
 
 const { 
-    loadCookies_ForSeattleTerminal,
     connectSeattleTerminal,
     seattleBulkAvailabilityCheck
 } = require("./_seattleTerminalsController.js")
+
+
+const { 
+    connectWUTTerminal,
+    uswutBulkAvailabilityCheck
+} = require("./_WUTTerminalsController.js")
+
 
 
 
@@ -53,27 +59,24 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
         const results = []
         
         for (const terminal of terminals) {
+            
             if (!containers.length) break
+
+            let foundContainers = []
             
             console.log(`Checking "${ terminal.label }" | ${ terminal.key }:`)
 
             // Seattle group
             if (terminal.group === "Seattle") {
-                loadCookies_ForSeattleTerminal(terminal)   //  перевіряю доступ до терміналу тут (+CookieJar) - раз на всі чанки, щоб не перелогінюватися за кожним чанком
-                if (await connectSeattleTerminal(terminal)) {
-                    const thisTerminalContainers = await seattleBulkAvailabilityCheck(terminal, containers)
-                    
-                    if (thisTerminalContainers.length) {
-                        // якщо щось знайшов, то відсіваю знайдені із першочергового списку контейнерів,
-                        // найшвидший спосіб - перетворити в множину і видалити знайдені
-                        const theRestOfContainers = new Set(containers)
-                        for (const c of thisTerminalContainers) {
-                            theRestOfContainers.delete(c.number)
-                        }
-                        // повертаю в масив і зберігаю знайдені результати
-                        containers = [...theRestOfContainers]
-                        results.push(...thisTerminalContainers)
-                    }
+                if (await connectSeattleTerminal(terminal, { shouldloadCookies: true })) {
+                    foundContainers = await seattleBulkAvailabilityCheck(terminal, containers)
+                }
+            }
+
+            // WUT
+            if (terminal.group === "USWUT") {
+                if (await connectWUTTerminal(terminal, { shouldloadCookies: true })) {
+                    foundContainers = await uswutBulkAvailabilityCheck(terminal, containers)
                 }
             }
 
@@ -84,11 +87,22 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
 
 
 
-
-            
-            if (containers.length) {
-                console.log(`${ terminal.key } — not found: `, containers)
+            if (foundContainers.length) {
+                // якщо щось знайшов, то відсіваю знайдені із першочергового списку контейнерів,
+                // найшвидший спосіб - перетворити в множину і видалити знайдені
+                const theRestOfContainers = new Set(containers)
+                for (const c of foundContainers) {
+                    theRestOfContainers.delete(c.number)
+                }
+                // повертаю в масив і зберігаю знайдені результати
+                containers = [...theRestOfContainers]
+                results.push(...foundContainers)
             }
+
+            if (containers.length) {
+                console.log(`${ terminal.key } — containers not found: `, containers)
+            }
+
         }
 
         return {
