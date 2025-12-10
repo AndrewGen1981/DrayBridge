@@ -77,6 +77,7 @@ const beforeProfileRender = async (req, res, next) => {
             // stringifyFitments: true,
             // revealCats: true,
             revealTerminals: true,
+            sort: { terminal: 1 },
         }))
 
         next()

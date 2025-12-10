@@ -9,6 +9,15 @@ main.admin-profile table#items tr {
     /* grid-auto-flow: column; */
     grid-template-columns: repeat(7, 1fr);
 }
+main.admin-profile table#items dl {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+main.admin-profile table#items dl dt {
+    font-weight: 500;
+}
 
 
 /* Pagination */
