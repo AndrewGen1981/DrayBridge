@@ -68,7 +68,7 @@ async function loginTideworks(terminal) {
 
 // Підключення до конкретного терміналу Сіетлу
 const connectSeattleTerminal = async (terminal, options = {}) => {
-    return connectTerminal(terminal, {
+    return await connectTerminal(terminal, {
         ...options,
         pingPath: "/home/default.do",
         loginCallback: loginTideworks

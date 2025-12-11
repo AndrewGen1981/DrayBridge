@@ -37,31 +37,29 @@ function saveCookies(terminal) {
 }
 
 
-
 // Перевірка активності сесії
-async function isSessionAlive(terminal, pingPath = "", agent) {
-    const { url, fetchWithMyJar } = terminal || {}
+async function isSessionAlive(terminal, pingPath = "") {
+    const { url, fetchWithMyJar, redirect = "manual" } = terminal || {}
     
     if (!url?.trim()) throw new AppError("❌ Login failed: URL is required", 404)
     if (!fetchWithMyJar) throw new AppError("Wrong terminal setup", 500)
     
     const ping = getURL(terminal, pingPath)
+    const resp = await fetchWithMyJar( ping, 
+        {
+            method: "GET",
+            headers: { "User-Agent": "Mozilla/5.0" },
+            redirect,
+        }
+    )
     
-    const request = { redirect: "manual" }
-    if (agent) request.agent = agent
-
-    const resp = await fetchWithMyJar(ping, request)
-
     if (resp.status !== 200) return false
 
-    // Додаткова перевірка дяя WUT
+    // Додаткова перевірка для WUT і для TOS
     const html = await resp.text()
-    if (html.includes("Session Timed Out")) {
-        // You need to Login to access this module
-        return false
-    }
+    const extraCheck = html.includes("Session Timed Out") || html.includes("You need to Login")
 
-    return true
+    return !extraCheck
 }
 
 
@@ -78,14 +76,13 @@ const connectTerminal = async (terminal, {
     loginCallback = async (terminal) => {
         console.log(`❗ Empty login callback for ${ terminal }`)
     },
-    agent = undefined,
 
 } = {}) => {
     try {
         if (shouldloadCookies) loadCookies(terminal)
         
         // #1 перевіряю чи "жива" ще сесія (читаю з файлу COOKIE_FILE)
-        const alive = await isSessionAlive(terminal, pingPath, agent)
+        const alive = await isSessionAlive(terminal, pingPath)
         
         // #2 якщо ні, то наново під*єднуюся і записую сесію в файл COOKIE_FILE
         if (alive) {
@@ -126,11 +123,13 @@ const getIPLocation = async (countries = []) => {
             .then(r => r.ok && r.json())
             
         if (!geo?.country) return
+
+        const _countries = Array.isArray(countries) ? countries : [ countries ]
     
         // може повертати або результат порівняння (якщо задати countries),
         // або просто країну реєстрації ip. VPN до уваги не береться
-        return countries?.length
-            ? countries.includes(geo.country)
+        return _countries?.length
+            ? _countries.includes(geo.country)
             : geo.country
 
     } catch (error) {

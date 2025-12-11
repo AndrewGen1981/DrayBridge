@@ -13,16 +13,6 @@ const {
 
 
 
-// Тільки для TOS
-const https = require("https")
-
-const httpsAgent = new https.Agent({
-    rejectUnauthorized: false
-})
-
-
-
-
 async function loginTOS(terminal) {
 
     const { url, env_login, env_passowrd, fetchWithMyJar } = terminal || {}
@@ -49,17 +39,12 @@ async function loginTOS(terminal) {
             "Content-Type": "application/x-www-form-urlencoded",
         },
         body: params.toString(),
-        redirect: "manual",
-        agent: httpsAgent,   //  опція виключно для TOS
+        // redirect: "manual",     //  !! для TOS потрібно redirect: "follow"
     })
 
     console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }`)
 
-    console.log("*** loginTOS")
-    console.log(resp)
-    console.log(await resp.text())
-
-    if (resp.status === 302) saveCookies(terminal)
+    if (resp.status === 200) saveCookies(terminal)
     else throw new AppError("❌ Login failed", 500)
 }
 
@@ -75,11 +60,10 @@ const connectTOSTerminal = async (terminal, options = {}) => {
         if (!isUSIP) throw new AppError("US IPs allowed only", 403)
     }
 
-    return connectTerminal(terminal, {
+    return await connectTerminal(terminal, {
         ...options,
         pingPath: "/account/Account/SelectApplication",
         loginCallback: loginTOS,
-        agent: httpsAgent,   //  опція виключно для TOS
     })
 }
 
@@ -105,6 +89,7 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
         if (!nums.length) return results
 
         const bulkSearchURL = getURL(terminal, "/Report/ImportContainer/ImporterContainerReport?pageSize=50&page=1&sortKey=Default&sortOrder=Ascending&_ch=1")        
+        // const bulkSearchURL = getURL(terminal, "/Report/ImportContainer/InquireMultipleByContainer")
 
         // iterate chunks of 50 (обмеження Tideworks по 50шт per request)
         for (let i = 0; i < nums.length; i += 50) {
@@ -120,7 +105,6 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
                     IsMultiInquiry: "True",
                     ContainerNumbers: chunk.join("\n"),
                 }),
-                agent: httpsAgent,   //  опція виключно для TOS
             })
 
             if (res.status >= 400) {
@@ -129,7 +113,6 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
             }
 
             const html = await res.text()
-            console.log(html)
             const $ = cheerio.load(html)
 
             $("table.appointment tbody tr").each((i, tr) => {
@@ -190,20 +173,3 @@ module.exports = {
     connectTOSTerminal,
     tosBulkAvailabilityCheck
 }
-
-
-
-// async function test() {
-
-//     const { TERMINALS } = require("../Config/terminalsCatalog")
-//     const terminal = TERMINALS["husky"]
-//     const containers = "MSKU1134611"
-
-//     let foundContainers
-
-//     if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
-//         foundContainers = await tosBulkAvailabilityCheck(terminal, containers)
-//     }
-// }
-
-// test()

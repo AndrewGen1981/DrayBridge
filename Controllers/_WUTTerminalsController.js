@@ -53,7 +53,7 @@ async function loginWUT(terminal) {
 // Підключення до WUT
 
 const connectWUTTerminal = async (terminal, options = {}) => {
-    return connectTerminal(terminal, {
+    return await connectTerminal(terminal, {
         ...options,
         pingPath: "/main/main.do",
         loginCallback: loginWUT

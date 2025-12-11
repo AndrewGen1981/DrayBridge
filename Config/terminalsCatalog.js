@@ -1,6 +1,11 @@
 // terminalsCatalog.js
 // Перелік терміналів, з якими "вміє" працювати додаток
 
+const https = require("https")
+const httpsAgent = new https.Agent({
+    rejectUnauthorized: false       // виключно для TOS, ⚠️ це вимикає TLS-перевірку, в TOS сертифікат не має підпису
+})
+
 // додає дані сесії в fetch
 const { CookieJar } = require("tough-cookie")
 
@@ -64,6 +69,8 @@ const TERMINALS = {
         env_login: "TOS_LOGIN",
         env_passowrd: "TOS_PASSWORD",
         cookieFile: "Cookies/cookies.tos.json",
+        agent: httpsAgent,  //  опція виключно для TOS
+        redirect: "follow",     //  опція виключно для TOS
         jar: new CookieJar()
     },
 }
@@ -84,8 +91,12 @@ for (const t of Object.values(TERMINALS)) {
     // * стандартно "чекатиме" 8с і розриватиме з*єднання
     // * робитиме 3 спроби з*днатися з подовженим часом очікування кожна (пауза між)
     
-    t.fetchWithMyJar = (url, options, cfg = {}) =>
-        fetchSmart(url, options, { fetchFunc, ...cfg })
+    const { agent } = t
+
+    t.fetchWithMyJar = (url, options = {}, cfg = {}) => {
+        if (agent) options.agent = agent
+        return fetchSmart(url, options, { fetchFunc, ...cfg })
+    }
 
     // Варіанти використання:
     // * await t.fetchWithMyJar(url, opts, { retries: 5 })
@@ -95,11 +106,12 @@ for (const t of Object.values(TERMINALS)) {
 
 // Утиліта: повертає path, використовуючи terminal.url
 const getURL = (terminal, path = "") => {
-    const _url = (terminal?.url || "").trim()
-    const slash = _url.endsWith("/") ? "" : "/"
-    const _path = path.trim()
+    const base = (terminal?.url || "").trim().replace(/\/+$/, "")  // прибираємо лише слеші в кінці
+    const tail = path.trim().replace(/^\/+/, "")                   // прибираємо слеші на початку
 
-    return (`${ _url }${ slash }${ _path }`).replace(/\/+/g, "/")
+    return tail
+        ? `${ base }/${ tail }`
+        : base
 }
 
 
