@@ -115,19 +115,21 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
             const html = await res.text()
             const $ = cheerio.load(html)
 
-            $("table.appointment tbody tr").each((i, tr) => {
+            for (const tr of $("table.appointment tbody tr")) {
 
-                const cols = $(tr).find("td").map((i, td) => $(td).text().trim()).get()
+                const cols = $(tr).find("td").map(td => $(td).text().trim()).get()
+                const number = cols[1] || null
+
+                if (!number || number.includes("Currently there are no active notifications that satisfy your criteria.")) continue
 
                 results.push({
 
                     // 1️⃣ Container
-                    number: cols[1] || null,
-
+                    number,
                     terminal: terminal.key,
 
                     status: cols[2] || null,
-                    statusDesc: cols[3] || cols[4] ? `Location: ${ cols[3] }. Discharge Date: ${ cols[4] }` : null,
+                    statusDesc: cols[3] || cols[4] ? `Location: ${ cols[3] }${ cols[4] ? `. Discharge Date: ${ cols[4] }` : "" }` : null,
 
                     containerTypeSize: cols[19] || null,
                     containerTypeSizeLabel: cols[20] || null,
@@ -156,7 +158,7 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
                         .replace(/\s+/g, " ")
                         .trim()
                 })
-            })
+            }
         }
 
         return results

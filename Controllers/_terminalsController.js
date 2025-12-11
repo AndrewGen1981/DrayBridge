@@ -70,7 +70,7 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
             
             console.log(`Checking "${ terminal.label }" | ${ terminal.key }:`)
 
-            // Seattle group
+            // Seattle group (t5, t18, t30...)
             if (terminal.group === "Seattle") {
                 if (await connectSeattleTerminal(terminal, { shouldloadCookies: true })) {
                     foundContainers = await seattleBulkAvailabilityCheck(terminal, containers)
