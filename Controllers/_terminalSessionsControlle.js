@@ -52,10 +52,14 @@ async function isSessionAlive(terminal, pingPath = "", agent) {
 
     const resp = await fetchWithMyJar(ping, request)
 
+    console.log("*** isSessionAlive ***")
+    console.log(resp)
+    console.log(await resp.text())
+
+
+
     if (resp.status !== 200) return false
 
-    console.log("*** isSessionAlive ***")
-    console.log(await resp.text())
 
     // Додаткова перевірка дяя WUT
     const html = await resp.text()
