@@ -13,6 +13,15 @@ const {
 
 
 
+// Тільки для TOS
+const https = require("https")
+
+const httpsAgent = new https.Agent({
+    rejectUnauthorized: false
+})
+
+
+
 
 async function loginTOS(terminal) {
 
@@ -41,6 +50,7 @@ async function loginTOS(terminal) {
         },
         body: params.toString(),
         redirect: "manual",
+        agent: httpsAgent,   //  опція виключно для TOS
     })
 
     console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }`)
@@ -101,7 +111,8 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
                     // MainMenu: "Report",
                     IsMultiInquiry: "True",
                     ContainerNumbers: chunk.join("\n"),
-                })
+                }),
+                agent: httpsAgent,   //  опція виключно для TOS
             })
 
             if (res.status >= 400) {
