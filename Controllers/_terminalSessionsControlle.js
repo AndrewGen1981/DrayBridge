@@ -54,6 +54,9 @@ async function isSessionAlive(terminal, pingPath = "", agent) {
 
     if (resp.status !== 200) return false
 
+    console.log("*** isSessionAlive ***")
+    console.log(await resp.text())
+
     // Додаткова перевірка дяя WUT
     const html = await resp.text()
     if (html.includes("Session Timed Out")) {
