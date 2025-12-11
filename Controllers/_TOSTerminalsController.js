@@ -115,6 +115,8 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
             const html = await res.text()
             const $ = cheerio.load(html)
 
+            console.log("Found rows:", $("table.appointment tbody tr").length)
+
             for (const tr of $("table.appointment tbody tr")) {
 
                 const cols = $(tr).find("td").map(td => $(td).text().trim()).get()
