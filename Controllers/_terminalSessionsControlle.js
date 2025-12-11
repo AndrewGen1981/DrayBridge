@@ -117,15 +117,15 @@ const getIPLocation = async (country) => {
         
     console.warn("Country", country)
     console.warn("Geo", geo)
-    
-    if (!geo?.country_code) return
+
+    if (!geo?.country) return
 
 
     // може повертати або результат порівняння (якщо задати _country),
     // або просто країну реєстрації ip. VPN до уваги не береться
     return country
-        ? country.toUpperCase() === geo.country_code.toUpperCase()
-        : geo.country_code
+        ? country.toUpperCase() === geo.country.toUpperCase()
+        : geo.country
 }
 
 
