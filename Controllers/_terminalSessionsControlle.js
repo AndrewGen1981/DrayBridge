@@ -100,9 +100,39 @@ const connectTerminal = async (terminal, {
 
 
 
+const getIP = async () => {
+    return await fetch("https://api.ipify.org?format=json")
+        .then(r => r.json())
+        .then(d => d.ip)
+}
+
+
+
+const getIPLocation = async (country) => {
+    const ip = await getIP() || null
+    if (!ip) return
+
+    const geo = await fetch(`https://ipinfo.io/${ip}/json`)
+        .then(r => r.json())
+
+    if (!geo?.country_code) return
+
+    // може повертати або результат порівняння (якщо задати _country),
+    // або просто країну реєстрації ip. VPN до уваги не береться
+    return country
+        ? country.toUpperCase() === geo.country_code.toUpperCase()
+        : geo.country_code
+}
+
+
+
 module.exports = {
     loadCookies,
     saveCookies,
     isSessionAlive,
-    connectTerminal
+
+    connectTerminal,
+
+    getIP,
+    getIPLocation,
 }

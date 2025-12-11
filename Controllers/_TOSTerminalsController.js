@@ -1,17 +1,20 @@
 const { AppError } = require("../Utils/AppError")
 const { getURL } = require("../Config/terminalsCatalog")
 
+const cheerio = require("cheerio")
+
 
 // --- Утиліти для роботи з сесіями терміналів
 const {
     saveCookies,
-    connectTerminal
+    connectTerminal,
+    getIPLocation,
 } = require("./_terminalSessionsControlle")
 
 
 
 
-async function loginWUT(terminal) {
+async function loginTOS(terminal) {
 
     const { url, env_login, env_passowrd, fetchWithMyJar } = terminal || {}
 
@@ -26,13 +29,11 @@ async function loginWUT(terminal) {
     if (!LOGIN || !PASSWORD) throw new AppError("Credentials are required", 403)
 
     const params = new URLSearchParams({
-        "usrId": "",
-        "pTmlCd": "USTIW",
-        "pUsrId": LOGIN,
-        "pUsrPwd": PASSWORD
+        "UserName": LOGIN,
+        "Password": PASSWORD
     })
 
-    const resp = await fetchWithMyJar(getURL(terminal,"/appAuthAction/login.do"), {
+    const resp = await fetchWithMyJar(getURL(terminal,"/logon?_=639009682112015408"), {
         method: "POST",
         headers: {
             "User-Agent": "Mozilla/5.0",
@@ -50,13 +51,17 @@ async function loginWUT(terminal) {
 
 
 
-// Підключення до WUT
+// Підключення до TOS
 
-const connectWUTTerminal = async (terminal, options = {}) => {
+const connectTOSTerminal = async (terminal, options = {}) => {
+    // TOS працює тільки з US ip
+    const isUSIP = await getIPLocation("US")
+    if (!isUSIP) throw new AppError("US IPs allowed only", 403)
+
     return connectTerminal(terminal, {
         ...options,
-        pingPath: "/main/main.do",
-        loginCallback: loginWUT
+        pingPath: "/account/Account/SelectApplication",
+        loginCallback: loginTOS
     })
 }
 
@@ -64,7 +69,7 @@ const connectWUTTerminal = async (terminal, options = {}) => {
 
 // --- Списковий пошук контейнерів.
 
-async function uswutBulkAvailabilityCheck(terminal, containers) {
+async function tosBulkAvailabilityCheck(terminal, containers) {
 
     const results = []
     
@@ -81,7 +86,7 @@ async function uswutBulkAvailabilityCheck(terminal, containers) {
         let nums = Array.isArray(containers) ? [...new Set(containers)] : []
         if (!nums.length) return results
 
-        const bulkSearchURL = getURL(terminal, "/uiArp02Action/searchContainerInformationListByCntrNo.do")
+        const bulkSearchURL = getURL(terminal, "/Report/ImportContainer/ImporterContainerReport?pageSize=50&page=1&sortKey=Default&sortOrder=Ascending&_ch=1")        
 
         // iterate chunks of 50 (обмеження Tideworks по 50шт per request)
         for (let i = 0; i < nums.length; i += 50) {
@@ -93,12 +98,9 @@ async function uswutBulkAvailabilityCheck(terminal, containers) {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: new URLSearchParams({
-                    blFlg: "N", //  (шукаю не по BOL)
-                    srchTpCd: "C",    // (тип пошуку — контейнер)
-                    tmlCd: "USTIW",   // (код терміналу)
-                    checkLogin: "true",
-                    usrId: process.env[env_login],
-                    cntrNo: chunk.join(","),
+                    // MainMenu: "Report",
+                    IsMultiInquiry: "True",
+                    ContainerNumbers: chunk.join("\n"),
                 })
             })
 
@@ -108,52 +110,50 @@ async function uswutBulkAvailabilityCheck(terminal, containers) {
             }
 
             const html = await res.text()
-            const match = html.match(/var result\s*=\s*(\[.*?\]);/s)
+            const $ = cheerio.load(html)
 
-            if (!match) {
-                // тут все вірно, бо якщо результатів не буде, то буде "var result = []"; і якщо 
-                // з переліку щось не знайдеться, то його просто не буде в "var result = []", але 
-                // сам ключ "var result" повинен бути, викликаю помилку, якщо його немає і показую перші 250 символів відповіді
-                throw new AppError(`Cannot find result in ${ (html || "NO HTML").replace(/\s+/g, " ").slice(0, 250) }`, 500)
-            }
+            $("table.appointment tbody tr").each((i, tr) => {
 
-            const chunkResults = JSON.parse(match[1])
+                const cols = $(tr).find("td").map((i, td) => $(td).text().trim()).get()
 
-            for (const obj of chunkResults) {
                 results.push({
 
                     // 1️⃣ Container
-                    number: obj.cntrNo,
+                    number: cols[1] || null,
+
                     terminal: terminal.key,
-                    status: obj.avlbFlg,
-                    statusDesc: obj.avlbDesc,
-                    containerTypeSize: obj.tmlPrivCntrTpszCdNm,
-                    // containerTypeSizeLabel - Seattle only
-                    lastFreeDate: obj.lstFreeDt,
-                    appointmentDate: obj.exstApntDt,
+
+                    status: cols[2] || null,
+                    statusDesc: cols[3] || cols[4] ? `Location: ${ cols[3] }. Discharge Date: ${ cols[4] }` : null,
+
+                    containerTypeSize: cols[19] || null,
+                    containerTypeSizeLabel: cols[20] || null,
                     
+                    lastFreeDate: cols[12] || null,
+                    appointmentDate: cols[13] || null,  //  paidThroughDate
+
                     // 2️⃣ Customs
-                    customStatus: obj.cusmHold,
-                    // customTimestamp - Seattle only
+                    customStatus: cols[8] || null,
+                    // customTimestamp
 
                     // 3️⃣ Customer/Carrier/Line
-                    SSCO: obj.oprCd,
-                    customerStatus: obj.custHold,
-                    customerHoldReason: obj.custHldRsn,
-                    // lineReleaseStatus - Seattle only
-                    // lineFirstFree - Seattle only
+                    SSCO: cols[18] || null,
+                    customerStatus: cols[9] || null,
+                    customerHoldReason: cols[21] ? `Genset Authorized: ${ cols[21] }` : null,
+                    lineReleaseStatus: cols[16] || null,
+                    lineFirstFree: cols[17] || null,
 
                     // 4️⃣ Terminal
-                    dwellAmount: obj.dwllAmt,
-                    damageFeeOutstanding: obj.dmgDueFlg,
-                    terminalHold: obj.tmnlHold,
-                    terminalHoldReason: obj.tmnlHoldRsn,
+                    dwellAmount: (Number(cols[11]) || 0) + (Number(cols[15]) || 0),     // demurrageDue + nonDemurrageAmount
+                    damageFeeOutstanding: cols[14] || 0,   // nonDemurrageDue
+                    terminalHold: cols[10] || null,
+                    terminalHoldReason: cols[17] ? `LSRF LFD Date: ${ cols[17] }` : null, 
 
-                    origin: JSON.stringify(obj)
-                        .replace(/\"/g, "")
-                        .replace(/\s+/g, ""),
+                    origin: $(tr).text()
+                        .replace(/\s+/g, " ")
+                        .trim()
                 })
-            }
+            })
         }
 
         return results
@@ -167,6 +167,6 @@ async function uswutBulkAvailabilityCheck(terminal, containers) {
 
 
 module.exports = {
-    connectWUTTerminal,
-    uswutBulkAvailabilityCheck
+    connectTOSTerminal,
+    tosBulkAvailabilityCheck
 }

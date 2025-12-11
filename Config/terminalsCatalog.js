@@ -8,8 +8,10 @@ const { CookieJar } = require("tough-cookie")
 const nodeFetch = require("node-fetch")
 const fetchCookie = require("fetch-cookie").default
 
+const { fetchSmart } = require("../Utils/fetchSmart")
 
-//  *** важливо - метод bulkAvailabilityCheck визначає як працювати з терміналом не на основі його ключа,
+
+//  *** ВАЖЛИВО - метод bulkAvailabilityCheck визначає як працювати з терміналом не на основі його ключа,
 // а на основі ГРУПИ; тобто використовуючи групи можна застосовувати однакові механізми аутентифікації,
 // пошуку контейнерів і т.д. для всієї групи
 
@@ -51,8 +53,19 @@ const TERMINALS = {
         cookieFile: "Cookies/cookies.uswut.json",
         jar: new CookieJar()
     },
+    
+    // TOS: HUSKY TERMINAL
 
-    // HUSKY TERMINAL & STEVEDORING
+    "husky": {
+        key: "husky",
+        group: "TOS",
+        label: "TOS: Husky Terminal",
+        url: "https://tosportal.portsamerica.com/",
+        env_login: "TOS_LOGIN",
+        env_passowrd: "TOS_PASSWORD",
+        cookieFile: "Cookies/cookies.tos.json",
+        jar: new CookieJar()
+    },
 }
 
 
@@ -60,10 +73,23 @@ const TERMINALS_ENUM = Object.keys(TERMINALS)
 
 
 
-// Init: кожен термінал працює зі своєю сесією.
+// 🟢 Init: кожен термінал працює зі своєю сесією.
 // Додавати їх потрібно тут, не при оголошенні TERMINALS
+
 for (const t of Object.values(TERMINALS)) {
-    t.fetchWithMyJar = fetchCookie(nodeFetch, t.jar)
+    // для кожного терміналу створюю власну fetch-функцію, яка використовує його сесію (cookie)
+    const fetchFunc = fetchCookie(nodeFetch, t.jar)
+
+    // 🟣 Інтеграція: підсилюю fetch-функцію кожного терміналу можливостями fetchSmart (див. Utils/fetchSmart.js)
+    // * стандартно "чекатиме" 8с і розриватиме з*єднання
+    // * робитиме 3 спроби з*днатися з подовженим часом очікування кожна (пауза між)
+    
+    t.fetchWithMyJar = (url, options, cfg = {}) =>
+        fetchSmart(url, options, { fetchFunc, ...cfg })
+
+    // Варіанти використання:
+    // * await t.fetchWithMyJar(url, opts, { retries: 5 })
+    // * await t.fetchWithMyJar(url, opts, { timeout: 12000 })
 }
 
 

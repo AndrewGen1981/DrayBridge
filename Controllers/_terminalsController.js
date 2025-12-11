@@ -1,7 +1,7 @@
 // Контролер для роботи з терміналами різних портів:
 // ✅ 1) термінали порту Сіетлу (t5, t18, t30...)
 // 2) WUT - WASHINGTON UNITED TERMINAL MARINE
-// 3) HUSKY TERMINAL & STEVEDORING
+// 3) TOS - HUSKY TERMINAL & STEVEDORING
 
 
 const { 
@@ -9,11 +9,15 @@ const {
     seattleBulkAvailabilityCheck
 } = require("./_seattleTerminalsController.js")
 
-
 const { 
     connectWUTTerminal,
     uswutBulkAvailabilityCheck
 } = require("./_WUTTerminalsController.js")
+
+const { 
+    connectTOSTerminal,
+    tosBulkAvailabilityCheck
+} = require("./_TOSTerminalsController.js")
 
 
 
@@ -80,6 +84,12 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
                 }
             }
 
+            // TOS
+            if (terminal.group === "TOS") {
+                if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
+                    foundContainers = await tosBulkAvailabilityCheck(terminal, containers)
+                }
+            }
 
 
 
