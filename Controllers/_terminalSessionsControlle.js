@@ -114,11 +114,12 @@ const getIPLocation = async (country) => {
 
     const geo = await fetch(`https://ipinfo.io/${ip}/json`)
         .then(r => r.json())
-
+        
+    console.warn("Country", country)
+    console.warn("Geo", geo)
+    
     if (!geo?.country_code) return
 
-    console.log("Country", country)
-    console.log("Geo", geo)
 
     // може повертати або результат порівняння (якщо задати _country),
     // або просто країну реєстрації ip. VPN до уваги не береться
