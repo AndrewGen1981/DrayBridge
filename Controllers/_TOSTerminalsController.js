@@ -64,9 +64,12 @@ async function loginTOS(terminal) {
 // Підключення до TOS
 
 const connectTOSTerminal = async (terminal, options = {}) => {
-    // TOS працює тільки з US ip
-    const isUSIP = await getIPLocation(["US"])
-    if (!isUSIP) throw new AppError("US IPs allowed only", 403)
+
+    if (global.isProduction) {
+        // TOS працює тільки з US ip
+        const isUSIP = await getIPLocation(["US"])
+        if (!isUSIP) throw new AppError("US IPs allowed only", 403)
+    }
 
     return connectTerminal(terminal, {
         ...options,
@@ -122,6 +125,8 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
             }
 
             const html = await res.text()
+            console.log(html)
+
             const $ = cheerio.load(html)
 
             $("table.appointment tbody tr").each((i, tr) => {
@@ -185,17 +190,17 @@ module.exports = {
 
 
 
-// async function test() {
+async function test() {
 
-//     const { TERMINALS } = require("../Config/terminalsCatalog")
-//     const terminal = TERMINALS["husky"]
-//     const containers = "MSKU1134611"
+    const { TERMINALS } = require("../Config/terminalsCatalog")
+    const terminal = TERMINALS["husky"]
+    const containers = "MSKU1134611"
 
-//     let foundContainers
+    let foundContainers
 
-//     if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
-//         foundContainers = await tosBulkAvailabilityCheck(terminal, containers)
-//     }
-// }
+    if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
+        foundContainers = await tosBulkAvailabilityCheck(terminal, containers)
+    }
+}
 
-// test()
+test()

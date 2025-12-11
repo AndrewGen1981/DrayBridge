@@ -51,10 +51,8 @@ async function isSessionAlive(terminal, pingPath = "", agent) {
     if (agent) request.agent = agent
 
     const resp = await fetchWithMyJar(ping, request)
-    console.log(await resp.text())
 
     if (resp.status !== 200) return false
-    // if (resp.status >= 400) return false
 
     // Додаткова перевірка дяя WUT
     const html = await resp.text()
@@ -106,28 +104,38 @@ const connectTerminal = async (terminal, {
 
 
 const getIP = async () => {
-    return await fetch("https://api.ipify.org?format=json")
-        .then(r => r.json())
-        .then(d => d.ip)
+    try {
+        return await fetch("https://api.ipify.org?format=json")
+            .then(r => r.json())
+            .then(d => d.ip)
+    } catch (error) {
+        console.warn(`Get IP issue: ${ error }`)
+        return null
+    }
 }
 
 
 
 const getIPLocation = async (countries = []) => {
-    const ip = await getIP() || null
-    if (!ip) return
+    try {
+        const ip = await getIP() || null
+        if (!ip) return
+    
+        const geo = await fetch(`https://ipinfo.io/${ ip }/json`)
+            .then(r => r.ok && r.json())
+            
+        if (!geo?.country) return
+    
+        // може повертати або результат порівняння (якщо задати countries),
+        // або просто країну реєстрації ip. VPN до уваги не береться
+        return countries?.length
+            ? countries.includes(geo.country)
+            : geo.country
 
-    const geo = await fetch(`https://ipinfo.io/${ip}/json`)
-        .then(r => r.json())
-        
-    // console.warn("Geo", geo)
-    if (!geo?.country) return
-
-    // може повертати або результат порівняння (якщо задати countries),
-    // або просто країну реєстрації ip. VPN до уваги не береться
-    return countries?.length
-        ? countries.includes(geo.country)
-        : geo.country
+    } catch (error) {
+        console.warn(`Get IP location issue: ${ error }`)
+        return false
+    }
 }
 
 
