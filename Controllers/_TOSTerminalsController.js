@@ -55,6 +55,10 @@ async function loginTOS(terminal) {
 
     console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }`)
 
+    console.log("*** loginTOS")
+    console.log(resp)
+    console.log(await resp.tetx())
+
     if (resp.status === 302) saveCookies(terminal)
     else throw new AppError("❌ Login failed", 500)
 }
