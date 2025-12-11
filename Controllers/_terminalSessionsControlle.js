@@ -52,7 +52,8 @@ async function isSessionAlive(terminal, pingPath = "", agent) {
 
     const resp = await fetchWithMyJar(ping, request)
 
-    if (resp.status !== 200) return false
+    // if (resp.status !== 200) return false
+    if (resp.status >= 400) return false
 
     // Додаткова перевірка дяя WUT
     const html = await resp.text()
@@ -118,8 +119,8 @@ const getIPLocation = async (country) => {
     const geo = await fetch(`https://ipinfo.io/${ip}/json`)
         .then(r => r.json())
         
-    console.warn("Country", country)
-    console.warn("Geo", geo)
+    // console.warn("Country", country)
+    // console.warn("Geo", geo)
 
     if (!geo?.country) return
 
