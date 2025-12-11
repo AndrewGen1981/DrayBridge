@@ -125,6 +125,7 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
             }
 
             const html = await res.text()
+            console.log(html)
             const $ = cheerio.load(html)
 
             $("table.appointment tbody tr").each((i, tr) => {
