@@ -125,8 +125,6 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
             }
 
             const html = await res.text()
-            console.log(html)
-
             const $ = cheerio.load(html)
 
             $("table.appointment tbody tr").each((i, tr) => {
@@ -190,17 +188,17 @@ module.exports = {
 
 
 
-async function test() {
+// async function test() {
 
-    const { TERMINALS } = require("../Config/terminalsCatalog")
-    const terminal = TERMINALS["husky"]
-    const containers = "MSKU1134611"
+//     const { TERMINALS } = require("../Config/terminalsCatalog")
+//     const terminal = TERMINALS["husky"]
+//     const containers = "MSKU1134611"
 
-    let foundContainers
+//     let foundContainers
 
-    if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
-        foundContainers = await tosBulkAvailabilityCheck(terminal, containers)
-    }
-}
+//     if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
+//         foundContainers = await tosBulkAvailabilityCheck(terminal, containers)
+//     }
+// }
 
-test()
+// test()
