@@ -60,6 +60,7 @@ async function isSessionAlive(terminal, pingPath = "", agent) {
     // Додаткова перевірка дяя WUT
     const html = await resp.text()
     if (html.includes("Session Timed Out")) {
+        // You need to Login to access this module
         return false
     }
 
