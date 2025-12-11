@@ -380,11 +380,11 @@ exports.addContainers = async (req, res, next) => {
         const { found = [], missing = [] } = await bulkAvailabilityCheck(brandNew, terminalsChoice) || {}
 
 
-        return res.json({
-            invalid,
-            existingContainers,
-            operations: [...found, ...missing],
-        })
+        // return res.json({
+        //     invalid,
+        //     existingContainers,
+        //     operations: [...found, ...missing],
+        // })
 
 
         // Build upsert operations
