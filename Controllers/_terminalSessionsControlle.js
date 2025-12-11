@@ -117,6 +117,9 @@ const getIPLocation = async (country) => {
 
     if (!geo?.country_code) return
 
+    console.log("Country", country)
+    console.log("Geo", geo)
+
     // може повертати або результат порівняння (якщо задати _country),
     // або просто країну реєстрації ip. VPN до уваги не береться
     return country
