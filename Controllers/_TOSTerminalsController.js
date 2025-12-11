@@ -115,14 +115,11 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
             const html = await res.text()
             const $ = cheerio.load(html)
 
-            console.log("Found rows:", $("table.appointment tbody tr").length)
+            const rows = $("table.appointment tbody tr").toArray()
 
-            for (const tr of $("table.appointment tbody tr")) {
+            for (const tr of rows) {
 
-                const cols = $(tr).find("td").map(td => $(td).text().trim()).get()
-
-                console.log(cols)
-
+                const cols = $(tr).find("td").map((_, td) => $(td).text().trim()).get()
                 const number = cols[1] || null
 
                 if (!number || number.includes("Currently there are no active notifications that satisfy your criteria.")) continue
