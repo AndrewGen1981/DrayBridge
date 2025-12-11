@@ -71,7 +71,8 @@ const connectTOSTerminal = async (terminal, options = {}) => {
     return connectTerminal(terminal, {
         ...options,
         pingPath: "/account/Account/SelectApplication",
-        loginCallback: loginTOS
+        loginCallback: loginTOS,
+        agent: httpsAgent,   //  опція виключно для TOS
     })
 }
 

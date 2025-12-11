@@ -39,16 +39,18 @@ function saveCookies(terminal) {
 
 
 // Перевірка активності сесії
-async function isSessionAlive(terminal, pingPath = "") {
+async function isSessionAlive(terminal, pingPath = "", agent) {
     const { url, fetchWithMyJar } = terminal || {}
     
     if (!url?.trim()) throw new AppError("❌ Login failed: URL is required", 404)
     if (!fetchWithMyJar) throw new AppError("Wrong terminal setup", 500)
     
     const ping = getURL(terminal, pingPath)
-    const resp = await fetchWithMyJar(ping, {
-        redirect: "manual"
-    })
+    
+    const request = { redirect: "manual" }
+    if (agent) request.agent = agent
+
+    const resp = await fetchWithMyJar(ping, request)
 
     if (resp.status !== 200) return false
 
@@ -74,14 +76,15 @@ const connectTerminal = async (terminal, {
     shouldloadCookies = false,
     loginCallback = async (terminal) => {
         console.log(`❗ Empty login callback for ${ terminal }`)
-    },    
+    },
+    agent = undefined,
 
 } = {}) => {
     try {
         if (shouldloadCookies) loadCookies(terminal)
         
         // #1 перевіряю чи "жива" ще сесія (читаю з файлу COOKIE_FILE)
-        const alive = await isSessionAlive(terminal, pingPath)
+        const alive = await isSessionAlive(terminal, pingPath, agent)
         
         // #2 якщо ні, то наново під*єднуюся і записую сесію в файл COOKIE_FILE
         if (alive) {
