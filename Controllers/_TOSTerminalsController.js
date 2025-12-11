@@ -120,6 +120,9 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
             for (const tr of $("table.appointment tbody tr")) {
 
                 const cols = $(tr).find("td").map(td => $(td).text().trim()).get()
+
+                console.log(cols)
+
                 const number = cols[1] || null
 
                 if (!number || number.includes("Currently there are no active notifications that satisfy your criteria.")) continue
