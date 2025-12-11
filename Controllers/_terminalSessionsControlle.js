@@ -51,9 +51,10 @@ async function isSessionAlive(terminal, pingPath = "", agent) {
     if (agent) request.agent = agent
 
     const resp = await fetchWithMyJar(ping, request)
+    console.log(await resp.text())
 
-    // if (resp.status !== 200) return false
-    if (resp.status >= 400) return false
+    if (resp.status !== 200) return false
+    // if (resp.status >= 400) return false
 
     // Додаткова перевірка дяя WUT
     const html = await resp.text()
@@ -112,23 +113,20 @@ const getIP = async () => {
 
 
 
-const getIPLocation = async (country) => {
+const getIPLocation = async (countries = []) => {
     const ip = await getIP() || null
     if (!ip) return
 
     const geo = await fetch(`https://ipinfo.io/${ip}/json`)
         .then(r => r.json())
         
-    // console.warn("Country", country)
     // console.warn("Geo", geo)
-
     if (!geo?.country) return
 
-
-    // може повертати або результат порівняння (якщо задати _country),
+    // може повертати або результат порівняння (якщо задати countries),
     // або просто країну реєстрації ip. VPN до уваги не береться
-    return country
-        ? country.toUpperCase() === geo.country.toUpperCase()
+    return countries?.length
+        ? countries.includes(geo.country)
         : geo.country
 }
 

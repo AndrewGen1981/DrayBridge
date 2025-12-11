@@ -1,0 +1,58 @@
+{
+  "version": "tough-cookie@6.0.0",
+  "storeType": "MemoryCookieStore",
+  "rejectPublicSuffixes": true,
+  "enableLooseMode": false,
+  "allowSpecialUseDomain": true,
+  "prefixSecurity": "silent",
+  "cookies": [
+    {
+      "key": "ASP.NET_SessionId",
+      "value": "bol1izcrj0lu2cnzjmunbeza",
+      "domain": "tosportal.portsamerica.com",
+      "path": "/",
+      "secure": true,
+      "httpOnly": true,
+      "hostOnly": true,
+      "creation": "2025-12-11T16:54:32.303Z",
+      "lastAccessed": "2025-12-11T16:54:32.305Z",
+      "sameSite": "lax"
+    },
+    {
+      "key": "BNES_ASP.NET_SessionId",
+      "value": "xS3bal+LEXzuSfrjfSBhai9yJyaeffg5/OPNVotaRNv0kMmtIu74gMDdGYbJy6jL19+zGrnNAp+MEfRsJ37LievEYwqviP5Ff38Aj7z5evWzfQ+OIJ6Y1Q==",
+      "domain": "tosportal.portsamerica.com",
+      "path": "/",
+      "secure": true,
+      "httpOnly": true,
+      "hostOnly": true,
+      "creation": "2025-12-11T16:54:32.303Z",
+      "lastAccessed": "2025-12-11T16:54:32.305Z",
+      "sameSite": "lax"
+    },
+    {
+      "key": ".ASPXAUTH",
+      "value": "D1F5F484D5A4B93360912452E930022A0569ECD52E52A0B8EED5C8CBE605B30FB73419F80281A7260606BFF284965863D955CAB75AEEC315763BC5D66C61992053504E9B24C84BA4792495B34779A861C81BCAA53079672DA39C1DE66391AA575FC96C077AA03E6DD46ADBCF2B6EE9EA20F8AD17FDA078B903A113E9E32D26C44BABDF22839C709E5545F53D6AEEE5BF585D7353275BE427412837F66930D57E9915E1445B98CB9C48200590A02094F5402959CEDA82C664E627EA6393967870B47A1621584E88024F08041C99D2409EF1E1FF3323FA3F9F732A04755ACA85AA2C5B04C928EF3103F402806F809D2F39819F658C05CFE2F1CD1ACA2DE2C195CD011C6B076DF4E099EC5CD16FAC2A44935AF5CB1B",
+      "domain": "tosportal.portsamerica.com",
+      "path": "/",
+      "secure": true,
+      "httpOnly": true,
+      "hostOnly": true,
+      "creation": "2025-12-11T16:54:32.932Z",
+      "lastAccessed": "2025-12-11T16:54:32.932Z",
+      "sameSite": "lax"
+    },
+    {
+      "key": "BNES_.ASPXAUTH",
+      "value": "oucdmgf2ToQKl/vHgzVGQP+/lqlfSYBsVK1alurCrpnydlZp6zjS8jSY297PS6mFQPAQ+QKSXaYIfWxrwXuxUd4rwy+e0I/NktfX2hdGmC8ccw/Cu3JqrFjMU+5b0j/YdOiDPYBSZRQOJGztPsfy9TlZouADP4r6vVG1LLBBeS/sCAWge+7OV/484aYjwoW0QEm0pBZywHB7qKwi2UEsoR8jeGoJNahQlymYig55X9dYqjTAKhPVjwbwzmXASjlqUSaCUm833vpoYIl6D2OmdLsrd5yiqZQuGf1UdYh/y3lrpqfWSRZ59S23NeTcYp26IRMUiMUVLM3UDFV/vwuFA9/zzTJr3VOMhwFWl7t7bF6U3QFFk6feIErPQqZaWUAsy0wlnN4J+s1oVnl3BEidjqPj9RDbXfKnpxmmMQ7igr4qyXF2LH1nHizHCCCWeJMQlB41Jp41qTU8e9zBFBjjGcxL9s5A+SYEay5zAUb6vt203EPeoPqxJaeFOUZAUoDe93bvj6VTBuFIm/QAIgQHQBdR0lJrwaquJol8v4j0/wDPPM5u6nWH6WP06ugtqrdD+WfHF1rYCCcgzHdeyDzG9yzbYWortUr+gxieiRWdJfjUKn7LHIY/ounmv0h7MNhvITCT5JVL20WsgC12luDDcTqGbeh1kphKiZH+Biy93H8VG/TEYpsQB+Tp8KCcR80txEfcFLGIol2iQ2R1i9SI3Do4rhfLTq3slPRXvqta/n5gbFQv7FJwsC6khfxo+hIQG3Rjdh+ZoY2zo7qq90EbduyLs9zbacib6B87EkSVMeY=",
+      "domain": "tosportal.portsamerica.com",
+      "path": "/",
+      "secure": true,
+      "httpOnly": true,
+      "hostOnly": true,
+      "creation": "2025-12-11T16:54:32.932Z",
+      "lastAccessed": "2025-12-11T16:54:32.932Z",
+      "sameSite": "lax"
+    }
+  ]
+}

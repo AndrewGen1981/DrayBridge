@@ -55,7 +55,7 @@ async function loginTOS(terminal) {
 
     console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }`)
 
-    if (resp.status === 200) saveCookies(terminal)
+    if (resp.status === 302) saveCookies(terminal)
     else throw new AppError("❌ Login failed", 500)
 }
 
@@ -65,7 +65,7 @@ async function loginTOS(terminal) {
 
 const connectTOSTerminal = async (terminal, options = {}) => {
     // TOS працює тільки з US ip
-    const isUSIP = await getIPLocation("US")
+    const isUSIP = await getIPLocation(["US"])
     if (!isUSIP) throw new AppError("US IPs allowed only", 403)
 
     return connectTerminal(terminal, {
@@ -182,3 +182,20 @@ module.exports = {
     connectTOSTerminal,
     tosBulkAvailabilityCheck
 }
+
+
+
+// async function test() {
+
+//     const { TERMINALS } = require("../Config/terminalsCatalog")
+//     const terminal = TERMINALS["husky"]
+//     const containers = "MSKU1134611"
+
+//     let foundContainers
+
+//     if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
+//         foundContainers = await tosBulkAvailabilityCheck(terminal, containers)
+//     }
+// }
+
+// test()
