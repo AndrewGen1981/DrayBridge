@@ -62,7 +62,7 @@ const connectTOSTerminal = async (terminal, options = {}) => {
 
     return await connectTerminal(terminal, {
         ...options,
-        pingPath: "/account/Account/SelectApplication",
+        sessPingPath: "/account/Account/SelectApplication",
         loginCallback: loginTOS,
     })
 }

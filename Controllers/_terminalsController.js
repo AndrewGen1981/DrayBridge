@@ -19,6 +19,11 @@ const {
     tosBulkAvailabilityCheck
 } = require("./_TOSTerminalsController.js")
 
+const { 
+    connectPCTTerminal,
+    pctBulkAvailabilityCheck
+} = require("./_PCTTerminalsController.js")
+
 
 
 
@@ -88,6 +93,13 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
             if (terminal.group === "TOS") {
                 if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
                     foundContainers = await tosBulkAvailabilityCheck(terminal, containers)
+                }
+            }
+
+            // PCT
+            if (terminal.group === "PCT") {
+                if (await connectPCTTerminal(terminal, { shouldloadCookies: true })) {
+                    foundContainers = await pctBulkAvailabilityCheck(terminal, containers)
                 }
             }
 

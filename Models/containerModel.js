@@ -25,6 +25,8 @@ const containerSchema = new mongoose.Schema({
         lowercase: true,
     },
 
+    subTerminal: String,    // деколи ресурс дає доступ до декількох терміналів, наприклад PCT дає доступ до : Los Angeles, Oakland, Tacoma
+
     // уніфіковані поля для відображення доступності контейнера
     status: String,     // WUT "avlbFlg"
     statusDesc: String,     // WUT "avlbDesc", Seattle "OSRA. Container Available"

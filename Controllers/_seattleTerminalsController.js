@@ -70,7 +70,7 @@ async function loginTideworks(terminal) {
 const connectSeattleTerminal = async (terminal, options = {}) => {
     return await connectTerminal(terminal, {
         ...options,
-        pingPath: "/home/default.do",
+        sessPingPath: "/home/default.do",
         loginCallback: loginTideworks
     })
 }

@@ -69,9 +69,24 @@ const TERMINALS = {
         env_login: "TOS_LOGIN",
         env_passowrd: "TOS_PASSWORD",
         cookieFile: "Cookies/cookies.tos.json",
-        agent: httpsAgent,  //  опція виключно для TOS
+        agent: httpsAgent,  //  опція для "битих сертифікатів"
         redirect: "follow",     //  опція виключно для TOS
         jar: new CookieJar()
+    },
+
+    // PCT - EVERPORT: Los Angeles, Oakland, Tacoma
+
+    "pct": {
+        key: "pct",
+        group: "PCT",
+        label: "PCT: Everport",
+        url: "https://www.etslink.com/",
+        env_login: "PCT_LOGIN",
+        env_passowrd: "PCT_PASSWORD",
+        cookieFile: "Cookies/cookies.pct.json",
+        agent: httpsAgent,  //  опція для "битих сертифікатів"
+        jar: new CookieJar(),
+        _sk: null,  // специфічне поле для PCT - це номер сесії, який повертається після успішного логіну і ним порібно підписувати (+кука) кожен запит в рамках цієї сесії
     },
 }
 

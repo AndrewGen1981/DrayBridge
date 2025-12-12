@@ -55,7 +55,7 @@ async function loginWUT(terminal) {
 const connectWUTTerminal = async (terminal, options = {}) => {
     return await connectTerminal(terminal, {
         ...options,
-        pingPath: "/main/main.do",
+        sessPingPath: "/main/main.do",
         loginCallback: loginWUT
     })
 }

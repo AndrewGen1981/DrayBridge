@@ -1,0 +1,21 @@
+{
+  "version": "tough-cookie@6.0.0",
+  "storeType": "MemoryCookieStore",
+  "rejectPublicSuffixes": true,
+  "enableLooseMode": false,
+  "allowSpecialUseDomain": true,
+  "prefixSecurity": "silent",
+  "cookies": [
+    {
+      "key": "JSESSIONID",
+      "value": "51036ECCE3A8127037F16921D01EF110",
+      "domain": "www.etslink.com",
+      "path": "/",
+      "secure": true,
+      "httpOnly": true,
+      "hostOnly": true,
+      "creation": "2025-12-12T15:06:46.228Z",
+      "lastAccessed": "2025-12-12T15:06:46.637Z"
+    }
+  ]
+}
