@@ -252,10 +252,13 @@ async function syncContainersData() {
 
 
 
+const cron = require("node-cron")
+const { timeZone } = require("../Config/__config.json")
+
+
+
 // Створюю розклад оновлення стоку
 function createTerminalsSyncSchedule() {
-    const { timeZone } = require("../Config/__config.json")
-
     // запускаю одразу без await
     syncContainersData()
 
