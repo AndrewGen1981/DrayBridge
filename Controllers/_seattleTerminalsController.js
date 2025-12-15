@@ -203,6 +203,8 @@ async function seattleBulkAvailabilityCheck(terminal, containers) {
                 throw new AppError(`Error fetching ${ bulkSearchURL }. ${ res.statusText }`, res.status)
             }
 
+            const seen = new Set()
+
             const $ = cheerio.load(await res.text())
 
             for (const tr of $("#result table tbody tr")) {
@@ -212,6 +214,10 @@ async function seattleBulkAvailabilityCheck(terminal, containers) {
                 
                 const number = clean($(tds[0]).find("a").first().text())
                 if (!number || number.toLowerCase() === "check nearby locations") continue
+
+                // дублікати викликатимуть помилки
+                if (seen.has(number)) continue
+                seen.add(number)
 
                 const cData = { number, terminal: terminal.key }
 

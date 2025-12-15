@@ -3,6 +3,15 @@
 // 2) WUT - WASHINGTON UNITED TERMINAL MARINE
 // 3) TOS - HUSKY TERMINAL & STEVEDORING
 
+const { TERMINALS } = require("../Config/terminalsCatalog")
+
+
+const { Container } = require("../Models/containerModel.js")
+const { AppError } = require("../Utils/AppError.js")
+
+
+const { fulfillPerContainer } = require("../Utils/mongoose_utils.js")
+
 
 const { 
     connectSeattleTerminal,
@@ -26,10 +35,51 @@ const {
 
 
 
+// async 
+async function terminalConnectAndCheckMany(terminal, containers = [], opt = {}) {
 
-const { TERMINALS } = require("../Config/terminalsCatalog")
+    if (!terminal || !containers?.length) return []
+    const options = { shouldloadCookies: true, ...opt }
+
+    // Seattle group (t5, t18, t30...)
+    if (terminal.group === "Seattle") {
+        if (await connectSeattleTerminal(terminal, options)) {
+            return await seattleBulkAvailabilityCheck(terminal, containers)
+        }
+    }
+
+    // WUT
+    if (terminal.group === "USWUT") {
+        if (await connectWUTTerminal(terminal, { shouldloadCookies: true })) {
+            return await uswutBulkAvailabilityCheck(terminal, containers)
+        }
+    }
+
+    // TOS
+    if (terminal.group === "TOS" && global.isProduction) {  //  only via VPN or at PRODUCTION
+        if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
+            return await tosBulkAvailabilityCheck(terminal, containers)
+        }
+    }
+
+    // PCT
+    if (terminal.group === "PCT") {
+        if (await connectPCTTerminal(terminal, { shouldloadCookies: true })) {
+            return await pctBulkAvailabilityCheck(terminal, containers)
+        }
+    }
 
 
+    // TODO: інші термінали тут
+
+
+    return []
+}
+
+
+
+// Логіка для введення контейнерів в систему списково (bulk).
+// Фактично використовується для ініту контейнерів і створення їх в манго.
 
 const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
     const emptyResult = { found: [], missing: [] }
@@ -71,44 +121,9 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
             
             if (!containers.length) break
 
-            let foundContainers = []
-            
             console.log(`Checking "${ terminal.label }" | ${ terminal.key }:`)
-
-            // Seattle group (t5, t18, t30...)
-            if (terminal.group === "Seattle") {
-                if (await connectSeattleTerminal(terminal, { shouldloadCookies: true })) {
-                    foundContainers = await seattleBulkAvailabilityCheck(terminal, containers)
-                }
-            }
-
-            // WUT
-            if (terminal.group === "USWUT") {
-                if (await connectWUTTerminal(terminal, { shouldloadCookies: true })) {
-                    foundContainers = await uswutBulkAvailabilityCheck(terminal, containers)
-                }
-            }
-
-            // TOS
-            if (terminal.group === "TOS") {
-                if (await connectTOSTerminal(terminal, { shouldloadCookies: true })) {
-                    foundContainers = await tosBulkAvailabilityCheck(terminal, containers)
-                }
-            }
-
-            // PCT
-            if (terminal.group === "PCT") {
-                if (await connectPCTTerminal(terminal, { shouldloadCookies: true })) {
-                    foundContainers = await pctBulkAvailabilityCheck(terminal, containers)
-                }
-            }
-
-
-
-            // TODO: інші термінали тут
-
-
-
+            const foundContainers = await terminalConnectAndCheckMany(terminal, containers)
+            
             if (foundContainers.length) {
                 // якщо щось знайшов, то відсіваю знайдені із першочергового списку контейнерів,
                 // найшвидший спосіб - перетворити в множину і видалити знайдені
@@ -140,6 +155,121 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
 
 
 
+
+// Автоматичне оновлення статусу контейнерів.
+// Використовується для corn.schedule авто-оновлення
+
+async function syncContainersData() {
+    try {
+        const allContainers = await Container.find()
+            .sort({ terminal: 1 })
+            .select("number terminal")
+            .lean()
+
+        if (!allContainers?.length)
+            throw new AppError("[AUTO-CHECK] Scheduled containers status check. Empty containers array.", 422)
+
+        console.log(`[AUTO-CHECK] Scheduled containers status check (${ allContainers.length }).`)
+
+        // об*єкт для сортування контейнерів за терміналами
+        const containerGroupsByTerminal = {}
+
+        for (const { number, terminal = "NA" } of allContainers) {
+            if (!containerGroupsByTerminal[terminal]) 
+                containerGroupsByTerminal[terminal] = []
+
+            containerGroupsByTerminal[terminal].push(number)
+        }
+
+        let missingContainers = new Set(containerGroupsByTerminal.NA || [])
+
+        for (const terminal of Object.values(TERMINALS)) {
+
+            // буду оновлювати в манго чанками - в розрізі терміналів
+            const operations = []
+
+            if (!containerGroupsByTerminal[terminal.key]?.length) {
+                console.log(`[AUTO-CHECK] Terminal: ${ terminal.label } | No containers assigned | Pending NA: ${ missingContainers.size }`)
+                continue
+            }
+
+            const containers = containerGroupsByTerminal[terminal.key]
+
+            const foundContainers = await terminalConnectAndCheckMany(terminal, [
+                ...containerGroupsByTerminal[terminal.key],
+                ...Array.from(missingContainers)
+            ])
+
+            console.log(`[AUTO-CHECK] Terminal: ${ terminal.label } | Assigned: ${ containers.length } | Pending NA: ${ missingContainers.size }`)
+
+            if (foundContainers.length > containers.length) {
+                // знайдено більше, як очікував, значить знайдено щось із missingContainers
+                for (const c of foundContainers) {
+                    if (c.number) missingContainers.delete(c.number)
+                }
+            } else if (foundContainers.length < containers.length) {
+                // знайшов менше, ніж очікував, змінюю статуси не знайдених
+                const fcSet = new Set(foundContainers.map(fc => fc.number))
+                for (const c of containers) {
+                    if (fcSet.has(c)) continue;
+                    foundContainers.push({
+                        number: c, status: "missing",
+                        statusDesc: "not found in terminal"
+                    })
+                }
+            }
+
+            // Build upsert operations
+            for (const c of foundContainers) {
+                const { number, ...update } = fulfillPerContainer(c)
+                operations.push({
+                    updateOne: {
+                        filter: {
+                            number: c.number,
+                            $or: Object.entries(update).map(([key, value]) => ({
+                                [key]: { $ne: value }
+                            }))
+                        },
+                        update: { $set: update },
+                        // upsert: true     // !!! створює дублікати
+                    }
+                })
+            }
+
+            if (operations.length > 0) {
+                console.log(`[AUTO-CHECK] ${ terminal.label } | Found: ${ foundContainers.length } | Pending NA: ${ missingContainers.size }`)
+                const result = await Container.bulkWrite(operations, { ordered: false })
+                console.log(`Update results: modified - ${ result.modifiedCount }, upserted - ${ result.upsertedCount }`)
+            } else {
+                console.log(`[AUTO-CHECK] ${terminal.label} | No changes detected`)
+            }
+        }
+
+    } catch (error) {
+        console.error(`[AUTO-CHECK][ERROR] ${error.code || ""} ${error.message}`)
+    }
+}
+
+
+
+// Створюю розклад оновлення стоку
+function createTerminalsSyncSchedule() {
+    const { timeZone } = require("../Config/__config.json")
+
+    // запускаю одразу без await
+    syncContainersData()
+
+    cron.schedule('0 */3 * * *', () => {
+        console.log('🔁 Sync every 3 hours')
+        syncContainersData()
+    }, {
+        timezone: timeZone
+    })
+}
+
+
+
 module.exports = {
-    bulkAvailabilityCheck
+    bulkAvailabilityCheck,
+    createTerminalsSyncSchedule
 }

@@ -199,6 +199,7 @@ app.use(
 
 
 const { startSocketIOWatcher } = require("./Controllers/socketWatcherController.js")
+const { createTerminalsSyncSchedule } = require("./Controllers/_terminalsController.js")
 
 
 
@@ -206,6 +207,8 @@ startSocketIOWatcher(
     // server
     app.listen(PORT, () => {
         console.log(`🚀 Сервер запущено на ${ isProduction ? `port: ${ PORT }` : devServer }`)
+        // Створюю розклад оновлення даних контейнерів
+        if (isProduction) createTerminalsSyncSchedule()
     }),
 
     // options for startSocketIOWatcher

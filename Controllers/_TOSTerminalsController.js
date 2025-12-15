@@ -115,6 +115,8 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
             const html = await res.text()
             const $ = cheerio.load(html)
 
+            const seen = new Set()
+
             const rows = $("table.appointment tbody tr").toArray()
 
             for (const tr of rows) {
@@ -123,6 +125,10 @@ async function tosBulkAvailabilityCheck(terminal, containers) {
                 const number = cols[1] || null
 
                 if (!number || number.includes("Currently there are no active notifications that satisfy your criteria.")) continue
+
+                // дублікати викликатимуть помилки
+                if (seen.has(number)) continue
+                seen.add(number)                
 
                 results.push({
 

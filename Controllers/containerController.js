@@ -23,21 +23,10 @@ const { AppError } = require("../Utils/AppError.js")
 
 const {
     cleanBodyCopy,
-    fulfillPerSchema
+    fulfillPerSchema,
+    fulfillPerContainer,
 } = require("../Utils/mongoose_utils.js")
 
-
-// Створюю аналог fulfillPerSchema для bulk операцій
-const allowed = new Set(Object.keys(Container.schema.paths))
-const fulfillPerContainer = (obj) => {
-    const result = {}
-    for (const k of Object.keys(obj)) {
-        if (allowed.has(k) && obj[k] != null) {
-            result[k] = obj[k]
-        }
-    }
-    return result
-}
 
 
 
@@ -402,7 +391,7 @@ exports.addContainers = async (req, res, next) => {
             throw new AppError("No containers could be created.", 422)
         }
 
-        const result = await Container.bulkWrite(operations)
+        const result = await Container.bulkWrite(operations, { ordered: false })
 
         res.json({
             valid,

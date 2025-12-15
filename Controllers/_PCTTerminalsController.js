@@ -156,13 +156,15 @@ async function pctBulkAvailabilityCheck(terminal, containers) {
             }
 
             // перевіряю коректність отриманих результатів
-            if (!contRespObj || contRespObj.success !== true || !Array.isArray(contRespObj.data) || !Array.isArray(contRespObj.cols)) {
-                console.warn("Response is not successful or missing data/cols")
+            if (!contRespObj || !Array.isArray(contRespObj.data) || !Array.isArray(contRespObj.cols)) {
+                console.warn(`Response is not successful or missing data/cols. Status ${ contRespObj?.status }, message: ${ contRespObj?.msg }`)
                 return results
             }
 
             // заголовки
             const colsNames = contRespObj.cols.map(c => c.name)
+
+            const seen = new Set()
 
             // дані
             for (let row of (contRespObj.data || [])) {
@@ -178,8 +180,14 @@ async function pctBulkAvailabilityCheck(terminal, containers) {
                     /not found/i.test(obj.PO_TERMINAL_NAME)
                 ) continue
 
+                const number = obj.PO_CNTR_NO
+                
+                // дублікати викликатимуть помилки
+                if (!number || seen.has(number)) continue
+                seen.add(number)
+
                 results.push({
-                    number: obj.PO_CNTR_NO || null,
+                    number,
                     terminal: terminal.key,
                     subTerminal: obj.PO_TERMINAL_ID?.toLowerCase() || null,
                     

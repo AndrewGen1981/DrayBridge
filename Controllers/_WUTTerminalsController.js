@@ -117,14 +117,24 @@ async function uswutBulkAvailabilityCheck(terminal, containers) {
                 throw new AppError(`Cannot find result in ${ (html || "NO HTML").replace(/\s+/g, " ").slice(0, 250) }`, 500)
             }
 
+            const seen = new Set()
+
             const chunkResults = JSON.parse(match[1])
 
             for (const obj of chunkResults) {
+
+                const number = obj.cntrNo
+
+                // дублікати викликатимуть помилки
+                if (!number || seen.has(number)) continue
+                seen.add(number)
+
                 results.push({
 
                     // 1️⃣ Container
-                    number: obj.cntrNo,
+                    number,
                     terminal: terminal.key,
+                    
                     status: obj.avlbFlg,
                     statusDesc: obj.avlbDesc,
                     containerTypeSize: obj.tmlPrivCntrTpszCdNm,

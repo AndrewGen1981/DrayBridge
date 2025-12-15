@@ -52,9 +52,28 @@ function cleanBodyCopyWithModel(body = {}, schemaOrModel, CUSTOM_FIELDS_TO_EXCLU
 }
 
 
+// Створюю аналог fulfillPerSchema для bulk операцій. Максимально швидкий
+
+const { Container } = require("../Models/containerModel")
+
+const allowed = new Set(Object.keys(Container.schema.paths))
+
+const fulfillPerContainer = (obj) => {
+    const result = {}
+    for (const k of Object.keys(obj)) {
+        if (allowed.has(k) && obj[k] != null) {
+            result[k] = obj[k]
+        }
+    }
+    return result
+}
+
+
 module.exports = {
     extractSchemaFields,
     fulfillPerSchema,
+    
+    fulfillPerContainer,
 
     cleanBodyCopy,
     cleanBodyCopyWithModel,
