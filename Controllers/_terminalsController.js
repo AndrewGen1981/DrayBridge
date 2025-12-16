@@ -193,10 +193,10 @@ async function syncContainersData() {
                 continue
             }
 
-            const containers = containerGroupsByTerminal[terminal.key]
+            const containers = [ ...new Set(containerGroupsByTerminal[terminal.key]) ]
 
             const foundContainers = await terminalConnectAndCheckMany(terminal, [
-                ...containerGroupsByTerminal[terminal.key],
+                ...containers,
                 ...Array.from(missingContainers)
             ])
 
