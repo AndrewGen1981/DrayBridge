@@ -8,14 +8,14 @@
   "cookies": [
     {
       "key": "JSESSIONID",
-      "value": "411DD4BC25AD5266BDBE2CBA83AF5D2C",
+      "value": "A62A5393271DC72B107C845772AC93B8",
       "domain": "www.etslink.com",
       "path": "/",
       "secure": true,
       "httpOnly": true,
       "hostOnly": true,
-      "creation": "2025-12-15T23:31:26.909Z",
-      "lastAccessed": "2025-12-15T23:31:27.508Z"
+      "creation": "2025-12-16T14:31:20.434Z",
+      "lastAccessed": "2025-12-16T14:31:20.632Z"
     }
   ]
 }

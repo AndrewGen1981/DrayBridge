@@ -32,7 +32,7 @@ const {
 
 // ***  Configs and Catalogs
 const { appDomain } = require("../Config/__config.json")
-const { TERMINALS_LABELS, TERMINALS } = require("../Config/terminalsCatalog.js")
+const { TERMINALS, TERMINALS_ENUM, TERMINALS_LABELS } = require("../Config/terminalsCatalog.js")
 const { bulkAvailabilityCheck } = require("./_terminalsController.js")
 
 
@@ -290,15 +290,19 @@ function normalizeContainerNumbers(input) {
 
 
 // Створюю єдину процедуру перевірки наявності контейнерів. Наприклад, існуючими вважаються такі,
-// які вже є в базі + їх статус не "missing". Правила валідації можна доповнювати, змінювати, але
-// вони повинні бути уніфіковані, оскільки використовуються в інших методах
+// які вже є в базі + прив*язані до певного терміналу (по статусу "missing" орієнтуватися помилково,
+// бо такий статус можуть мати контейнери, прив*язані до терміналів). Правила валідації можна доповнювати,
+// змінювати, алевони повинні бути уніфіковані, оскільки використовуються в інших методах
 
 async function validateExisting(numbers) {
     if (!numbers?.length) return []
     return await Container.find(
         {
             number: { $in: numbers },
-            status: { $ne: "missing" }
+            terminal: {
+                $exists: true,
+                $in: TERMINALS_ENUM
+            }
         },
         { number: 1, _id: 0 }
     ).lean()

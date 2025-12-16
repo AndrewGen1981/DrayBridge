@@ -163,22 +163,33 @@ async function syncContainersData() {
     try {
         const allContainers = await Container.find()
             .sort({ terminal: 1 })
-            .select("number terminal")
+            .select("number terminal status")
             .lean()
 
         if (!allContainers?.length)
             throw new AppError("[AUTO-CHECK] Scheduled containers status check. Empty containers array.", 422)
 
-        console.log(`[AUTO-CHECK] Scheduled containers status check (${ allContainers.length }).`)
+        console.log(`[AUTO-CHECK] Scheduled containers status check (${ allContainers.length } pcs).`)
 
         // об*єкт для сортування контейнерів за терміналами
         const containerGroupsByTerminal = {}
 
-        for (const { number, terminal = "NA" } of allContainers) {
+        // тут важливе питання що робити з групою контейнерів зі статусом "pending". Це такі контейнери, які були
+        // знайдені і підтверджені під конкретним терміналом, але під час останньої регулярної перевірки термінал не
+        // підтверджує наявність такого контейнера. Може підтвердити при наступній перевірці, АЛЕ могло статися так, що
+        // контейнер перемістився під інший термінал (дуже рідко, але буває). Теоретично, їх можна вибирати окремо і
+        // зараховувати до missingContainers і тоді інші термінали зможуть їх також перевірити
+
+        for (const c of allContainers) {
+
+            // всі status: "pending" до missingContainers
+            const terminal = c.status === "pending" ? "NA"
+                : c.terminal || "NA"
+
             if (!containerGroupsByTerminal[terminal]) 
                 containerGroupsByTerminal[terminal] = []
 
-            containerGroupsByTerminal[terminal].push(number)
+            containerGroupsByTerminal[terminal].push(c.number)
         }
 
         let missingContainers = new Set(containerGroupsByTerminal.NA || [])
@@ -193,7 +204,7 @@ async function syncContainersData() {
                 continue
             }
 
-            const containers = [ ...new Set(containerGroupsByTerminal[terminal.key]) ]
+            const containers = containerGroupsByTerminal[terminal.key]
 
             const foundContainers = await terminalConnectAndCheckMany(terminal, [
                 ...containers,
@@ -215,8 +226,8 @@ async function syncContainersData() {
                 for (const c of containers) {
                     if (fcSet.has(c)) continue;
                     foundContainers.push({
-                        number: c, status: "missing",
-                        statusDesc: "not found in terminal"
+                        number: c, status: "pending",
+                        statusDesc: "Awaiting terminal confirmation"
                     })
                 }
             }
@@ -251,6 +262,12 @@ async function syncContainersData() {
         console.error(`[AUTO-CHECK][ERROR] ${error.code || ""} ${error.message}`)
     }
 }
+
+
+
+// ***  test
+// syncContainersData()
+// ***
 
 
 
