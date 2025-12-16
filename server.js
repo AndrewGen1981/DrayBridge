@@ -207,6 +207,7 @@ startSocketIOWatcher(
     // server
     app.listen(PORT, () => {
         console.log(`🚀 Сервер запущено на ${ isProduction ? `port: ${ PORT }` : devServer }`)
+        
         // Створюю розклад оновлення даних контейнерів
         if (isProduction) createTerminalsSyncSchedule()
     }),
