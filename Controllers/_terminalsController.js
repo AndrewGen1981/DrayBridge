@@ -200,10 +200,8 @@ async function syncContainersData() {
                 ...Array.from(missingContainers)
             ])
 
-            console.log(`[AUTO-CHECK] ${ terminal.label }
-                | Assigned: ${ containers.length } | Found: ${ foundContainers?.length || 0 } 
-                | Pending NA: ${ missingContainers.size }`)
-                
+            console.log(`[AUTO-CHECK] ${ terminal.label } | Assigned: ${ containers.length } | Found: ${ foundContainers?.length || 0 }  | Pending NA: ${ missingContainers.size }`)
+
             if (!foundContainers?.length ) continue;
 
             if (foundContainers.length > containers.length) {
