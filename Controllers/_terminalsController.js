@@ -234,6 +234,10 @@ async function syncContainersData() {
 
             // Build upsert operations
             for (const c of foundContainers) {
+
+                // важливо прибрати попередній статус, бо він може бути в документі манго "Awaiting terminal confirmation" з попереднього разу
+                c.statusDesc ??= null
+
                 const { number, ...update } = fulfillPerContainer(c)
                 operations.push({
                     updateOne: {
