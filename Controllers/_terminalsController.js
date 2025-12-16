@@ -124,7 +124,7 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
             console.log(`Checking "${ terminal.label }" | ${ terminal.key }:`)
             const foundContainers = await terminalConnectAndCheckMany(terminal, containers)
             
-            if (foundContainers.length) {
+            if (foundContainers?.length) {
                 // якщо щось знайшов, то відсіваю знайдені із першочергового списку контейнерів,
                 // найшвидший спосіб - перетворити в множину і видалити знайдені
                 const theRestOfContainers = new Set(containers)
@@ -200,7 +200,11 @@ async function syncContainersData() {
                 ...Array.from(missingContainers)
             ])
 
-            console.log(`[AUTO-CHECK] Terminal: ${ terminal.label } | Assigned: ${ containers.length } | Pending NA: ${ missingContainers.size }`)
+            console.log(`[AUTO-CHECK] ${ terminal.label }
+                | Assigned: ${ containers.length } | Found: ${ foundContainers?.length || 0 } 
+                | Pending NA: ${ missingContainers.size }`)
+                
+            if (!foundContainers?.length ) continue;
 
             if (foundContainers.length > containers.length) {
                 // знайдено більше, як очікував, значить знайдено щось із missingContainers
