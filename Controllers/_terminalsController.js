@@ -262,8 +262,8 @@ async function syncContainersData() {
 
             if (operations.length > 0) {
                 console.log(`[AUTO-CHECK] ${ terminal.label } | Found: ${ foundContainers.length } | Pending NA: ${ missingContainers.size }`)
-                // const result = await Container.bulkWrite(operations, { ordered: false })
-                // console.log(`Update results: modified - ${ result.modifiedCount }, upserted - ${ result.upsertedCount }`)
+                const result = await Container.bulkWrite(operations, { ordered: false })
+                console.log(`Update results: modified - ${ result.modifiedCount }, upserted - ${ result.upsertedCount }`)
             } else {
                 console.log(`[AUTO-CHECK] ${terminal.label} | No changes detected`)
             }
