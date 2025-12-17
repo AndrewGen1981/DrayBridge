@@ -106,10 +106,11 @@ for (const t of Object.values(TERMINALS)) {
     // * стандартно "чекатиме" 8с і розриватиме з*єднання
     // * робитиме 3 спроби з*днатися з подовженим часом очікування кожна (пауза між)
     
-    const { agent } = t
+    const { key, agent } = t
 
     t.fetchWithMyJar = (url, options = {}, cfg = {}) => {
         if (agent) options.agent = agent
+        if (key === "husky") options.timeout = 15000    //  для "husky" 8с не вистачає
         return fetchSmart(url, options, { fetchFunc, ...cfg })
     }
 
