@@ -231,9 +231,10 @@ const seattlePerItemtAvailabilityCheck = async (terminal, _containers, { pause =
             }
 
             const origin = { ...mapStrong, ...mapSpan, ...mapOSRA }
-            if (Object.keys(origin).length) obj.origin = JSON.stringify(origin)
-            
-            results.push(obj)
+            if (Object.keys(origin).length) {
+                obj.origin = JSON.stringify(origin)
+                results.push(obj)
+            }            
 
             if (pause) await setTimeout(pause)
         }
