@@ -35,59 +35,59 @@ const TERMINALS = {
         cookieFile: "Cookies/cookies.t5.json",
         jar: new CookieJar()
     },
-    "t18": {
-        key: "t18",
-        group: "Seattle",
-        label: "Terminal 18",
-        url: "https://t18.tideworks.com/fc-T18/",
-        env_login: "TIDEWORKS_LOGIN",
-        env_passowrd: "TIDEWORKS_PASSWORD",
-        cookieFile: "Cookies/cookies.t18.json",
-        jar: new CookieJar()
-    },
+    // "t18": {
+    //     key: "t18",
+    //     group: "Seattle",
+    //     label: "Terminal 18",
+    //     url: "https://t18.tideworks.com/fc-T18/",
+    //     env_login: "TIDEWORKS_LOGIN",
+    //     env_passowrd: "TIDEWORKS_PASSWORD",
+    //     cookieFile: "Cookies/cookies.t18.json",
+    //     jar: new CookieJar()
+    // },
 
-    // WUT - WASHINGTON UNITED TERMINAL MARINE
+    // // WUT - WASHINGTON UNITED TERMINAL MARINE
 
-    "wut": {
-        key: "wut",
-        group: "USWUT",
-        label: "Washington United Terminals",
-        url: "http://tns.uswut.com/",
-        env_login: "WUT_LOGIN",
-        env_passowrd: "WUT_PASSWORD",
-        cookieFile: "Cookies/cookies.uswut.json",
-        jar: new CookieJar()
-    },
+    // "wut": {
+    //     key: "wut",
+    //     group: "USWUT",
+    //     label: "Washington United Terminals",
+    //     url: "http://tns.uswut.com/",
+    //     env_login: "WUT_LOGIN",
+    //     env_passowrd: "WUT_PASSWORD",
+    //     cookieFile: "Cookies/cookies.uswut.json",
+    //     jar: new CookieJar()
+    // },
     
-    // TOS: HUSKY TERMINAL
+    // // TOS: HUSKY TERMINAL
 
-    "husky": {
-        key: "husky",
-        group: "TOS",
-        label: "TOS: Husky Terminal",
-        url: "https://tosportal.portsamerica.com/",
-        env_login: "TOS_LOGIN",
-        env_passowrd: "TOS_PASSWORD",
-        cookieFile: "Cookies/cookies.tos.json",
-        agent: httpsAgent,  //  опція для "битих сертифікатів"
-        redirect: "follow",     //  опція виключно для TOS
-        jar: new CookieJar()
-    },
+    // "husky": {
+    //     key: "husky",
+    //     group: "TOS",
+    //     label: "TOS: Husky Terminal",
+    //     url: "https://tosportal.portsamerica.com/",
+    //     env_login: "TOS_LOGIN",
+    //     env_passowrd: "TOS_PASSWORD",
+    //     cookieFile: "Cookies/cookies.tos.json",
+    //     agent: httpsAgent,  //  опція для "битих сертифікатів"
+    //     redirect: "follow",     //  опція виключно для TOS
+    //     jar: new CookieJar()
+    // },
 
-    // PCT - EVERPORT: Los Angeles, Oakland, Tacoma
+    // // PCT - EVERPORT: Los Angeles, Oakland, Tacoma
 
-    "pct": {
-        key: "pct",
-        group: "PCT",
-        label: "PCT: Everport",
-        url: "https://www.etslink.com/",
-        env_login: "PCT_LOGIN",
-        env_passowrd: "PCT_PASSWORD",
-        cookieFile: "Cookies/cookies.pct.json",
-        agent: httpsAgent,  //  опція для "битих сертифікатів"
-        jar: new CookieJar(),
-        _sk: null,  // специфічне поле для PCT - це номер сесії, який повертається після успішного логіну і ним порібно підписувати (+кука) кожен запит в рамках цієї сесії
-    },
+    // "pct": {
+    //     key: "pct",
+    //     group: "PCT",
+    //     label: "PCT: Everport",
+    //     url: "https://www.etslink.com/",
+    //     env_login: "PCT_LOGIN",
+    //     env_passowrd: "PCT_PASSWORD",
+    //     cookieFile: "Cookies/cookies.pct.json",
+    //     agent: httpsAgent,  //  опція для "битих сертифікатів"
+    //     jar: new CookieJar(),
+    //     _sk: null,  // специфічне поле для PCT - це номер сесії, який повертається після успішного логіну і ним порібно підписувати (+кука) кожен запит в рамках цієї сесії
+    // },
 }
 
 

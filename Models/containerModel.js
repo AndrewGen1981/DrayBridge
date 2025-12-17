@@ -63,6 +63,9 @@ const containerSchema = new mongoose.Schema({
     terminalHold: String,   // WUT "tmnlHold" холд терміналу, Seattle "holds"
     terminalHoldReason: String,     // WUT "tmnlHoldRsn"
 
+    portFirstFreeDay: String,   // OSRA
+    portLastFreeDay: String,    // OSRA
+
     origin: String,
 
 }, {

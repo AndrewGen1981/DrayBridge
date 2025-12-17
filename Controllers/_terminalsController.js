@@ -15,7 +15,8 @@ const { fulfillPerContainer } = require("../Utils/mongoose_utils.js")
 
 const { 
     connectSeattleTerminal,
-    seattleBulkAvailabilityCheck
+    seattleBulkAvailabilityCheck,
+    seattlePerItemtAvailabilityCheck,
 } = require("./_seattleTerminalsController.js")
 
 const { 
@@ -39,12 +40,18 @@ const {
 async function terminalConnectAndCheckMany(terminal, containers = [], opt = {}) {
 
     if (!terminal || !containers?.length) return []
-    const options = { shouldloadCookies: true, ...opt }
+
+    // якщо в opt передати _seattleCheckBulk = false, то кожег контейнер терміналу Сіетлу буде
+    // перевірятися окремо, плюс додається блок OSRA. По замовчуванню _seattleCheckBulk = true
+    const { _seattleCheckBulk = true, ...restOfOptions } = opt
+    const options = { shouldloadCookies: true, ...restOfOptions }
 
     // Seattle group (t5, t18, t30...)
     if (terminal.group === "Seattle") {
         if (await connectSeattleTerminal(terminal, options)) {
-            return await seattleBulkAvailabilityCheck(terminal, containers)
+            return _seattleCheckBulk
+                ? await seattleBulkAvailabilityCheck(terminal, containers)
+                : await seattlePerItemtAvailabilityCheck(terminal, containers)
         }
     }
 
@@ -209,7 +216,7 @@ async function syncContainersData() {
             const foundContainers = await terminalConnectAndCheckMany(terminal, [
                 ...containers,
                 ...Array.from(missingContainers)
-            ])
+            ], { _seattleCheckBulk: false })    //  перевіряю контейнери Сієтлу кожен окремо + OSRA
 
             console.log(`[AUTO-CHECK] ${ terminal.label } | Assigned: ${ containers.length } | Found: ${ foundContainers?.length || 0 }  | Pending NA: ${ missingContainers.size }`)
 
@@ -255,8 +262,8 @@ async function syncContainersData() {
 
             if (operations.length > 0) {
                 console.log(`[AUTO-CHECK] ${ terminal.label } | Found: ${ foundContainers.length } | Pending NA: ${ missingContainers.size }`)
-                const result = await Container.bulkWrite(operations, { ordered: false })
-                console.log(`Update results: modified - ${ result.modifiedCount }, upserted - ${ result.upsertedCount }`)
+                // const result = await Container.bulkWrite(operations, { ordered: false })
+                // console.log(`Update results: modified - ${ result.modifiedCount }, upserted - ${ result.upsertedCount }`)
             } else {
                 console.log(`[AUTO-CHECK] ${terminal.label} | No changes detected`)
             }

@@ -23,6 +23,17 @@ const {
 
 
 
+// Утиліта для безпечного парсингу HTML
+const clean = v => {
+    const s = (v || "")
+        .replace(/\u00a0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+
+    return s || null
+}
+
+
 
 // Логін на латформу терміналу, у Tideworks (фізичний логін, на рівні http)
 async function loginTideworks(terminal) {
@@ -88,61 +99,139 @@ const connectSeattleTerminal = async (terminal, options = {}) => {
 
 // --- Метод #1. Поштучний пошук (seattlePerItemtAvailabilityCheck).
 
-// Утиліта для seattlePerItemtAvailabilityCheck
-// Виніс в окрему функцію просто щоб можна було робити await "Promise.all" і отримувати одразу (паралельно) дані по equipment та osra
-const seattlePerItemtAvailabilityFetch = async (fetchContainerURL, selector = "body") => {
-    if (!fetchContainerURL?.trim()) return
-    const content = await fetchWithJar(fetchContainerURL)
-    const $ = cheerio.load(await content.text())
-    return $(selector).html()?.trim() || null
-}
-
-
 
 // Стандартний механізм пошуку приналежності контенера до терміналу (по одному контейнеру за один запит)
 // * основна інформація - через /import/default.do?method=container&eqptNbr=NWRU3635205 (приклад)
 // * додаткова інформація - через /equipment/default.do?method=OSRAComplianceInformation&equipmentNumber=NWRU3635205 (приклад)
-const seattlePerItemtAvailabilityCheck = async (terminal, containers, options) => {
+
+const seattlePerItemtAvailabilityCheck = async (terminal, _containers, { pause = 250 } = {}) => {
+
+    const results = []
+
     try {
-        if (!terminal?.url) throw new AppError("Terminal is not defined.", 400)
-        if (!containers?.length) throw new AppError("Empty containers set.", 422)
+        const { url, fetchWithMyJar } = terminal || {}
 
-        const isConnected = await connectSeattleTerminal(terminal, options)
-        if (!isConnected) throw new AppError("Cannot connect to the Terminal.", 500)            
+        if (!url?.trim() || !fetchWithMyJar) {
+            console.warn("No terminal/url provided")
+            return results
+        }
 
-        const {
-            pause = 1000,   // пауза, щоб уникнути rate limit, можна змінити в опціях; "0/false" - відміняє паузу
-            isMapResults = false    // результати можна повернути як Map, якщо далі необхідно проводити співсталення даних з базою
-        } = options
+        // захищаю оригінальний вхідний масив контейнерів
+        let containers = Array.isArray(_containers) ? [...new Set(_containers)] : []
+        if (!containers.length) return results
+
+        const seen = new Set()
         
-        const results = isMapResults ? {} : []
+        for (const container of containers) {
 
-        for (const container of [ ...new Set(containers) ]) {
+            if (seen.has(container)) continue
+            seen.add(container)
+
             // шукаю базову інформацію про контейнер
-            const equipmentRequestURL = getURL(terminal, `/import/default.do?method=container&eqptNbr=${ container }`)
+            const containerPromise = terminal
+                .fetchWithMyJar(getURL(terminal, `/import/default.do?method=container&eqptNbr=${ container }`))
+                .then(r => r.text())
+            
+            // запасний url, попередній повертає більш розширену інформацію, але не повертає нічого
+            // по експортних операціях та контейнерах в статусі "Empty"
+            const containerBackupPromise = terminal
+                .fetchWithMyJar(getURL(terminal, `/equipment/default.do?method=equipmentSubmit&equipClass=CTR&number=${ container }`))
+                .then(r => r.text())
 
             // шукаю OSRA Compliance Information
-            const OSRAComplianceRequestURL = getURL(terminal, `/equipment/default.do?method=OSRAComplianceInformation&equipmentNumber=${ container }&soLineId=WSL`)
-            
-            const [ equipment, osra ] = await Promise.all([
-                seattlePerItemtAvailabilityFetch(equipmentRequestURL, "body > div.container"),
-                seattlePerItemtAvailabilityFetch(OSRAComplianceRequestURL, "body")
-            ])
+            const osraPromise = terminal
+                .fetchWithMyJar(getURL(terminal, `/equipment/default.do?method=OSRAComplianceInformation&equipmentNumber=${ container }&soLineId=WSL`))
+                .then(r => r.text())
 
-            // визначаю як зберігати результати
-            if (isMapResults) {
-                results[container] = {
-                    equipment, osra,
-                    terminal: terminal.key,
-                }
-            } else {
-                results.push({
-                    container, equipment, osra,
-                    terminal: terminal.key,
-                })
+            const [cntrHTML, backHTML, osraHTML] = await Promise.all([containerPromise, containerBackupPromise, osraPromise])
+
+            const obj = {
+                number: container,
+                terminal: terminal.key,
             }
 
-            console.log(`[SeattleDefaultChecker] Done: ${ container }, terminal ${ terminal.label }`)
+            const mapStrong = {}
+            const mapSpan = {}
+
+            if ((cntrHTML?.trim() && !/have an issue/i.test(cntrHTML)) ||
+                (backHTML?.trim() && !/No records found matching your search criteria/i.test(backHTML))) {
+
+                const isCNTR = cntrHTML?.trim() && !/have an issue/i.test(cntrHTML)
+
+                const $ = cheerio.load(isCNTR ? cntrHTML : backHTML)
+                
+                let root
+                if (isCNTR) {
+                    root = $("h2:contains('Container')").first().closest(".container")
+                } else {
+                    root = $("#result")
+                }
+
+                root.find("div").each((_, el) => {
+                    const label = clean($(el).contents().first().text())
+                    const strong = clean($(el).find("strong").first().text())
+                    const span = clean($(el).find("span").first().text())
+                    if (label) {
+                        if (strong) mapStrong[label] = strong
+                        if (span) mapSpan[label] = span
+                    }
+                })
+
+                obj.status = [mapStrong["Available for pickup:"], mapStrong["Category:"], mapStrong["Status:"]].filter(Boolean).join(", ")
+
+                obj.containerTypeSize = [mapStrong["Size/Type:"], mapStrong["Weight:"], mapStrong["Gross Weight:"]].filter(Boolean).join(", ")
+                obj.containerTypeSizeLabel = mapSpan["Size/Type:"]
+
+                obj.SSCO = [mapStrong["Line:"], mapStrong["Vessel/Voyage:"]].filter(Boolean).join(", ")
+                obj.customerStatus = [mapStrong["Location:"], mapStrong["Unload Date:"]].filter(Boolean).join(", ")
+
+                obj.terminalHold = mapStrong["Holds:"]
+                obj.terminalHoldReason = mapStrong["Add'l Holds Info:"]
+
+                // ===== Fees / Dwell =====
+                obj.dwellAmount = clean(root.find("div:contains('Total Fees') strong").last().text())
+
+                obj.customStatus = mapStrong["Customs Release Status:"]
+                obj.customTimestamp = clean(root.find("#cust-rel-date").text())
+
+                obj.lineReleaseStatus = mapStrong["Line Release Status:"]
+                obj.customerStatus ??= clean(root.find("#line-rel-date").text())
+
+                obj.appointmentDate = mapStrong["Satisfied Thru:"]
+            }
+
+
+            const mapOSRA = {}
+
+            if (osraHTML?.trim() && new RegExp(container, "i").test(osraHTML)) {
+                const $ = cheerio.load(osraHTML)
+                const root = $(".pad-20").first()
+
+                root.find("div").each((_, el) => {
+                    const label = clean($(el).contents().first().text())
+                    const strong = clean($(el).find("strong").first().text())
+                    if (label) mapOSRA[label] = strong || null
+                })
+
+                const statusDesc = mapOSRA["Container Available:"]
+                if (statusDesc) obj.statusDesc = `Container Available: ${ statusDesc }`
+
+                // ===== Line Free Days =====
+                obj.lineFirstFree = mapOSRA["Line First Free Day:"]
+                obj.lastFreeDate = mapOSRA["Line Last Free Day:"]
+            
+                // ===== Port Free Days =====
+                obj.portFirstFreeDay = mapOSRA["Port First Free Day:"]
+                obj.portLastFreeDay = mapOSRA["Port Last Free Day:"]
+            
+                // Це сума "Total Fees" по контейнеру та усіх fee по OSRA, перезаписую поле dwellAmount
+                obj.dwellAmount = clean(root.find("div:contains('Grand Total') strong").last().text())
+            }
+
+            const origin = { ...mapStrong, ...mapSpan, ...mapOSRA }
+            if (Object.keys(origin).length) obj.origin = JSON.stringify(origin)
+            
+            results.push(obj)
 
             if (pause) await setTimeout(pause)
         }
@@ -150,10 +239,8 @@ const seattlePerItemtAvailabilityCheck = async (terminal, containers, options) =
         return results
         
     } catch (error) {
-        console.error(`Updating terminal containers issue: ${ error }`)
-        const status = error.status || 500
-        const message = error.message || String(error)
-        throw new AppError(message, status)     //  прокидаю помилку далі
+        console.error(`Updating terminal "${ terminal.label }" containers issue: ${ error }`)
+        return results  //  якщо виникне помилка, то повернеться вже прочитана кількість
     }
 }
 
@@ -166,7 +253,6 @@ const seattlePerItemtAvailabilityCheck = async (terminal, containers, options) =
 async function seattleBulkAvailabilityCheck(terminal, containers) {
 
     const results = []
-    const clean = v => (v || "").replace(/\s+/g, " ").trim()    //  утиліта
 
     try {
         const { url, fetchWithMyJar } = terminal || {}
