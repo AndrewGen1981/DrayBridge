@@ -178,6 +178,7 @@ const seattlePerItemtAvailabilityCheck = async (terminal, _containers, { pause =
                 })
 
                 obj.status = [mapStrong["Available for pickup:"], mapStrong["Category:"], mapStrong["Status:"]].filter(Boolean).join(", ")
+                obj.statusDesc = null
 
                 obj.containerTypeSize = [mapStrong["Size/Type:"], mapStrong["Weight:"], mapStrong["Gross Weight:"]].filter(Boolean).join(", ")
                 obj.containerTypeSizeLabel = mapSpan["Size/Type:"]
