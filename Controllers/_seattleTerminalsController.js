@@ -127,6 +127,8 @@ const seattlePerItemtAvailabilityCheck = async (terminal, _containers, { pause =
             if (seen.has(container)) continue
             seen.add(container)
 
+            console.log(container)
+
             // шукаю базову інформацію про контейнер
             const containerPromise = terminal
                 .fetchWithMyJar(getURL(terminal, `/import/default.do?method=container&eqptNbr=${ container }`))
