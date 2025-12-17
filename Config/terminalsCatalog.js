@@ -110,7 +110,7 @@ for (const t of Object.values(TERMINALS)) {
 
     t.fetchWithMyJar = (url, options = {}, cfg = {}) => {
         if (agent) options.agent = agent
-        if (key === "husky") options.timeout = 15000    //  для "husky" 8с не вистачає
+        if (key === "husky") cfg.timeout = 15000    //  для "husky" 8с не вистачає
         return fetchSmart(url, options, { fetchFunc, ...cfg })
     }
 

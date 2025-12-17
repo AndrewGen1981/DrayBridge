@@ -79,12 +79,12 @@
 
                     <tr data-id="<%= containers[i]._id%>">
 
-                        <td class="number">
-                            <%= containers[i].number %>
-                            <p>updated: <%- tools.localDateTime(containers[i].updatedAt, "html") %></p>
+                        <td class="number"><%= containers[i].number %></td>
+                        
+                        <td class="terminal">
+                            <%= containers[i].terminal %>
+                            <p>last checked: <%- tools.localDateTime(containers[i].updatedAt, "html") %></p>
                         </td>
-
-                        <td class="terminal"><%= containers[i].terminal %></td>
 
                         <td class="status-desc">
                             <p class="status"><%= containers[i].status %></p>
