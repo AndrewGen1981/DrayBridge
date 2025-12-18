@@ -15,8 +15,9 @@ const { getListing } = require("../Config/openaiRequest.js")
 
 
 // ***  Models
-const { Container } = require("../Models/containerModel.js")
 const { User } = require("../Models/userModel.js")
+const { Terminal } = require("../Models/terminalModel.js")
+const { Container } = require("../Models/containerModel.js")
 
 
 const { AppError } = require("../Utils/AppError.js")
@@ -244,13 +245,19 @@ exports.getContainers = async (req, options = {}) => {
 
 
 exports.index = async (req, res, next) => {
-    // Головна сторінка рауту "Containers"
+    try {
+        // Головна сторінка рауту "Containers"
 
-    
+        const terminals = await Terminal.find().lean()
+        
+        res.render("../Views/containers/containers_main.ejs", {
+            TERMINALS_LABELS
+        })
 
-    res.render("../Views/containers/containers_main.ejs", {
-        TERMINALS_LABELS
-    })
+    } catch (error) {
+        console.error(error)
+        next()
+    }
 }
 
 
