@@ -16,10 +16,7 @@ const { getURL } = require("../Config/terminalsCatalog")
 
 
 // --- Утиліти для роботи з сесіями терміналів
-const {
-    saveCookies,
-    connectTerminal
-} = require("./_terminalSessionsControlle")
+const { connectTerminal } = require("./_terminalSessionsController")
 
 
 
@@ -70,9 +67,7 @@ async function loginTideworks(terminal) {
     })
 
     console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }`)
-
-    if (resp.status === 302) saveCookies(terminal)
-    else throw new AppError("❌ Login failed", 500)
+    return resp.status === 302
 }
 
 

@@ -33,6 +33,7 @@ const TERMINALS = {
         env_login: "TIDEWORKS_LOGIN",
         env_passowrd: "TIDEWORKS_PASSWORD",
         cookieFile: "Cookies/cookies.t5.json",
+        redirect: "follow",
         jar: new CookieJar()
     },
     "t18": {
@@ -43,6 +44,7 @@ const TERMINALS = {
         env_login: "TIDEWORKS_LOGIN",
         env_passowrd: "TIDEWORKS_PASSWORD",
         cookieFile: "Cookies/cookies.t18.json",
+        redirect: "follow",
         jar: new CookieJar()
     },
 
@@ -70,7 +72,7 @@ const TERMINALS = {
         env_passowrd: "TOS_PASSWORD",
         cookieFile: "Cookies/cookies.tos.json",
         agent: httpsAgent,  //  опція для "битих сертифікатів"
-        redirect: "follow",     //  опція виключно для TOS
+        redirect: "follow",
         jar: new CookieJar()
     },
 

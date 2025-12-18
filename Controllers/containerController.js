@@ -244,6 +244,10 @@ exports.getContainers = async (req, options = {}) => {
 
 
 exports.index = async (req, res, next) => {
+    // Головна сторінка рауту "Containers"
+
+    
+
     res.render("../Views/containers/containers_main.ejs", {
         TERMINALS_LABELS
     })

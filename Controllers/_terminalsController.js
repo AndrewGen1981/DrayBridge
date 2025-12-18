@@ -7,6 +7,8 @@ const { TERMINALS } = require("../Config/terminalsCatalog")
 
 
 const { Container } = require("../Models/containerModel.js")
+const { Terminal } = require("../Models/terminalModel.js")
+
 const { AppError } = require("../Utils/AppError.js")
 
 
@@ -218,17 +220,15 @@ async function syncContainersData() {
                 ...Array.from(missingContainers)
             ], { _seattleCheckBulk: false })    //  перевіряю контейнери Сієтлу кожен окремо + OSRA
 
-            console.log(`[AUTO-CHECK] ${ terminal.label } | Assigned: ${ containers.length } | Found: ${ foundContainers?.length || 0 }  | Pending NA: ${ missingContainers.size }`)
-
+            // - якщо нічого не знайшов, то просто переходжу до наступного терміналу; це також може бути свідченням того,
+            // що просто не вдалося під*єднатися до терміналу, не потрібно змінювати статуси контейнерів
             if (!foundContainers?.length ) continue;
+            
+            // - якщо знайшов, то спочатку додам статус "pending", а потім рахую статистику
 
-            if (foundContainers.length > containers.length) {
-                // знайдено більше, як очікував, значить знайдено щось із missingContainers
-                for (const c of foundContainers) {
-                    if (c.number) missingContainers.delete(c.number)
-                }
-            } else if (foundContainers.length < containers.length) {
-                // знайшов менше, ніж очікував, змінюю статуси не знайдених
+            // Додаткова логіка для випадку коли знайдено менше, ніж очікував, змінюю статуси незнайдених;
+            // "незнайдені" - ці ті, які є в containers (Манго), але відсутні в foundContainers (знайдені)
+            if (foundContainers.length < containers.length) {
                 const fcSet = new Set(foundContainers.map(fc => fc.number))
                 for (const c of containers) {
                     if (fcSet.has(c)) continue;
@@ -239,10 +239,39 @@ async function syncContainersData() {
                 }
             }
 
-            // Build upsert operations
+            // статус "pending" перевірено/додано, обновлюю статистику
+            const stats = {
+                totalContainers: foundContainers.length,
+                statuses: {},
+                lastUpdatedAt: new Date()
+            }
+
+            const foundMoreThanExpected = foundContainers.length > containers.length
+
+            // збираємо кількість по кожному статусу
+            for (const c of foundContainers) {
+                const status = c.status || "unknown"
+                stats.statuses[status] = (stats.statuses[status] || 0) + 1
+                
+                // якщо знайдено більше, як очікував, значить знайдено щось із missingContainers
+                if (foundMoreThanExpected && c.number)
+                    missingContainers.delete(c.number)
+            }
+
+            // оновлюємо документ терміналу в Mongo
+            if (terminal.key) {
+                await Terminal.updateOne(
+                    { key: terminal.key },
+                    { $set: { stats } },
+                    { upsert: true }
+                )
+            }
+
+            // -- Build upsert operations
             for (const c of foundContainers) {
 
-                // важливо прибрати попередній статус, бо він може бути в документі манго "Awaiting terminal confirmation" з попереднього разу
+                // важливо прибрати попередній статус, бо він може бути в документі манго
+                // "Awaiting terminal confirmation" з попереднього разу
                 c.statusDesc ??= null
 
                 const { number, ...update } = fulfillPerContainer(c)
@@ -262,8 +291,7 @@ async function syncContainersData() {
 
             if (operations.length > 0) {
                 console.log(`[AUTO-CHECK] ${ terminal.label } | Found: ${ foundContainers.length } | Pending NA: ${ missingContainers.size }`)
-                const result = await Container.bulkWrite(operations, { ordered: false })
-                console.log(`Update results: modified - ${ result.modifiedCount }, upserted - ${ result.upsertedCount }`)
+                await Container.bulkWrite(operations, { ordered: false })
             } else {
                 console.log(`[AUTO-CHECK] ${terminal.label} | No changes detected`)
             }
@@ -277,7 +305,7 @@ async function syncContainersData() {
 
 
 // ***  test
-// syncContainersData()
+syncContainersData()
 // ***
 
 

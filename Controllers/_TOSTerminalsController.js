@@ -6,14 +6,19 @@ const cheerio = require("cheerio")
 
 // --- Утиліти для роботи з сесіями терміналів
 const {
-    saveCookies,
     connectTerminal,
     getIPLocation,
-} = require("./_terminalSessionsControlle")
+} = require("./_terminalSessionsController")
 
 
 
 async function loginTOS(terminal) {
+
+    // TOS працює тільки з US ip
+    if (global.isProduction) {
+        const isUSIP = await getIPLocation(["US"])
+        if (!isUSIP) throw new AppError("US IPs allowed only", 403)
+    }
 
     const { url, env_login, env_passowrd, fetchWithMyJar } = terminal || {}
 
@@ -43,9 +48,7 @@ async function loginTOS(terminal) {
     })
 
     console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }`)
-
-    if (resp.status === 200) saveCookies(terminal)
-    else throw new AppError("❌ Login failed", 500)
+    return resp.status === 200
 }
 
 
@@ -53,13 +56,6 @@ async function loginTOS(terminal) {
 // Підключення до TOS
 
 const connectTOSTerminal = async (terminal, options = {}) => {
-
-    if (global.isProduction) {
-        // TOS працює тільки з US ip
-        const isUSIP = await getIPLocation(["US"])
-        if (!isUSIP) throw new AppError("US IPs allowed only", 403)
-    }
-
     return await connectTerminal(terminal, {
         ...options,
         sessPingPath: "/account/Account/SelectApplication",

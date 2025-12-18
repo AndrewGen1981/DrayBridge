@@ -3,16 +3,11 @@ const { getURL } = require("../Config/terminalsCatalog")
 
 
 // --- Утиліти для роботи з сесіями терміналів
-const {
-    saveCookies,
-    connectTerminal
-} = require("./_terminalSessionsControlle")
-
+const { connectTerminal } = require("./_terminalSessionsController")
 
 
 
 async function loginWUT(terminal) {
-
     const { url, env_login, env_passowrd, fetchWithMyJar } = terminal || {}
 
     if (!url?.trim()) throw new AppError("❌ Login failed: URL is required", 404)
@@ -43,9 +38,7 @@ async function loginWUT(terminal) {
     })
 
     console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }`)
-
-    if (resp.status === 200) saveCookies(terminal)
-    else throw new AppError("❌ Login failed", 500)
+    return resp.status === 200
 }
 
 

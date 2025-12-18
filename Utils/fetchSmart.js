@@ -28,6 +28,7 @@ async function fetchSmart (
         fetchFunc = fetch,  //  🧩 зроблено для fetchCookie(nodeFetch, jar) або ж спрацьовуватиме стандартний fetch, якщо не перекрито
     } = {}
 ) {
+
     for (let attempt = 0; attempt <= retries; attempt++) {
 
         const controller = new AbortController()

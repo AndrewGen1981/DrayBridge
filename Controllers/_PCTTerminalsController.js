@@ -1,19 +1,13 @@
 const { AppError } = require("../Utils/AppError")
-const { getURL, TERMINALS } = require("../Config/terminalsCatalog")
-
-const cheerio = require("cheerio")
+const { getURL } = require("../Config/terminalsCatalog")
 
 
 // --- Утиліти для роботи з сесіями терміналів
-const {
-    saveCookies,
-    connectTerminal,
-} = require("./_terminalSessionsControlle")
+const { connectTerminal } = require("./_terminalSessionsController")
 
 
 
 async function loginPCT(terminal) {
-
     const { url, env_login, env_passowrd, fetchWithMyJar } = terminal || {}
 
     if (!url?.trim()) throw new AppError("❌ Login failed: URL is required", 404)
@@ -58,14 +52,12 @@ async function loginPCT(terminal) {
     // ключ сесії, яким в подальшому потрібно підписувати кожен запит, на рівні з куками 
 
     const loginResponse = await resp.text()
-    const { success, _sk } = JSON.parse(loginResponse || "{}") || {}
+    const { chkVerify, success, _sk } = JSON.parse(loginResponse || "{}") || {}
 
-    console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }, response: ${ loginResponse }`)
+    console.log(`🔄 Logging to ${ terminal.label }... Status: ${ resp.status }, success: ${ success }, capcha is ${ chkVerify ? "REQUIRED" : "IGNORED" }`)
 
     if (_sk) terminal._sk = _sk
-
-    if (resp.status === 200 && success && _sk) saveCookies(terminal)
-    else throw new AppError("❌ Login failed", 500)
+    return  resp.status === 200 && success && _sk
 }
 
 
@@ -233,161 +225,3 @@ module.exports = {
     connectPCTTerminal,
     pctBulkAvailabilityCheck
 }
-
-
-
-// async function test () {
-
-//     const terminal = TERMINALS["pct"]
-//     const { url, env_login, env_passowrd, fetchWithMyJar } = terminal || {}
-//     const LOGIN = process.env[env_login]
-//     const PASSWORD = process.env[env_passowrd]
-
-
-
-    
-
-
-//     const resp1 = await fetchWithMyJar(getURL(terminal,"/"))
-//     const loginPage = await resp1.text()
-
-//     const m = loginPage.match(/&verifyKey=(\d{6})/);
-//     const PI_VERIFY_KEY = m ? m[1] : null;
-
-//     console.log(PI_VERIFY_KEY)
-//     // тут має повернути 6-значне число
-
-//     const params = new URLSearchParams({
-//         "PI_LOGIN_ID": LOGIN,
-//         "PI_PASSWORD": PASSWORD,
-//         PI_VERIFY_KEY,
-//     })
-
-
-//     const resp = await fetchWithMyJar(getURL(terminal,"/login"), {
-//         method: "POST",
-//         headers: {
-//             "User-Agent": "Mozilla/5.0",
-//             "Content-Type": "application/x-www-form-urlencoded",
-//         },
-//         body: params.toString(),
-//         // redirect: "follow",
-//         // redirect: "manual",
-//     })
-
-//     console.log(resp.status)
-
-//     const loginResponse = await resp.text()
-
-//     console.log(loginResponse)
-//     // тут має повернути щось типу {"chkVerify":false,"success":true,"_sk":"9615337114"}
-
-//     const { success, _sk } = JSON.parse(loginResponse || "{}")
-//     console.log(success, _sk)
-
-
-
-//     // перевіряю сесію
-
-
-//     // const resp5 = await fetchWithMyJar(
-//     //     getURL(terminal, "/data/WIMPP003.queryByCnta.data.json?_sk=" + _sk),
-//     //     { method: "POST" }
-//     // );
-//     const resp5 = await fetchWithMyJar(
-//         getURL(terminal, `/data/WIMPP003.queryByCnta.data.json?_sk=${ _sk }`),
-//         { method: "GET" }
-//     );
-
-//     console.log(resp5.status)
-//     console.log(await resp5.text())
-
-//     //     200
-//     // {"success":false,"msg":"No data found."
-
-
-
-//     // отримую контейнери
-
-//     const params1 = new URLSearchParams({
-//         PI_BUS_ID: "?cma_bus_id",
-//         PI_TMNL_ID: "?cma_env_loc",
-//         PI_CTRY_CODE: "?cma_env_ctry",
-//         PI_STATE_CODE: "?cma_env_state",
-//         PI_CNTR_NO: "DRYU9878330\nEMCU8949670\nCBHU9524510",
-//         page: "1",
-//         start: "0",
-//         limit: "-1",
-//         _sk,    //  <= тут номер сесії
-//     });
-
-//     // https://www.etslink.com/data/WIMPP003.queryByCnta.data.json?_dc=1765536001982
-
-//     const resp2 = await fetchWithMyJar(getURL(terminal,"/data/WIMPP003.queryByCnta.data.json?_dc=1765536001982"), {
-//         method: "POST",
-//         headers: {
-//             "User-Agent": "Mozilla/5.0",
-//             "Content-Type": "application/x-www-form-urlencoded",
-//         },
-//         body: params1.toString(),
-//         // redirect: "follow",
-//         // redirect: "manual",
-//     })
-
-
-//     console.log(resp2.status)
-
-//     if (resp2.status !== 200) {
-//         console.error(`Unexpected status code: ${resp2.status}`);
-//         return [];
-//     }
-
-//     let contRespText;
-//     try {
-//         contRespText = await resp2.text();
-//         // console.log(contRespText)
-//     } catch (err) {
-//         console.error("Failed to read response text:", err);
-//         return [];
-//     }
-
-//     let contRespObj;
-//     try {
-//         contRespObj = JSON.parse(contRespText || "{}");
-//     } catch (err) {
-//         console.error("Failed to parse JSON:", err);
-//         return [];
-//     }
-
-//     if (!contRespObj || contRespObj.success !== true || !Array.isArray(contRespObj.data) || !Array.isArray(contRespObj.cols)) {
-//         console.warn("Response is not successful or missing data/cols");
-//         return [];
-//     }
-
-//     // заголовки
-//     const colsNames = contRespObj.cols.map(c => c.name)
-
-//     const results = []
-
-//     // дані
-//     for (let row of (contRespObj.data || [])) {
-//         const obj = {};
-        
-//         colsNames.forEach((colName, idx) => {
-//             obj[colName] = idx < row.length ? row[idx] : null;
-//         });
-
-//         if (
-//             !obj.PO_TERMINAL_ID ||
-//             !obj.PO_TERMINAL_NAME ||
-//             obj.PO_TERMINAL_NAME.includes("not found")
-//         ) continue
-        
-//         results.push(obj)
-//     }
-
-//     console.log(results)
-
-// }
-
-// test()
