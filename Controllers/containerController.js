@@ -248,10 +248,26 @@ exports.index = async (req, res, next) => {
     try {
         // Головна сторінка рауту "Containers"
 
-        const terminals = await Terminal.find().lean()
+        const terminals = await Terminal.find()
+            .select("-session.cookies")
+            .lean()
+
+        for (t of terminals) {
+            const TERMINAL = TERMINALS[t?.key || "NA"]
+            t.label = TERMINAL?.label || "NA"
+            t.group = TERMINAL?.group || "NA"
+
+            if (t.stats?.statuses) {
+                t.stats.statuses = Object.fromEntries(
+                    Object.entries(t.stats.statuses)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                )
+            }
+        }
         
         res.render("../Views/containers/containers_main.ejs", {
-            TERMINALS_LABELS
+            TERMINALS_LABELS,
+            terminals
         })
 
     } catch (error) {

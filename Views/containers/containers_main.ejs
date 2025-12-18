@@ -13,14 +13,20 @@
 <body class="entire-page">
 
     <%
-        const { TERMINALS_LABELS } = locals
+        const {
+            TERMINALS_LABELS = [],
+            terminals = []
+        } = locals
     %>
+
 
     <%- include("../__header.ejs") %>
 
 
     <main class="standard-template containers">
+
         <h1 class="main-title">Containers</h1>
+        
         <form action="/admin/containers/add-containers" method="post" id="add_containers">
             <div class="textarea-box">
                 <textarea name="new_containers" id="new_containers" placeholder="Place container numbers to be added" required></textarea>
@@ -39,6 +45,58 @@
                 <button type="submit" class="color-button -green">Add New</button>
             </div>
         </form>
+
+        <!-- Terminals -->
+        <section class="terminals-list">
+            <% for (const t of terminals) {
+                const { stats = {}, session = {}, health = {} } = t || {}              
+                %>
+
+                <div class="terminal-card" id="<%= t._id %>" data-key="<%= t.key %>">
+                    <div class="card-header">
+                        <h3><%= t.label %></h3>
+                        <h4>group: <%= t.group %></h4>
+                    </div>
+
+                    <fieldset>
+                        <legend>Statistics</legend>
+                        <h5>Total containers: <%= stats.totalContainers ?? 0 %></h5>
+                        <ul class="containers-statuses">
+                            <% for (const [k, v] of Object.entries(stats.statuses || {})) { %>
+                                <li>
+                                    <dl>
+                                        <dt><%= k %></dt>
+                                        <dd><%= v %></dd>
+                                    </dl>
+                                </li>
+                            <% } %>
+                        </ul>
+                        <p class="stat-last-updated">Last updated at:<span><%- tools.localDateTime(stats.lastUpdatedAt, "html") %></span></p>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Session</legend>
+                        <p class="sess-last-checked">Last checked at:<span><%- tools.localDateTime(session.lastCheckedAt, "html") %></span></p>
+                        <p class="sess-last-logged">Last login at:<span><%- tools.localDateTime(session.lastLoginAt, "html") %></span></p>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Health</legend>
+                        <% if (health.lastError?.message) { %>
+                            <h6>Last error detected:</h6>
+                            <p class="health-last-error"><%= health.lastError.message %></p>
+                            <p class="health-last-error-at"><%- tools.localDateTime(health.lastError.at, "html") %></p>
+                        <% } else { %>
+                            <p class="health-no-errors">No errors detected</p>
+                        <% } %>
+                    </fieldset>
+                    <div class="buttons">
+                        <button type="button" id="sync" class="color-button -blue">Sync Manually</button>
+                        <button type="button" id="off" class="color-button -red">Turn Off</button>
+                    </div>
+
+                </div>
+            <% } %>
+        </section>
+
     </main>
 
 

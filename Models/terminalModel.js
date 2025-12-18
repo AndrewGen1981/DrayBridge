@@ -18,8 +18,7 @@ const terminalSchema = new mongoose.Schema({
         index: true,
     },
 
-    group: String,
-    label: String,
+    active: { type: Boolean, default: true },
 
     session: {
         _id: false,
@@ -55,7 +54,7 @@ const terminalSchema = new mongoose.Schema({
     }
 
 }, {
-    timestamps: true,
+    // timestamps: true,
     collection: "_TERMINALS"
 })
 
