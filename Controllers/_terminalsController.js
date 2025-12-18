@@ -305,7 +305,7 @@ async function syncContainersData() {
 
 
 // ***  test
-syncContainersData()
+// syncContainersData()
 // ***
 
 
