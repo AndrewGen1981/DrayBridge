@@ -40,7 +40,7 @@ main.admin-profile .data-section ul li {
     position: relative;
 }
 
-main.admin-profile .data-section ul li[data-key]::after {
+main.admin-profile .data-section.-containers ul li[data-key]::after {
     content: "";
 
     position: absolute;
@@ -49,22 +49,25 @@ main.admin-profile .data-section ul li[data-key]::after {
 
     background-color: var(--terminal_color);
     border-radius: 50%;
-    opacity: 0.5;
+    opacity: 0.6;
 
     z-index: 1;
 }
 
 main.admin-profile .data-section ul li[data-key="t5"] {
-    --terminal_color: #4fb2d1;
+    --terminal_color: #0fa7e7;
 }
 main.admin-profile .data-section ul li[data-key="t18"] {
-    --terminal_color: #dd3c3c;
+    --terminal_color: #fd6464;
 }
 main.admin-profile .data-section ul li[data-key="wut"] {
     --terminal_color: #019679;
 }
 main.admin-profile .data-section ul li[data-key="husky"] {
-    --terminal_color: #d1b84f;
+    --terminal_color: #e3bc53;
+}
+main.admin-profile .data-section ul li[data-key="pct"] {
+    --terminal_color: #707e8b;
 }
 
 main.admin-profile .data-section.-terminals ul a {
@@ -87,6 +90,14 @@ main.admin-profile .data-section dl {
 main.admin-profile .data-section dt {
     text-transform: capitalize;
     color: var(--font-col-300);
+}
+main.admin-profile .data-section dd.stats {
+    padding: 1rem 2rem;
+
+    font-size: 2.2rem;
+    color: #fff;
+    background-color: var(--terminal_color);
+    border-radius: 1rem;
 }
 main.admin-profile .data-section dd.status {
     color: #3086e1;
