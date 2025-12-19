@@ -342,7 +342,7 @@ const index = async (req) => {
 
 
         // Останні оновлені контейнери
-        const WINDOW_MS = 5 * 60 * 1000
+        const WINDOW_MS = 60 * 60 * 1000
         
         const minDate = new Date(Math.min(...UPDATE_WINDOW))
         const maxDate = new Date(Math.max(...UPDATE_WINDOW))
