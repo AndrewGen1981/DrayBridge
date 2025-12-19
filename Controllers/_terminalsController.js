@@ -360,7 +360,7 @@ const index = async (req) => {
             .lean()
 
         for (c of lastUpdatedContainers) {
-            c.terminal = TERMINALS[c.terminal || "NA"]?.label
+            c.terminalLabel = TERMINALS[c.terminal || "NA"]?.label
                 || c.terminal
         }
 

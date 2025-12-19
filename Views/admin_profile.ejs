@@ -32,7 +32,7 @@
             <ul>
                 <% for (const t of terminals) { %>
                     <a href="/admin/containers?terminal=<%= t.key %>">
-                        <li id="<%= t._id %>">
+                        <li id="<%= t._id %>" data-key="<%= t.key %>">
                             <dl>
                                 <dt>title</dt>
                                 <dd>"<%= t.label %>" / <%= t.group %></dd>
@@ -59,7 +59,7 @@
                     const status = (c.status || "NA").toUpperCase()
                     %>
 
-                    <li id="<%= c._id %>">
+                    <li id="<%= c._id %>" data-key="<%= c.terminal %>">
                         <dl>
                             <dt>number</dt>
                             <dd><%= c.number %></dd>
@@ -70,7 +70,7 @@
                         </dl>
                         <dl>
                             <dt>terminal</dt>
-                            <dd><%= c.terminal %></dd>
+                            <dd><%= c.terminalLabel %></dd>
                         </dl>
                     </li>
 

@@ -25,6 +25,8 @@ main.admin-profile .data-section ul {
 }
 
 main.admin-profile .data-section ul li {
+    --terminal_color: #ccc;
+
     padding: 1rem 0.5rem;
 
     display: grid;
@@ -33,6 +35,36 @@ main.admin-profile .data-section ul li {
     background-color: var(--main-color1);
     border: 1px solid var(--main-color2);
     border-radius: 3px;
+
+    isolation: isolate;
+    position: relative;
+}
+
+main.admin-profile .data-section ul li[data-key]::after {
+    content: "";
+
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 5px; height: 5px;
+
+    background-color: var(--terminal_color);
+    border-radius: 50%;
+    opacity: 0.5;
+
+    z-index: 1;
+}
+
+main.admin-profile .data-section ul li[data-key="t5"] {
+    --terminal_color: #4fb2d1;
+}
+main.admin-profile .data-section ul li[data-key="t18"] {
+    --terminal_color: #dd3c3c;
+}
+main.admin-profile .data-section ul li[data-key="wut"] {
+    --terminal_color: #019679;
+}
+main.admin-profile .data-section ul li[data-key="husky"] {
+    --terminal_color: #d1b84f;
 }
 
 main.admin-profile .data-section.-terminals ul a {
