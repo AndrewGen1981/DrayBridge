@@ -15,8 +15,11 @@
     <%
         const {
             TERMINALS_LABELS = [],
-            terminals = []
+            terminals = [],
+            query = {}
         } = locals
+
+        const { terminal } = query
     %>
 
 
@@ -78,6 +81,7 @@
                                 name="<%= t.key %>"
                                 value="total"
                                 data-selector
+                                <% if (t.key === terminal) { %> checked <% } %>
                             />
                             <label for="<%= t.key %>.total">Total containers: <%= stats.totalContainers ?? 0 %></label>
                         </h5>

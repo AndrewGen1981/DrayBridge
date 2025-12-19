@@ -8,15 +8,15 @@
 
     <link rel="shortcut icon" href="/favico.png">
     <link rel="stylesheet" href="/admin_profile.css">
-    
 </head>
 <body class="entire-page">
 
-
     <%
-        const { terminals = [], lastUpdatedContainers = [] } = locals
+        const {
+            terminals = [],
+            lastUpdatedContainers = []
+        } = locals
     %>
-
 
     <%- include("__header.ejs") %>
 
@@ -28,45 +28,52 @@
         <h1 class="main-title">Dashboard</h1>
 
         <section class="data-section -terminals">
-            <h2>Assigned Terminals</h2>
+            <h2>Assigned terminals (<%= terminals.length %>)</h2>
             <ul>
                 <% for (const t of terminals) { %>
-                    <li id="<%= t._id %>">
-                        <dl>
-                            <dt>title</dt>
-                            <dd>"<%= t.label %>" / <%= t.key %> / <%= t.group %></dd>
-                        </dl>
-                        <dl>
-                            <dt>assigned containers</dt>
-                            <dd><%= t.stats?.totalContainers ?? 0 %></dd>
-                        </dl>
-                        <dl>
-                            <dt>last sync</dt>
-                            <dd><%- tools.localDateTime(t.session?.lastCheckedAt, "html") %></dd>
-                        </dl>
-                    </li>
+                    <a href="/admin/containers?terminal=<%= t.key %>">
+                        <li id="<%= t._id %>">
+                            <dl>
+                                <dt>title</dt>
+                                <dd>"<%= t.label %>" / <%= t.group %></dd>
+                            </dl>
+                            <dl>
+                                <dt>assigned containers</dt>
+                                <dd><%= t.stats?.totalContainers ?? 0 %></dd>
+                            </dl>
+                            <dl>
+                                <dt>last sync</dt>
+                                <dd><%- tools.localDateTime(t.session?.lastCheckedAt, "html") %></dd>
+                            </dl>
+                        </li>
+                    </a>
                 <% } %>
             </ul>
+            <a href="/admin/containers" id="more">more...</a>
         </section>
 
         <section class="data-section -containers">
-            <h2>Last Updated containers</h2>
+            <h2>Last updated containers (<%= lastUpdatedContainers.length %>)</h2>
             <ul>
-                <% for (const c of lastUpdatedContainers) { %>
+                <% for (const c of lastUpdatedContainers) {
+                    const status = (c.status || "NA").toUpperCase()
+                    %>
+
                     <li id="<%= c._id %>">
                         <dl>
                             <dt>number</dt>
-                            <dd>"<%= c.number %></dd>
+                            <dd><%= c.number %></dd>
                         </dl>
                         <dl>
-                            <dt>status</dt>
-                            <dd><%= c.status %></dd>
+                            <dt><%= ["YES", "NO"].includes(status) ? "is available" : "status" %></dt>
+                            <dd class="status"><%= c.status %></dd>
                         </dl>
                         <dl>
                             <dt>terminal</dt>
                             <dd><%= c.terminal %></dd>
                         </dl>
                     </li>
+
                 <% } %>
             </ul>
         </section>

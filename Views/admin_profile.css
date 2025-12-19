@@ -1,8 +1,52 @@
-/* Terminals */
-
-main.admin-profile .data-section li {
-    margin-block: 2rem;
+main.admin-profile {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
 }
+
+/* Terminals & Last updated containers */
+
+main.admin-profile .data-section h2 {
+    font-size: 1.5rem;
+    text-transform: capitalize;
+}
+
+main.admin-profile .data-section.-terminals a#more {
+    color: var(--accent-red-hover);
+    text-underline-offset: 2px;
+}
+
+main.admin-profile .data-section ul {
+    margin-block: 1rem;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
+    gap: 2rem;
+}
+
+main.admin-profile .data-section ul li {
+    padding: 1rem 0.5rem;
+
+    display: grid;
+    place-items: center;
+
+    background-color: var(--main-color1);
+    border: 1px solid var(--main-color2);
+    border-radius: 3px;
+}
+
+main.admin-profile .data-section.-terminals ul a {
+    text-decoration: none;
+}
+
+main.admin-profile .data-section.-terminals ul li {
+    box-shadow: var(--shadow-s);
+    transition: box-shadow 0.25s;
+}
+main.admin-profile .data-section.-terminals ul a:is(:hover, :focus-visible) li {
+    box-shadow: var(--shadow-m);
+}
+
 main.admin-profile .data-section dl {
     margin-block: 3px;
     display: flex;
@@ -11,4 +55,7 @@ main.admin-profile .data-section dl {
 main.admin-profile .data-section dt {
     text-transform: capitalize;
     color: var(--font-col-300);
+}
+main.admin-profile .data-section dd.status {
+    color: #3086e1;
 }

@@ -299,6 +299,7 @@ exports.getContainers = async (req, options = {}) => {
 exports.index = async (req, res, next) => {
     try {
         // Головна сторінка рауту "Containers"
+        const { query } = req
 
         const terminals = await Terminal.find()
             .select("-session.cookies")
@@ -319,7 +320,8 @@ exports.index = async (req, res, next) => {
         
         res.render("../Views/containers/containers_main.ejs", {
             TERMINALS_LABELS,
-            terminals
+            terminals,
+            query
         })
 
     } catch (error) {
