@@ -25,10 +25,12 @@ const { AppError } = require("../Utils/AppError.js")
 const {
     cleanBodyCopy,
     fulfillPerSchema,
+    extractSchemaFields,
     fulfillPerContainer,
 } = require("../Utils/mongoose_utils.js")
 
 
+const { splitOnUpperCase } = require("../Utils/tools.js")
 
 
 // ***  Configs and Catalogs
@@ -36,6 +38,20 @@ const { appDomain } = require("../Config/__config.json")
 const { TERMINALS, TERMINALS_ENUM, TERMINALS_LABELS } = require("../Config/terminalsCatalog.js")
 const { bulkAvailabilityCheck } = require("./_terminalsController.js")
 
+
+const containerSchemaFields = extractSchemaFields(Container)
+const containerSchemaFieldsLabels = Object.fromEntries(
+    containerSchemaFields
+    .map(l => [ [l], splitOnUpperCase(l) ])
+)
+
+
+// функція для UI, повертає назви полів схеми Container
+exports.containerSchemaLabels = (splitOnUpperCase = false) => {
+    return splitOnUpperCase
+        ? containerSchemaFieldsLabels
+        : containerSchemaFields
+}
 
 
 
@@ -54,10 +70,46 @@ const buildFilter = (obj = {}, useAnd = false) => {
     const group1 = []
     const group2 = []
 
+    // перевіряю чи це не пари значень термінал - статуси, приклад:
+    // [
+    //     { terminal: 't5', status: [ 'Export, Empty', 'Export, Full' ] },
+    //     { terminal: 't18', status: [ 'Available', 'Export, Full' ] }
+    // ]
+    const paired = Array.isArray(obj.terminalStatus)
+        ? obj.terminalStatus
+        : []
+
+    if (paired.length) {
+        const or = paired
+            .filter(p => p.terminal && p.status?.length)
+            .map(p => ({
+                terminal: p.terminal,
+                status: { $in: p.status }
+            }))
+
+        if (or.length) {
+            filters.$or = or
+            frontendFilters.fTerminalStatus = paired
+            return { filters, frontendFilters }
+        }
+    }
+
     //  id-шки
     const idArray = obj.id ? Array.isArray(obj.id) ? obj.id : obj.id.split(',') : []
     const ids = idArray.filter(Boolean)
     if (ids.length) filters._id = { $in: ids }
+
+    const terminalArr = normalizeArray(obj.terminal)
+    if (terminalArr.length) {
+        group1.push({ terminal: { $in: terminalArr } })
+        frontendFilters.fTerminal = terminalArr
+    }
+
+    const statusArr = normalizeArray(obj.status)
+    if (statusArr.length) {
+        group2.push({ status: { $in: statusArr } })
+        frontendFilters.fstatus = statusArr
+    }
     
     // --- LOGIC: OR groups + AND between them ---
     if (useAnd) {

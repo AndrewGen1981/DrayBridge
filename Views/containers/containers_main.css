@@ -1,30 +1,63 @@
 main.containers {
     margin-block: 4rem;
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 3rem;
 }
 
+
+/* Add more Popup */
+main.containers #addFormPopup {
+    position: fixed;
+
+    top: 0; left: 0;
+    width: 100dvw; height: 100dvh;
+
+    display: none;
+
+    background-color: #303c45ed;
+    backdrop-filter: blur(1px);
+
+    isolation: isolate;
+    z-index: 2;
+}
+main.containers #addFormPopup.-shown {
+    display: flex;
+}
+
+main.containers #addFormPopup .popup-inner {
+    margin: auto;
+    width: min(140rem, 95%);
+
+    display: grid;
+    gap: 2rem;
+}
+
+main.containers #addFormPopup .popup-inner menu[type="context"]{
+    margin-left: auto;
+}
+
 main.containers form#add_containers {
-    --w: min(45rem, 100%);
-
-    padding: 1rem;
-
+    padding: 2.2rem 1.5rem;
+    
     display: grid;
+    grid-template-columns: 1fr 2fr;
     gap: 2rem;
-
-    outline: 1px solid var(--main-color3);
+    
+    background-color: var(--main-color2);
+    border-radius: 3px;
 }
-main.containers #add_containers .textarea-box {
-
-    display: grid;
-    grid-template-columns: var(--w) 1fr;
+main.containers #add_containers .input-box {
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
 }
-main.containers #add_containers .textarea-box .validation-results-box,
+main.containers #add_containers .validation-results-box,
 main.containers #add_containers textarea#new_containers,
 main.containers #add_containers select#terminals {
     padding: 1rem;
-    border: 1px solid #aaa;
+    border: 1px solid var(--main-color3);
+    border-radius: 3px;
 }
 
 main.containers #add_containers select#terminals {
@@ -32,6 +65,7 @@ main.containers #add_containers select#terminals {
 }
 
 main.containers #add_containers textarea#new_containers {
+    flex: 1;
     aspect-ratio: 2 / 1;
     resize: none;
 }
@@ -42,6 +76,8 @@ main.containers .validation-results-box h2 {
 }
 main.containers .validation-results-box ul#validation_results {
     list-style-position: inside;
+    max-height: 65dvh;
+    overflow-y: auto;
 }
 main.containers .validation-results-box ul#validation_results li {
     text-wrap: balance;
@@ -85,8 +121,41 @@ main.containers .terminal-card {
     gap: 1rem;
 
     box-shadow: var(--shadow-s);
+    background-color: var(--main-color1);
     border-radius: 3px;
+    position: relative;
 }
+main.containers .terminal-card::after {
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+main.containers .terminal-card.-searching::after {
+    content: "⟳";
+
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 2rem; height: 2rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.75rem;
+    transform-origin: center;
+    color: #089ecd8a;
+
+    border-radius: 50%;
+    opacity: 1;
+
+    animation: waiting 4s infinite;
+    animation-timing-function: ease-out;
+}
+@keyframes waiting {
+    to {
+        rotate: 1080deg;
+    }
+}
+
 main.containers .terminal-card h3 {
     font-size: 1.35rem;
     text-align: center;
@@ -102,11 +171,27 @@ main.containers .terminal-card fieldset legend {
 }
 main.containers .terminal-card ul {
     margin-block: 0.5rem;
-    margin-left: 2rem;
+    margin-left: 1.5rem;
+}
+main.containers .terminal-card ul li {
+    margin-block: 2px;
+    padding-block: 2px;
+    gap: 1rem;
+    display: flex;
+    align-items: center;
+    user-select: none;
+}
+main.containers .terminal-card ul input[type="checkbox"] {
+    width: 1.5rem;
+    aspect-ratio: 1;
+}
+main.containers .terminal-card ul li dt::after {
+    margin-left: 5px;
+    content: "-";
 }
 main.containers .terminal-card ul li dl {
     display: flex;
-    gap: 1rem;
+    gap: 5px;
 }
 main.containers .terminal-card p.stat-last-updated,
 main.containers .terminal-card p.sess-last-checked,
@@ -120,4 +205,39 @@ main.containers .terminal-card .buttons {
     display: flex;
     align-items: end;
     justify-content: space-around;
+}
+
+
+/* Results Area */
+main.containers #result li {
+    margin-block: 1rem;
+    padding: 1rem;
+
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(30rem, 100%), 1fr));
+    gap: 3px 2rem;
+    
+    background-color: var(--main-color1);
+    border: 1px solid var(--main-color3);
+    border-radius: 3px;
+}
+
+main.containers #result li dl {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+main.containers #result li dt {
+    text-transform: capitalize;
+    color: var(--font-col-300);
+}
+main.containers #result li dd[name="status"] {
+    color: #0f78c3;
+}
+main.containers #result li dd[name="dwellAmount"] {
+    color: var(--font-col-600);
+    font-weight: 600;
+}
+main.containers #result li dd[name="terminalHoldReason"] {
+    color: var(--accent-red-hover);
 }

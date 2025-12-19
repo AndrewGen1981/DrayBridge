@@ -16,5 +16,30 @@ containerRouter.post("/validate-numbers", containerController.validateNumbers)
 containerRouter.post("/add-containers", containerController.addContainers)
 
 
+containerRouter.post("/get-containers", async(req, res) => {
+
+    // console.log(req.body)
+    // return res.json()
+
+    const result = await containerController.getContainers(req, {
+        splitOnUpperCase: true,
+        revealTerminals: true,
+        projection: {
+            createdAt: 0,
+            origin: 0,
+            __v: 0,
+        },
+        sort: {
+            status: 1,
+        },
+    })
+
+    // додаю Labels для полів схеми Container, для виводу в UI
+    result.schemaLabels = containerController.containerSchemaLabels(true)
+
+    res.json(result)
+})
+
+
 
 module.exports = containerRouter

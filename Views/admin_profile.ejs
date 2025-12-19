@@ -14,25 +14,7 @@
 
 
     <%
-        const { containers = [], pagination = {}, paginationData = {}, filters = {} } = locals
-
-        // Фільтри
-        const areFilters = Object.keys(query).filter(f => f !== "page" && f !== "reset").length > 0
-        const areAdvFilters = Object.keys(filters).some(k => k !== "query" && filters[k].length)
-
-        // Пагінація. Парамерти попереднього запиту, щоб можна було перелистувати сторінки в рамках
-        // конкретного запиту paginationData додаються до посилань "горталки" в menu type="toolbar"
-        const { totalDocs = containers.length, totalPages = 1, currentPage = 1 } = pagination
-        const {
-            first, prev, curr, next, last,
-            baseUrl,        //  поки не використовую - чиста строка baseURL: /admin/profile
-            //queryString,    //  поки не використовую - строка запиту БЕЗ параметру "page": make=KW%2CPT%2CFR
-            queryParams,    //  baseUrl + queryString, т.т. БЕЗ параметру "page": /admin/profile?make=KW%2CPT%2CFR
-        } = paginationData
-
-        // Edge-case - це остання сторінка, яка відображає решту елементів; filter відсікає "нереальні" варіанти
-        const maxOnPage = [ 30, 60, 100 ].filter(m => next.isActive || m < containers.length)
-        const itemsOnPage = [ ...new Set([ containers.length, ...maxOnPage ]) ].sort((a,b) => a - b)
+        const { terminals = [], lastUpdatedContainers = [] } = locals
     %>
 
 
@@ -41,185 +23,55 @@
 
     <main class="standard-template admin-profile">
 
-        <!-- Базовий профайл -->
         <%- include("__user_basic_profile.ejs") %>
 
-        <h2 class="main-title">
-            <select id="items-on-page">
-                <% itemsOnPage.forEach(iop => { %>
-                    <option value="<%= iop %>" <% if(containers.length === iop) { %> selected <% } %> ><%= iop %></option>
-                <% }) %>
-            </select>
-            <b id="storage-qty"><%= totalDocs %></b>
-        </h2>
+        <h1 class="main-title">Dashboard</h1>
 
-        
-        
-        
-        <aside>
-            <input type="search" name="criteria_search" id="criteria_search" placeholder="Containers search" />
-            <div id="found-results" class="closed" hidden>searching...</div>
-        </aside>
-        
-        <!-- Items -->
-        <table id="items">
-            <thead>
-                <tr>
-                    <th scope="col">Container</th>
-                    <th scope="col">Terminal</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Size/Type</th>
-                    <th scope="col">Customs</th>
-                    <th scope="col">Customer/Carrier/Line</th>
-                    <th scope="col">Terminal</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% for (let i = 0; i < containers.length; i++) { %>
-
-                    <tr data-id="<%= containers[i]._id%>">
-
-                        <td class="number"><%= containers[i].number %></td>
-                        
-                        <td class="terminal">
-                            <%= containers[i].terminal %>
-                            <p>last checked: <%- tools.localDateTime(containers[i].updatedAt, "html") %></p>
-                        </td>
-
-                        <td class="status-desc">
-                            <p class="status"><%= containers[i].status %></p>
-                            <i class="status-desc"><%= containers[i].statusDesc %></i>
-                            <% if (containers[i].lastFreeDate) { %>
-                                <dl class="last-free-date">
-                                    <dl>Last Free Date</dl>
-                                    <dt><%= containers[i].lastFreeDate %></dt>
-                                </dl>
-                            <% } %>
-                            <% if (containers[i].appointmentDate) { %>
-                                <dl class="appointment-date">
-                                    <dl>Appointment Date</dl>
-                                    <dt><%= containers[i].appointmentDate %></dt>
-                                </dl>
-                            <% } %>
-                        </td>
-
-                        <td class="type-size">
-                            <p><%= containers[i].containerTypeSize %></p>
-                            <i><%= containers[i].containerTypeSizeLabel %></i>
-                        </td>
-
-                        <td class="customs">
-                            <p><%= containers[i].customStatus %></p>
-                            <i><%= containers[i].customTimestamp %></i>
-                        </td>
-
-                        <td class="customer">
-                            <p><%= containers[i].SSCO %></p>
-                            <% if (containers[i].customerStatus) { %>
-                                <dl class="customer-status">
-                                    <dl>Customer Status</dl>
-                                    <dt><%= containers[i].customerStatus %></dt>
-                                </dl>
-                            <% } %>
-                            <% if (containers[i].customerHoldReason) { %>
-                                <dl class="customer-hold-reason">
-                                    <dl>Customer Hold Reason</dl>
-                                    <dt><%= containers[i].customerHoldReason %></dt>
-                                </dl>
-                            <% } %>
-                            <% if (containers[i].lineReleaseStatus) { %>
-                                <dl class="line-release-status">
-                                    <dl>Line Release Status</dl>
-                                    <dt><%= containers[i].lineReleaseStatus %></dt>
-                                </dl>
-                            <% } %>
-                            <% if (containers[i].lineFirstFree) { %>
-                                <dl class="line-first-free">
-                                    <dl>Line First Free</dl>
-                                    <dt><%= containers[i].lineFirstFree %></dt>
-                                </dl>
-                            <% } %>
-                        </td>
-
-                        <td class="terminal">
-                            <% if (containers[i].dwellAmount) { %>
-                                <dl class="dwell-amount">
-                                    <dl>Dwell Amount</dl>
-                                    <dt><%= tools.money(containers[i].dwellAmount) %></dt>
-                                </dl>
-                            <% } %>
-                            <% if (containers[i].damageFeeOutstanding) { %>
-                                <dl class="damage-fee-outstanding">
-                                    <dl>Damage Fee Outstanding</dl>
-                                    <dt><%= containers[i].damageFeeOutstanding %></dt>
-                                </dl>
-                            <% } %>
-                            <% if (containers[i].terminalHold) { %>
-                                <dl class="terminal-hold">
-                                    <dl>Terminal Hold</dl>
-                                    <dt><%= containers[i].terminalHold %></dt>
-                                </dl>
-                            <% } %>
-                            <% if (containers[i].terminalHoldReason) { %>
-                                <dl class="terminal-hold-reason">
-                                    <dl>Terminal Hold Reason</dl>
-                                    <dt><%= containers[i].terminalHoldReason %></dt>
-                                </dl>
-                            <% } %>
-                        </td>
-
-                    </tr>
-
+        <section class="data-section -terminals">
+            <h2>Assigned Terminals</h2>
+            <ul>
+                <% for (const t of terminals) { %>
+                    <li id="<%= t._id %>">
+                        <dl>
+                            <dt>title</dt>
+                            <dd>"<%= t.label %>" / <%= t.key %> / <%= t.group %></dd>
+                        </dl>
+                        <dl>
+                            <dt>assigned containers</dt>
+                            <dd><%= t.stats?.totalContainers ?? 0 %></dd>
+                        </dl>
+                        <dl>
+                            <dt>last sync</dt>
+                            <dd><%- tools.localDateTime(t.session?.lastCheckedAt, "html") %></dd>
+                        </dl>
+                    </li>
                 <% } %>
-            </tbody>
-        </table>
+            </ul>
+        </section>
 
-
-        <!-- Pagination -->
-        <menu type="toolbar" id="pagination_menu">
-            <a <% if(first.isActive) { %> href="<%= first.href %>#nav_pages" <% } %> data-active="<%= first.isActive %>">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="11 17 6 12 11 7" />
-                    <polyline points="18 17 13 12 18 7" />
-                </svg>
-            </a>
-            <a <% if(prev.isActive) { %> href="<%= prev.href %>#nav_pages" <% } %> data-active="<%= prev.isActive %>">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 18 9 12 15 6" />
-                </svg>
-            </a>
-
-            <!--    << < 1 of 10 > >>   -->
-            <span class="current-page">
-
-                <% if (totalPages === 1) { %>
-                    <strong><%= currentPage %></strong>
-                <% } else { %>
-                    <select id="nav_pages" onchange="location.replace(this.value)">
-                        <% for (let _page = 1; _page <= totalPages; _page++) { %>
-                            <option value="<%= queryParams %>&page=<%= _page %>#nav_pages"
-                                <% if (_page === currentPage) { %> selected <% } %>
-                            ><%= _page %></option>
-                        <% } %>
-                    </select>
+        <section class="data-section -containers">
+            <h2>Last Updated containers</h2>
+            <ul>
+                <% for (const c of lastUpdatedContainers) { %>
+                    <li id="<%= c._id %>">
+                        <dl>
+                            <dt>number</dt>
+                            <dd>"<%= c.number %></dd>
+                        </dl>
+                        <dl>
+                            <dt>status</dt>
+                            <dd><%= c.status %></dd>
+                        </dl>
+                        <dl>
+                            <dt>terminal</dt>
+                            <dd><%= c.terminal %></dd>
+                        </dl>
+                    </li>
                 <% } %>
+            </ul>
+        </section>
 
-                of <%= totalPages %> page<%= totalPages > 1 ? "s" : "" %>
-            </span>
-            
-            <a <% if(next.isActive) { %> href="<%= next.href %>#nav_pages" <% } %> data-active="<%= next.isActive %>">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6" />
-                </svg>
-            </a>
-            <a <% if(last.isActive) { %> href="<%= last.href %>#nav_pages" <% } %> data-active="<%= last.isActive %>">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="13 17 18 12 13 7" />
-                    <polyline points="6 17 11 12 6 7" />
-                </svg>
-            </a>
-        </menu>
-
+        
         
     </main>
 

@@ -21,7 +21,8 @@ const upload = multer({ storage, limits: {
 const roleController = require('../Controllers/roleController')
 const logsController = require("../Controllers/logsController")
 
-const containersController = require("../Controllers/containerController.js")
+const containerController = require("../Controllers/containerController.js")
+const terminalsController = require("../Controllers/_terminalsController.js")
 
 
 const { cloudinaryMonitoring, deleteFromCloudinary } = require("../Controllers/cloudinaryController.js")
@@ -39,19 +40,19 @@ const adminRouter = express.Router()
 
 
 // Специфічні раути для Адміна, в т.ч. Інжекти
-adminRouter.post("/test-container-number", containersController.testContainerExists)
-adminRouter.post("/get-container-by-id", containersController.getContainerById)
+adminRouter.post("/test-container-number", containerController.testContainerExists)
+adminRouter.post("/get-container-by-id", containerController.getContainerById)
 
 // adminRouter.post("/add-new-item",
 //     // upload.array("images", global.MAX_FILES_ALLOWED_TO_UPLOAD),
-//     containersController.addNewItemOrUpdate
+//     containerController.addNewItemOrUpdate
 // )
 
-adminRouter.post("/delete-container-by-id", containersController.deleteContainerById)
+adminRouter.post("/delete-container-by-id", containerController.deleteContainerById)
 
 
-adminRouter.post("/find-by-criteria", containersController.findContainerByCriteria)
-adminRouter.post("/update-max-on-page", containersController.updateMaxOnPage)
+adminRouter.post("/find-by-criteria", containerController.findContainerByCriteria)
+adminRouter.post("/update-max-on-page", containerController.updateMaxOnPage)
 
 
 
@@ -71,17 +72,10 @@ adminRouter.use("/containers", require("./containersRouter.js"))
 // Інжект - перед рендером профайлу
 const beforeProfileRender = async (req, res, next) => {
     try {
-        // Передаю в профайл параметри командної строки, масив оферів і статуси
+        // Передаю в профайл параметри командної строки
         res.locals.query = req.query || {}
-        Object.assign(res.locals, await containersController.getContainers(req, {
-            // stringifyFitments: true,
-            // revealCats: true,
-            revealTerminals: true,
-            sort: {
-                // terminal: -1
-                number: 1,
-            },
-        }))
+
+        Object.assign(res.locals, await terminalsController.index(req))
 
         next()
     } catch (error) {

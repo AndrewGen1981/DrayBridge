@@ -310,6 +310,75 @@ async function syncContainersData() {
 
 
 
+// Terminals dashboard info
+
+const index = async (req) => {
+    try {
+        const terminals = await Terminal.find()
+            .select("-session.cookies -health")
+            .lean()
+
+        const UPDATE_WINDOW = new Set()
+
+        for (t of terminals) {
+            const TERMINAL = TERMINALS[t?.key || "NA"]
+            t.label = TERMINAL?.label || "NA"
+            t.group = TERMINAL?.group || "NA"
+
+            if (t.stats?.statuses) {
+                t.stats.statuses = Object.fromEntries(
+                    Object.entries(t.stats.statuses)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                )
+            }
+
+            if (t.stats?.lastUpdatedAt) {
+                UPDATE_WINDOW.add(+t.stats.lastUpdatedAt)     //  1766066511441 з дати
+            }
+        }
+
+
+        if (!UPDATE_WINDOW.size) return { terminals }
+
+
+        // Останні оновлені контейнери
+        const WINDOW_MS = 5 * 60 * 1000
+        
+        const minDate = new Date(Math.min(...UPDATE_WINDOW))
+        const maxDate = new Date(Math.max(...UPDATE_WINDOW))
+        
+        const from = new Date(minDate.getTime() - WINDOW_MS)
+        const to = new Date(maxDate.getTime() + WINDOW_MS)
+
+        const lastUpdatedContainers = await Container
+            .find({ updatedAt: {
+                $gte: from,
+                $lte: to }
+            })
+            .sort({ terminal: 1 })
+            .select("number terminal status")
+            .lean()
+
+        for (c of lastUpdatedContainers) {
+            c.terminal = TERMINALS[c.terminal || "NA"]?.label
+                || c.terminal
+        }
+
+        return {
+            // TERMINALS_LABELS,
+            terminals,
+            lastUpdatedContainers
+        }
+
+    } catch (error) {
+        console.error(error)
+        return {}
+    }
+}
+
+
+
+
 const cron = require("node-cron")
 const { timeZone } = require("../Config/__config.json")
 
@@ -332,5 +401,8 @@ function createTerminalsSyncSchedule() {
 
 module.exports = {
     bulkAvailabilityCheck,
-    createTerminalsSyncSchedule
+    createTerminalsSyncSchedule,
+
+    // Middlewares
+    index,
 }

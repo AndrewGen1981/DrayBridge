@@ -75,6 +75,9 @@ const containerSchema = new mongoose.Schema({
 
 
 
+containerSchema.index({ updatedAt: -1 })
+
+
 module.exports = { 
     Container: mongoose.model("containerModel", containerSchema),
 }

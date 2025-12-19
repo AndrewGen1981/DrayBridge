@@ -2,6 +2,7 @@
 
 /* @GENERAL */
 :root {
+    --main-color: #ebeff3;
     --main-color1: #f5f7fa;
     --main-color2: #e3e8ee;
     --main-color3: #c6d4df;
@@ -79,13 +80,9 @@
 }
 
 html, body {
-    background: linear-gradient(
-        135deg,
-        var(--main-color1),
-        var(--main-color3),
-        var(--main-color2)
-    );
-    scroll-behavior: smooth
+    background-color: var(--main-color);
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
 }
 
 body.entire-page {
@@ -395,8 +392,8 @@ table thead tr:nth-child(1) th:nth-last-child(1) {
     cursor: pointer;
 }
 
-.color-button:not(:disabled):is(:hover, :focus),
-.action-btn:not(:disabled):is(:hover, :focus) {
+.color-button:not(:disabled):is(:hover, :focus-visible),
+.action-btn:not(:disabled):is(:hover, :focus-visible) {
     background-color: var(--abtn-ch);
 }
 

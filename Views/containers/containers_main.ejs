@@ -25,29 +25,41 @@
 
     <main class="standard-template containers">
 
-        <h1 class="main-title">Containers</h1>
+        <h1 class="main-title">Terminals & Containers</h1>
+
+        <menu type="toolbar">
+            <button type="button" class="color-button -green" onclick="addFormPopup.classList.add('-shown')">Add more Containers</button>
+        </menu>
+
+        <div id="addFormPopup">
+            <div class="popup-inner">
+                <menu type="context">
+                    <button type="button" class="color-button" onclick="addFormPopup.classList.remove('-shown')">Close</button>
+                </menu>
+                <form action="/admin/containers/add-containers" method="post" id="add_containers">
+                    <div class="input-box">
+                        <textarea name="new_containers" id="new_containers" placeholder="Place container numbers to be added" required></textarea>
+                        <select name="terminals" id="terminals" multiple>
+                            <option value="auto" selected>Auto define</option>
+                            <% for (const [k, v] of Object.entries(TERMINALS_LABELS)) { %>
+                                <option value="<%= k %>"><%= v %></option>
+                            <% } %>
+                        </select>
+                        <div class="controls">
+                            <button type="submit" class="color-button -green">Add New</button>
+                        </div>
+                    </div>
+                    <div class="validation-results-box">
+                        <h2>Validation results <span id="indicator" hidden>⏳️</span></h2>
+                        <ul id="validation_results" hidden></ul>
+                    </div>
+                </form>
+            </div>
+        </div>
         
-        <form action="/admin/containers/add-containers" method="post" id="add_containers">
-            <div class="textarea-box">
-                <textarea name="new_containers" id="new_containers" placeholder="Place container numbers to be added" required></textarea>
-                <div class="validation-results-box">
-                    <h2>Validation results <span id="indicator" hidden>⏳️</span></h2>
-                    <ul id="validation_results" hidden></ul>
-                </div>
-            </div>
-            <div class="controls">
-                <select name="terminals" id="terminals" multiple>
-                    <option value="auto" selected>Auto define</option>
-                    <% for (const [k, v] of Object.entries(TERMINALS_LABELS)) { %>
-                        <option value="<%= k %>"><%= v %></option>
-                    <% } %>
-                </select>
-                <button type="submit" class="color-button -green">Add New</button>
-            </div>
-        </form>
 
         <!-- Terminals -->
-        <section class="terminals-list">
+        <section class="terminals-list" id="terminals-list">
             <% for (const t of terminals) {
                 const { stats = {}, session = {}, health = {} } = t || {}              
                 %>
@@ -60,14 +72,33 @@
 
                     <fieldset>
                         <legend>Statistics</legend>
-                        <h5>Total containers: <%= stats.totalContainers ?? 0 %></h5>
+                        <h5>
+                            <input type="checkbox"
+                                id="<%= t.key %>.total"
+                                name="<%= t.key %>"
+                                value="total"
+                                data-selector
+                            />
+                            <label for="<%= t.key %>.total">Total containers: <%= stats.totalContainers ?? 0 %></label>
+                        </h5>
                         <ul class="containers-statuses">
-                            <% for (const [k, v] of Object.entries(stats.statuses || {})) { %>
+                            <% for (const [k, v] of Object.entries(stats.statuses || {})) {
+                                const key = `${ t.key }.${ k.toLowerCase().replace(/[^a-zA-Z0-9_]/g, "") }`
+                                %>
+
                                 <li>
-                                    <dl>
-                                        <dt><%= k %></dt>
-                                        <dd><%= v %></dd>
-                                    </dl>
+                                    <input type="checkbox"
+                                        id="<%= key %>"
+                                        name="<%= t.key %>"
+                                        value="<%= k %>"
+                                        data-selector
+                                    />
+                                    <label for="<%= key %>">
+                                        <dl>
+                                            <dt><%= k %></dt>
+                                            <dd><%= v %></dd>
+                                        </dl>
+                                    </label>
                                 </li>
                             <% } %>
                         </ul>
@@ -97,6 +128,12 @@
             <% } %>
         </section>
 
+        <!-- Found results -->
+        <ul id="result"></ul>
+
+
+        <!-- Pagination -->
+
     </main>
 
 
@@ -104,6 +141,7 @@
 
 
     <script type="module" src="/containers/containers_main.js" defer></script>
+    <script type="module" src="/containers/containers_select.js" defer></script>
 
 
 </body>
