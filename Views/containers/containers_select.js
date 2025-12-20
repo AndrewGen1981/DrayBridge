@@ -155,6 +155,11 @@ if (terminalsList && resultBox) {
                     await Swal.fire({ icon: "error", title: "Request failed",
                         text: error?.message || "An unexpected error occurred." })
                 }                
+            } else if (e.target.closest("button[name='sync']")) {
+                // Ручна синхронізація
+
+                await Swal.fire({ icon: "info", title: "Eventually, this will work too...",
+                    toast: true, timer: 3500, timerProgressBar: true })
             }
         
         })

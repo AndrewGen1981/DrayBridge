@@ -168,7 +168,7 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
 // Автоматичне оновлення статусу контейнерів.
 // Використовується для corn.schedule авто-оновлення
 
-async function syncContainersData() {
+async function syncContainersData(isAuto = true) {
     try {
         const allContainers = await Container.find()
             .sort({ terminal: 1 })
@@ -220,7 +220,7 @@ async function syncContainersData() {
                 ...Array.from(missingContainers)
             ], {
                 _seattleCheckBulk: false,   //  перевіряю контейнери Сієтлу кожен окремо + OSRA
-                isAuto: true,
+                isAuto,
             })
 
             // - якщо нічого не знайшов, то просто переходжу до наступного терміналу; це також може бути свідченням того,
