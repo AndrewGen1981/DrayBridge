@@ -43,7 +43,7 @@ async function terminalConnectAndCheckMany(terminal, containers = [], opt = {}) 
 
     if (!terminal || !containers?.length) return []
 
-    // якщо в opt передати _seattleCheckBulk = false, то кожег контейнер терміналу Сіетлу буде
+    // якщо в opt передати _seattleCheckBulk = false, то кожен контейнер терміналу Сіетлу буде
     // перевірятися окремо, плюс додається блок OSRA. По замовчуванню _seattleCheckBulk = true
     const { _seattleCheckBulk = true, ...restOfOptions } = opt
     const options = { shouldloadCookies: true, ...restOfOptions }
@@ -218,7 +218,10 @@ async function syncContainersData() {
             const foundContainers = await terminalConnectAndCheckMany(terminal, [
                 ...containers,
                 ...Array.from(missingContainers)
-            ], { _seattleCheckBulk: false })    //  перевіряю контейнери Сієтлу кожен окремо + OSRA
+            ], {
+                _seattleCheckBulk: false,   //  перевіряю контейнери Сієтлу кожен окремо + OSRA
+                isAuto: true,
+            })
 
             // - якщо нічого не знайшов, то просто переходжу до наступного терміналу; це також може бути свідченням того,
             // що просто не вдалося під*єднатися до терміналу, не потрібно змінювати статуси контейнерів
@@ -378,6 +381,26 @@ const index = async (req) => {
 
 
 
+const toggleActivity = async (req, res, next) => {
+    try {
+        const { id } = req.body || {}
+        if (!id) throw new AppError("Terminal ID is required", 400)
+        
+        const { modifiedCount } = await Terminal.updateOne(
+            { _id: id },
+            [{ $set: { active: { $not: "$active" } } }]
+        ) || {}
+
+        return res.json({ result: modifiedCount === 1 })
+
+    } catch (error) {
+        console.error(error)
+        return res.json({ result: false })
+    }
+}
+
+
+
 
 const cron = require("node-cron")
 const { timeZone } = require("../Config/__config.json")
@@ -405,4 +428,5 @@ module.exports = {
 
     // Middlewares
     index,
+    toggleActivity,
 }

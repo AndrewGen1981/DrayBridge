@@ -68,6 +68,9 @@ adminRouter.get("/logs", logsController.viewLogs)
 // робота з контейнерами
 adminRouter.use("/containers", require("./containersRouter.js"))
 
+// робота з терміналами
+adminRouter.use("/terminals", require("./terminalsRouter.js"))
+
 
 // Інжект - перед рендером профайлу
 const beforeProfileRender = async (req, res, next) => {

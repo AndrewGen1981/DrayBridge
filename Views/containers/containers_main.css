@@ -207,6 +207,15 @@ main.containers .terminal-card .buttons {
     justify-content: space-around;
 }
 
+main.containers .terminal-card[data-active="false"] {
+    background-color: #eff0f173;
+}
+main.containers .terminal-card[data-active="false"] button[name="off"] {
+    --abtn-c1: var(--accent-green);
+    --abtn-c2: var(--accent-green-border);
+    --abtn-ch: var(--accent-green-hover);
+}
+
 
 /* Results Area */
 main.containers #result li {

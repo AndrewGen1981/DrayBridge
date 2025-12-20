@@ -75,6 +75,8 @@ const containerSchema = new mongoose.Schema({
 
 
 
+containerSchema.index({ terminal: 1 })
+containerSchema.index({ status: 1 })
 containerSchema.index({ updatedAt: -1 })
 
 

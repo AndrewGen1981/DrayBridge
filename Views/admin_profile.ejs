@@ -33,7 +33,7 @@
             <ul>
                 <% for (const t of terminals) { %>
                     <a href="/admin/containers?terminal=<%= t.key %>">
-                        <li id="<%= t._id %>" data-key="<%= t.key %>">
+                        <li id="<%= t._id %>" data-key="<%= t.key %>" data-active="<%= t.active %>">
                             <dl>
                                 <dt>title</dt>
                                 <dd>"<%= t.label %>" / <%= t.group %></dd>

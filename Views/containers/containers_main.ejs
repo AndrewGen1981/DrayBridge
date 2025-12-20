@@ -67,7 +67,12 @@
                 const { stats = {}, session = {}, health = {} } = t || {}              
                 %>
 
-                <div class="terminal-card" id="<%= t._id %>" data-key="<%= t.key %>">
+                <div class="terminal-card"
+                    id="<%= t._id %>"
+                    data-key="<%= t.key %>"
+                    data-active="<%= t.active %>"
+                >
+
                     <div class="card-header">
                         <h3><%= t.label %></h3>
                         <h4>group: <%= t.group %></h4>
@@ -124,8 +129,8 @@
                         <% } %>
                     </fieldset>
                     <div class="buttons">
-                        <button type="button" id="sync" class="color-button -blue">Sync Manually</button>
-                        <button type="button" id="off" class="color-button -red">Turn Off</button>
+                        <button type="button" name="sync" id="sync.<%= t._id %>" class="color-button -blue">Sync Manually</button>
+                        <button type="button" name="off" id="off.<%= t._id %>" class="color-button"><%= t.active === false ? "Enable" : "Turn Off"  %></button>
                     </div>
 
                 </div>

@@ -16,6 +16,7 @@ if (terminalsList && resultBox) {
 
         // Кліки по картках терміналів
         terminalsList.addEventListener("click", async (e) => {
+
             // Кліки по чекбоксах карток терміналів
             if (e.target.closest("input[type='checkbox'][data-selector]")) {
         
@@ -97,11 +98,69 @@ if (terminalsList && resultBox) {
                         text: error?.message || "An unexpected error occurred." })
                 }        
         
+            } else if (e.target.closest("button[name='off']")) {
+                // Вмикання/вимикання терміналів з оновлення
+
+                try {
+
+                    const btn = e.target
+                    const card = btn.closest(".terminal-card")
+                    const id = btn.id?.split(".")?.[1]
+
+                    if (!id || id !== card?.id) {
+                        console.warn("Cannot proceed, Terminal ID is required")
+                        return
+                    }
+
+                    const isActive = card.dataset.active !== "false"
+
+                    const { isConfirmed } = await Swal.fire({
+                        icon: "question",
+                        title: isActive
+                            ? "Disable this terminal?"
+                            : "Enable this terminal?",
+                        html: `
+                            This terminal will be <b>${ isActive ? "excluded from" : "included in" }</b>
+                            the automatic data updates.
+                            <br><br>
+                            Are you sure you want to continue?
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: isActive ? "Disable terminal" : "Enable terminal",
+                        cancelButtonText: "Cancel"
+                    })
+                        
+                    if (!isConfirmed) return
+
+                    const { result } = await fetchWithHandler({
+                        action: "/admin/terminals/toggle-activity",
+                        method: "post",
+                        body: { id }
+                    }) || {}
+
+                    if (result) {
+                        await Swal.fire({ icon: "success", title: "Successfully updated!",
+                            toast: true, timer: 1500, timerProgressBar: true })
+
+                        card.dataset.active = !isActive
+                        btn.textContent = isActive ? "Enable" : "Turn Off"
+                    } else {
+                        await Swal.fire({ icon: "error", title: "Something went wrong!",
+                            toast: true, timer: 2500, timerProgressBar: true })
+                        return
+                    }
+
+                } catch (error) {
+                    console.log("❌ Couldn't update: ", error.message || error)
+                    await Swal.fire({ icon: "error", title: "Request failed",
+                        text: error?.message || "An unexpected error occurred." })
+                }                
             }
         
         })
 
-        // Реакція на ?terminal=t5
+
+        // Реакція на query типу "?terminal=t5"
         const chkSelector = "input[type='checkbox'][value='total'][data-selector]:checked"
         const checked = terminalsList.querySelectorAll(chkSelector)
         if (checked.length) checked[0].dispatchEvent(new Event("click", { bubbles: true }))

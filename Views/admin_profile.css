@@ -54,19 +54,19 @@ main.admin-profile .data-section.-containers ul li[data-key]::after {
     z-index: 1;
 }
 
-main.admin-profile .data-section ul li[data-key="t5"] {
+main.admin-profile .data-section ul li[data-key="t5"]:not([data-active="false"]) {
     --terminal_color: #0fa7e7;
 }
-main.admin-profile .data-section ul li[data-key="t18"] {
+main.admin-profile .data-section ul li[data-key="t18"]:not([data-active="false"]) {
     --terminal_color: #fd6464;
 }
-main.admin-profile .data-section ul li[data-key="wut"] {
+main.admin-profile .data-section ul li[data-key="wut"]:not([data-active="false"]) {
     --terminal_color: #019679;
 }
-main.admin-profile .data-section ul li[data-key="husky"] {
+main.admin-profile .data-section ul li[data-key="husky"]:not([data-active="false"]) {
     --terminal_color: #e3bc53;
 }
-main.admin-profile .data-section ul li[data-key="pct"] {
+main.admin-profile .data-section ul li[data-key="pct"]:not([data-active="false"]) {
     --terminal_color: #707e8b;
 }
 

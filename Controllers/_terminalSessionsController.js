@@ -141,10 +141,26 @@ const connectTerminal = async (terminal, {
         console.log(`❗ Empty login callback for ${ terminal }`)
     },
 
+    // Оновлюються автоматично лише термінали з active !== false,
+    // але ручне оновлення в будь-якому випадку дозволене
+    isAuto = false,
+
 } = {}) => {
     try {
         const { key } = terminal || {}
         if (!key) throw new AppError("Terminal key is required", 500)
+
+        // Якщо не ручне оновлення, то перевіряю активність терміналу
+        if (isAuto) {
+            const { active = true } = (STORAGE_TYPE === "MONGO"
+                ? await Terminal.findOne({ key }).select(active).lean()
+                : terminal) || {}
+    
+            if (!active) {
+                console.warn(`⚠️ Auto sync is disabled for ${ terminal.label }`)
+                return
+            }
+        }
 
         if (shouldloadCookies) await loadCookies(terminal)
         
