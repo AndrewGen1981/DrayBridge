@@ -153,7 +153,7 @@ const connectTerminal = async (terminal, {
         // Якщо не ручне оновлення, то перевіряю активність терміналу
         if (isAuto) {
             const { active = true } = (STORAGE_TYPE === "MONGO"
-                ? await Terminal.findOne({ key }).select(active).lean()
+                ? await Terminal.findOne({ key }).select("active").lean()
                 : terminal) || {}
     
             if (!active) {
