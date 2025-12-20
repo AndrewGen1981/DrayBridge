@@ -146,9 +146,11 @@ const connectTerminal = async (terminal, {
     isAuto = false,
 
 } = {}) => {
+    
+    const { key } = terminal || {}
+    if (!key) throw new AppError("Terminal key is required", 500)
+
     try {
-        const { key } = terminal || {}
-        if (!key) throw new AppError("Terminal key is required", 500)
 
         // Якщо не ручне оновлення, то перевіряю активність терміналу
         if (isAuto) {
