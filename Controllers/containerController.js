@@ -73,7 +73,8 @@ const buildFilter = (obj = {}, useAnd = false) => {
     // перевіряю чи це не пари значень термінал - статуси, приклад:
     // [
     //     { terminal: 't5', status: [ 'Export, Empty', 'Export, Full' ] },
-    //     { terminal: 't18', status: [ 'Available', 'Export, Full' ] }
+    //     { terminal: 't18', status: [ 'Available', 'Export, Full' ] },
+    //     { terminal: 'wut', status: [] } - увесь wut
     // ]
     const paired = Array.isArray(obj.terminalStatus)
         ? obj.terminalStatus
@@ -81,11 +82,12 @@ const buildFilter = (obj = {}, useAnd = false) => {
 
     if (paired.length) {
         const or = paired
-            .filter(p => p.terminal && p.status?.length)
-            .map(p => ({
-                terminal: p.terminal,
-                status: { $in: p.status }
-            }))
+            .filter(p => p.terminal && p.status)
+            .map(p => {
+                const o = { terminal: p.terminal }
+                if (p.status.length) o.status = { $in: p.status }
+                return o
+            })
 
         if (or.length) {
             filters.$or = or

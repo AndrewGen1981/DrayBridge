@@ -170,13 +170,15 @@ const bulkAvailabilityCheck = async (containerNumbers, terminalsChoice) => {
 
 async function syncContainersData(isAuto = true) {
     try {
-        const allContainers = await Container.find()
+        const allContainers = await Container
+            .find()
+            .active()   //  хелпер, описаний в схемі
             .sort({ terminal: 1 })
             .select("number terminal status")
             .lean()
 
         if (!allContainers?.length)
-            throw new AppError("[AUTO-CHECK] Scheduled containers status check. Empty containers array.", 422)
+            throw new AppError("[AUTO-CHECK] Scheduled containers status check. Empty containers array.", 400)
 
         console.log(`[AUTO-CHECK] Scheduled containers status check (${ allContainers.length } pcs).`)
 

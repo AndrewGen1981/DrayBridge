@@ -68,16 +68,40 @@ const containerSchema = new mongoose.Schema({
 
     origin: String,
 
+
+    // Soft delete через поле + TTL index
+    // тобто, усі “живі” контейнери - це { deletedAt: null }
+    deletedAt: {
+        type: Date,
+        default: null,
+        index: true
+    },
+
+    expiresAt: {
+        type: Date,
+    }
+
 }, {
     timestamps: true,
     collection: "_CONTAINERS"
 })
 
 
+// Хелпери
+containerSchema.query.active = function () {
+    return this.where({ deletedAt: null })
+}
 
+
+// Індекси
 containerSchema.index({ terminal: 1 })
 containerSchema.index({ status: 1 })
 containerSchema.index({ updatedAt: -1 })
+
+containerSchema.index(
+    { expiresAt: 1 },
+    { expireAfterSeconds: 0 }
+)
 
 
 module.exports = { 
