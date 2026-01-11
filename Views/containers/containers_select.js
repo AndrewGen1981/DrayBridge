@@ -11,6 +11,29 @@ if (!resultBox) console.warn("Cannot find result area in the DOM")
 let selectTimer
 
 
+function containersToHTMLList (containers = [], schemaLabels = containers[0] || {}) {
+    if (!containers.length) return null
+
+    let html = ""
+    for (const c of containers) {
+        html += `<li data-id="${ c._id }">`
+        html += `<input type="checkbox" name="containers" id="${ c._id }" value="${ c._id }" hidden />`
+        
+        // щоб зберігався порядок полів йду по схемі, не по об*єкту
+        for (const k of Object.keys(schemaLabels)) {
+            if (!c[k]) continue     //  _id сюди не портапляє, бо в schemaLabels це "id"
+            html += `<dl class="${ k }">
+                <dt>${ schemaLabels[k] || k }</dt>
+                <dd name="${ k }">${ c[k] }</dd>
+            </dl>`
+        }
+        html += "</li>"
+    }
+
+    return  html
+}
+
+
 if (terminalsList && resultBox) {
     document.addEventListener("DOMContentLoaded", () => {
 
@@ -59,34 +82,9 @@ if (terminalsList && resultBox) {
                                 terminalStatus: Object.entries(obj)
                                     .map(([k, v]) => ({ terminal: k, status: v }))
                             }
-                        })
-        
-                        // console.log(result)
-        
-                        const { containers = [], schemaLabels = {} } = result || {}
-        
-                        if (containers.length) {
-                            let html = ""
-                            for (const c of containers) {
-                                html += `<li id="${ c._id }">`
-                                
-                                // щоб зберігався порядок полій йду по схемі, не по об*єкту
-                                for (const k of Object.keys(schemaLabels)) {
-        
-                                    if (!c[k]) continue     //  _id сюди не портапляє, бо в schemaLabels це "id"
-                                    
-                                    html += `<dl class="${ k }">
-                                        <dt>${ schemaLabels[k] || k }</dt>
-                                        <dd name="${ k }">${ c[k] }</dd>
-                                    </dl>`
-        
-                                }
-                                html += "</li>"
-                            }
-                            resultBox.innerHTML = html
-                        } else {
-                            resultBox.innerHTML = `Nothing found...`
-                        }
+                        }) || {}
+
+                        resultBox.innerHTML = containersToHTMLList(result.containers, result.schemaLabels) || "Nothing found..."
         
                         // знімаю всі позначки "wait"
                         terminalsList.querySelectorAll(`.terminal-card`).forEach(c => c.classList.remove("-searching"))
@@ -165,6 +163,24 @@ if (terminalsList && resultBox) {
         })
 
 
+        // Кліки по списку контейнерів
+        resultBox.addEventListener("click", (e) => {
+
+            const container = e.target.closest("ul#result li")
+            if (container) {
+                const { id } = container.dataset || {}
+                if (!id) return
+
+                const checkbox = document.getElementById(id)
+                if (!checkbox) return
+
+                checkbox.checked = !checkbox.checked
+                container.classList.toggle("-selected", checkbox.checked)
+            }
+
+        })
+
+
         // Реакція на query типу "?terminal=t5"
         const chkSelector = "input[type='checkbox'][value='total'][data-selector]:checked"
         const checked = terminalsList.querySelectorAll(chkSelector)
@@ -172,3 +188,36 @@ if (terminalsList && resultBox) {
         
     })
 }
+
+
+
+// Показати unassigned. Частина контейнерів, доданих вручну, може бути не прив*язана
+// до жодного контейнеру. Наприклад, заведено з помилкою номер контейнеру або
+// термінал не підтверджує наявність певного контейнеру
+
+const showUnassigned = document.getElementById("showUnassigned")
+if (showUnassigned) showUnassigned.addEventListener("click", async() => {
+    try {
+        showUnassigned.disabled = true
+
+        const result = await fetchWithHandler({
+            action: "/admin/containers/get-containers",
+            method: "post",
+            body: {
+                terminal: "__UNASSIGNED__"
+            }
+        }) || {}
+
+        resultBox.innerHTML = containersToHTMLList(result.containers, result.schemaLabels) || "Nothing found..."
+
+        terminalsList.querySelectorAll("input[type='checkbox'][data-selector]:checked")
+            .forEach(t => t.checked = false)
+
+    } catch (error) {
+        console.log("❌ Couldn't execute: ", error.message || error)
+        await Swal.fire({ icon: "error", title: "Request failed",
+            text: error?.message || "An unexpected error occurred." })
+    } finally {
+        showUnassigned.disabled = false
+    }
+})

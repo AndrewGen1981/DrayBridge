@@ -16,7 +16,8 @@
         const {
             TERMINALS_LABELS = [],
             terminals = [],
-            query = {}
+            query = {},
+            unAssignedContainers = 0
         } = locals
 
         const { terminal } = query
@@ -32,6 +33,9 @@
 
         <menu type="toolbar">
             <button type="button" class="color-button -green" onclick="addFormPopup.classList.add('-shown')">Add more Containers</button>
+            <% if (unAssignedContainers) { %>
+                <button type="button" id="showUnassigned" class="color-button">Show unassigned (<%= unAssignedContainers %>)</button>
+            <% } %>
         </menu>
 
         <div id="addFormPopup">
@@ -140,6 +144,14 @@
         <!-- Found results -->
         <ul id="result"></ul>
 
+        <!-- CRUD modal menu -->
+        <div id="containersCRUD">
+            <dl>
+                <dd id="selectedCRUD">0</dd>
+                <dt>Selected</dt>
+            </dl>
+            <button type="button" id="deleteSelected" class="color-button -red" disabled>Delete Selected</button>
+        </div>
 
         <!-- Pagination -->
 

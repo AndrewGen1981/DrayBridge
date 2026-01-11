@@ -172,7 +172,7 @@ async function syncContainersData(isAuto = true) {
     try {
         const allContainers = await Container
             .find()
-            .active()   //  хелпер, описаний в схемі
+            .active()   //  не оновлюю позначені для видалення; хелпер, описаний в схемі
             .sort({ terminal: 1 })
             .select("number terminal status")
             .lean()

@@ -102,8 +102,23 @@ const buildFilter = (obj = {}, useAnd = false) => {
     if (ids.length) filters._id = { $in: ids }
 
     const terminalArr = normalizeArray(obj.terminal)
-    if (terminalArr.length) {
-        group1.push({ terminal: { $in: terminalArr } })
+
+    // спеціальний кейс: unassigned terminals
+    if (terminalArr.includes("__UNASSIGNED__")) {
+        group1.push({
+            $or: [
+                { terminal: null },
+                { terminal: { $exists: false } }
+            ]
+        })
+
+        frontendFilters.fTerminal = terminalArr
+    }
+
+    // звичайні термінали
+    const realTerminals = terminalArr.filter(t => t !== "__UNASSIGNED__")
+    if (realTerminals.length) {
+        group1.push({ terminal: { $in: realTerminals } })
         frontendFilters.fTerminal = terminalArr
     }
 
@@ -298,9 +313,9 @@ exports.getContainers = async (req, options = {}) => {
 // --- Middleware
 
 
+// Головна сторінка рауту "Containers"
 exports.index = async (req, res, next) => {
     try {
-        // Головна сторінка рауту "Containers"
         const { query } = req
 
         const terminals = await Terminal.find()
@@ -319,11 +334,14 @@ exports.index = async (req, res, next) => {
                 )
             }
         }
-        
+
+        const unAssignedContainers = await Container.countDocuments({ terminal: null })
+       
         res.render("../Views/containers/containers_main.ejs", {
             TERMINALS_LABELS,
             terminals,
-            query
+            query,
+            unAssignedContainers
         })
 
     } catch (error) {
