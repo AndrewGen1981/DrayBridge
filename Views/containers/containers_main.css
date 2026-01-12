@@ -5,6 +5,11 @@ main.containers {
     gap: 3rem;
 }
 
+main.containers menu[type="toolbar"] {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
 
 /* Add more Popup */
 main.containers #addFormPopup {
@@ -234,7 +239,7 @@ main.containers #result li {
 }
 
 main.containers #result li.-selected {
-    outline: 2px solid var(--accent-gray-border);
+    outline: 2px solid var(--accent-blue-border);
     outline-offset: -2px;
 }
 main.containers #result li[data-toremove="true"] {
