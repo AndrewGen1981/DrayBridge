@@ -11,12 +11,16 @@ if (!resultBox) console.warn("Cannot find result area in the DOM")
 let selectTimer
 
 
+// Реакція на зміни - перевіряю вибране
+const toggleSelected = () => document.dispatchEvent(new Event("toggleSelected"))
+
+
 function containersToHTMLList (containers = [], schemaLabels = containers[0] || {}) {
     if (!containers.length) return null
 
     let html = ""
     for (const c of containers) {
-        html += `<li data-id="${ c._id }">`
+        html += `<li data-id="${ c._id }" data-toremove="${ Boolean(c.deletedAt) }">`
         html += `<input type="checkbox" name="containers" id="${ c._id }" value="${ c._id }" hidden />`
         
         // щоб зберігався порядок полів йду по схемі, не по об*єкту
@@ -88,6 +92,8 @@ if (terminalsList && resultBox) {
         
                         // знімаю всі позначки "wait"
                         terminalsList.querySelectorAll(`.terminal-card`).forEach(c => c.classList.remove("-searching"))
+
+                        toggleSelected()
                     }, 1000)
                     
                 } catch (error) {
@@ -176,6 +182,8 @@ if (terminalsList && resultBox) {
 
                 checkbox.checked = !checkbox.checked
                 container.classList.toggle("-selected", checkbox.checked)
+
+                toggleSelected()
             }
 
         })
@@ -212,6 +220,8 @@ if (showUnassigned) showUnassigned.addEventListener("click", async() => {
 
         terminalsList.querySelectorAll("input[type='checkbox'][data-selector]:checked")
             .forEach(t => t.checked = false)
+        
+        toggleSelected()
 
     } catch (error) {
         console.log("❌ Couldn't execute: ", error.message || error)

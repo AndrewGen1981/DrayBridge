@@ -37,6 +37,7 @@ const { splitOnUpperCase } = require("../Utils/tools.js")
 const { appDomain } = require("../Config/__config.json")
 const { TERMINALS, TERMINALS_ENUM, TERMINALS_LABELS } = require("../Config/terminalsCatalog.js")
 const { bulkAvailabilityCheck } = require("./_terminalsController.js")
+const { localDateTime } = require("../Utils/localDateTime.js")
 
 
 const containerSchemaFields = extractSchemaFields(Container)
@@ -292,6 +293,13 @@ exports.getContainers = async (req, options = {}) => {
                 || container.terminal
                 || "NA"
         }
+
+        if (container.deletedAt) {
+            const days = Math.round((container.expiresAt - Date.now()) / (24 * 60 * 60 * 1000))
+            container.deletedAt = `in ${ days } day${ days > 1 ? "s" : "" }`
+            container.expiresAt = undefined
+        }
+
         // ... ще операції
     }
 
@@ -673,6 +681,61 @@ exports.updateMaxOnPage = async (req, res, next) => {
 
         res.json({ result: true, message: `Hey ${ username }, your personal configs were updated.` })
         
+    } catch (error) {
+        console.error(error)
+        const status = error.status || 500
+        const message = error.message || String(error)
+        res.status(status).json({ result: false, issue: message })
+    }
+}
+
+
+
+exports.removeContainers = async (req, res, next) => {
+    try {
+
+        const { containers = [] } = req.body || {}
+        if (!containers.length) throw new AppError("Containers to remove are required", 400)
+
+        await Container.updateMany({
+            _id: { $in: containers },
+            deletedAt: null,
+        },{
+            $set: {
+                deletedAt: new Date(),
+                expiresAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),     // 10 days
+            }
+        })
+
+        res.json({ result: true })
+
+    } catch (error) {
+        console.error(error)
+        const status = error.status || 500
+        const message = error.message || String(error)
+        res.status(status).json({ result: false, issue: message })
+    }
+}
+
+
+
+exports.restoreContainers = async (req, res, next) => {
+    try {
+
+        const { containers = [] } = req.body || {}
+        if (!containers.length) throw new AppError("Containers to restore are required", 400)
+
+        await Container.updateMany({
+            _id: { $in: containers }
+        },{
+            $set: {
+                deletedAt: null,
+                expiresAt: null,
+            }
+        })
+
+        res.json({ result: true })
+
     } catch (error) {
         console.error(error)
         const status = error.status || 500

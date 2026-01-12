@@ -232,9 +232,13 @@ main.containers #result li {
 
     cursor: pointer;
 }
+
 main.containers #result li.-selected {
-    outline: 2px solid var(--accent-green-border);
-    outline-offset: 1px;
+    outline: 2px solid var(--accent-gray-border);
+    outline-offset: -2px;
+}
+main.containers #result li[data-toremove="true"] {
+    background-color: #ffdae1;
 }
 
 main.containers #result li dl {
@@ -260,31 +264,37 @@ main.containers #result li dd[name="terminalHoldReason"] {
 
 /* CRUD modal menu */
 main.containers #containersCRUD {
-    padding: 2rem;
-    background-color: aliceblue;
-    outline: 1px solid red;
+    padding: 7px 1rem;
+    background-color: var(--main-color);
 
-    position: fixed;
-    bottom: 0; right: 0;
-    
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.2rem;
+
+    transition: 0.5s;
+
+    box-shadow: var(--shadow-s);
+    border-radius: 3px;
 }
 
-main.containers #containersCRUD dl {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    background-color: #eee;
-
-    border: 1px solid #bbb;
-    border-radius: 1.5rem;
-
-    padding-right: 1rem;
+main.containers #containersCRUD.-active {
+    position: sticky; top: 0;
+    background-color: var(--main-color1);
 }
-main.containers #containersCRUD dl dd#selectedCRUD {
+main.containers #containersCRUD.-active #selectedCRUD {
+    transition: background-color 0.25s ;
+    background-color: #d3f1fc;
+}
+
+main.containers #containersCRUD button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+main.containers #containersCRUD button {
+    transition: opacity 0.5;
+}
+
+main.containers #selectedCRUD {
     width: 3rem;
     aspect-ratio: 1;
 
@@ -292,6 +302,6 @@ main.containers #containersCRUD dl dd#selectedCRUD {
     align-items: center;
     justify-content: center;
 
-    background-color: #bbb;
+    background-color: var(--accent-gray);
     border-radius: 50%;
 }

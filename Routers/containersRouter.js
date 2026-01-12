@@ -41,5 +41,8 @@ containerRouter.post("/get-containers", async(req, res) => {
 })
 
 
+containerRouter.post("/restore", containerController.restoreContainers)
+containerRouter.delete("/", containerController.removeContainers)
+
 
 module.exports = containerRouter

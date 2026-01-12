@@ -141,17 +141,16 @@
             <% } %>
         </section>
 
+        <!-- CRUD modal menu -->
+        <nav id="containersCRUD">
+            <span id="selectedCRUD">0</span>
+            <button type="button" id="deselect" class="color-button" disabled>Deselect</button>
+            <button type="button" id="deleteSelected" class="color-button -red" disabled>Delete Selected</button>
+            <button type="button" id="restore" class="color-button -yellow" disabled>Restore</button>
+        </nav>
+
         <!-- Found results -->
         <ul id="result"></ul>
-
-        <!-- CRUD modal menu -->
-        <div id="containersCRUD">
-            <dl>
-                <dd id="selectedCRUD">0</dd>
-                <dt>Selected</dt>
-            </dl>
-            <button type="button" id="deleteSelected" class="color-button -red" disabled>Delete Selected</button>
-        </div>
 
         <!-- Pagination -->
 
@@ -163,6 +162,7 @@
 
     <script type="module" src="/containers/containers_main.js" defer></script>
     <script type="module" src="/containers/containers_select.js" defer></script>
+    <script type="module" src="/containers/containers_CRUD.js" defer></script>
 
 
 </body>
