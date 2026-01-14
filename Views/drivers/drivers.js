@@ -30,17 +30,91 @@ const dropzone = document.getElementById("dropzone")
 const previews = document.getElementById("previews")
 
 
+const MAX_FILES = 10
+const MAX_FILE_SIZMB = 5    // MB
+const MAX_FILE_SIZE = MAX_FILE_SIZMB * 1024 * 1024
+
+
 const dropDownEvents = ["dragenter", "dragover", "dragleave", "drop"]
 let dt = new DataTransfer()
 
+
 function updateFilesStorage(_files = []) {
     const files = Array.isArray(_files) ? _files : [..._files]
+    const rejected = []
+
     for (const file of files) {
+
+        // Перевіряю формат
+        if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+            rejected.push({
+                file,
+                reasonGroup: 0,
+                reasonText: "Wrong file type. Images and PDF are allowed only",
+            })
+            continue
+        }        
+
+        // Перевіряю чи не дублікат
         const isDuplicate = Array.from(dt.files)
-            .some(f => f.name === file.name && f.size === file.size)
-        if (isDuplicate) continue
+            .some(f => f.name.toLowerCase() === file.name.toLowerCase())
+        
+        if (isDuplicate) {
+            rejected.push({
+                file,
+                reasonGroup: 1,
+                reasonText: "Duplicate file name",
+            })
+            continue
+        }
+
+        // Перевіряю максимально дозволену кількість файлів
+        if (dt.files.length >= MAX_FILES) {
+            rejected.push({
+                file,
+                reasonGroup: 2,
+                reasonText: `Maximum ${ MAX_FILES } files allowed`,
+            })
+            continue
+        }
+
+        // Перевіряю граничний об*єм
+        if (file.size > MAX_FILE_SIZE) {
+            rejected.push({
+                file,
+                reasonGroup: 3,
+                reasonText: `File size exceeds ${ MAX_FILE_SIZMB }MB`,
+            })
+            continue
+        }
+
         dt.items.add(file)
     }
+
+    showRejectedFiles(rejected)
+}
+
+
+function showRejectedFiles(rejected = []) {
+    if (!rejected.length) return
+
+    rejected.sort((a,b) => a.reasonGroup - b.reasonGroup)
+
+    let html = `<p style="margin-bottom:.5rem;">The following files were skipped:</p>`
+    html += `<ul style="margin-left:1rem;text-align:left;list-style-position:inside;">`
+
+    let group
+    for (const r of rejected) {
+        html += `<li ${ r.reasonGroup !== group ? 'style="margin-top:.5rem;"' : "" }><b>${ r.file.name }</b> — ${ r.reasonText }</li>`
+        group = r.reasonGroup
+    }
+
+    html += `</ul>`
+
+    Swal.fire({
+        icon: "warning", title: "Some files were not added",
+        html, width: "45rem", confirmButtonText: "OK"
+    })
 }
 
 
@@ -131,8 +205,7 @@ function removeFile(index) {
         .forEach(file => newDt.items.add(file))
 
     dt = newDt
-    filesInput.files = dt.files
-    renderPreviews()
+    syncInput()
 }
 
 function clearAll() {
