@@ -120,7 +120,7 @@ footer nav a {
     text-decoration: none;
     border-radius: 0.3rem;
     
-    transition: background-color 0.2s ease;
+    transition: background-color 0.25s;
     cursor: pointer;
 }
 
@@ -134,11 +134,17 @@ header nav a:is(:hover, :focus-within),
 footer nav a:is(:hover, :focus-within) {
     background-color: #fff;
 }
+header nav a:is(:hover, :focus-within) dd svg,
+footer nav a:is(:hover, :focus-within) dd svg {
+    stroke: #077497;
+}
 
-/* header nav a dd,
+header nav a dd,
 footer nav a dd {
-    display: none;
-} */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 @media (max-width: 550px) {
     header nav,
@@ -155,7 +161,7 @@ footer nav a dd {
     }
     header nav a dd,
     footer nav a dd {
-        display: block;
+        display: flex;
         font-size: 2rem;
     }
 }

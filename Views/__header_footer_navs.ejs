@@ -3,14 +3,14 @@
 <nav>
 
     <% main_menu.forEach(({
-            route = "/", title = "?", emoji = "🟡",
+            route = "/", title = "?", svg,
             authSensitive, roleSensitive
         }) => { %>
 
         <% if ((!authSensitive || isAuthenticated) && (!roleSensitive || role === roleSensitive)) { %>
             <a href="<%= route %>" title="<%= title %>">
                 <dt><%= title %></dt>
-                <dd><%= emoji %></dd>
+                <dd><%- svg %></dd>
             </a>
         <% } %>
 

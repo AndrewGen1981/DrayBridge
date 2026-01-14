@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" view-transition>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Drivers</title>
+
+    <link rel="shortcut icon" href="/favico.png">
+    <link rel="stylesheet" href="/drivers/drivers.css">
+
+</head>
+<body class="entire-page">
+
+    <%
+        const { drivers = [], DRIVER_STATES = {}, stateNames = new Map() } = locals
+
+        const driverSchema = {
+            "firstName": { label: "First name", type: "text", required: true },
+            "lastName": { label: "Last name", type: "text", required: true },
+
+            "phone": { label: "Phone", required: true },
+            "email": { label: "Email", required: true },
+            "password": { label: "Password", required: true },
+
+            "dateOfBirth": { label: "Date of birth", type: "date" },
+            "dateOfHire": { label: "Date of hire", type: "date" },
+
+            "drivingTruck": { label: "Driving truck" },
+            "drivingTrailer": { label: "Driving trailer" },
+        }
+    %>
+
+
+    <%- include("../__header.ejs") %>
+
+
+    <main class="standard-template drivers">
+
+        <h1 class="main-title">Drivers</h1>
+
+        <div id="asideWrapper" class="<%= drivers.length ? '-hidden' : '' %>">
+            <aside id="driverProfile">
+                <form action="/admin/drivers" method="post">
+    
+                    <p class="form-item">
+                        <label for="status">Status</label>
+                        <select name="status" id="status" required>
+                            <% for (const state of Object.keys(DRIVER_STATES)) { %>
+                                <option value="<%= state %>"
+                                    <% if (DRIVER_STATES[state].isDefault) { %> selected <% } %>
+                                >
+                                    <%= DRIVER_STATES[state].label?.toUpperCase() %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </p>
+
+                    <fieldset>
+                        <legend>Driver Info</legend>
+                        <% for (const k of Object.keys(driverSchema)) { %>
+                            <p class="form-item">
+                                <label for="<%= k %>"><%= driverSchema[k].label %></label>
+                                <input type="<%= driverSchema[k].type || k %>"
+                                    name="<%= k %>"
+                                    id="<%= k %>"
+                                    <% if (driverSchema[k].required) { %> required <% } %>
+                                />
+                            </p>
+                        <% } %>
+                    </fieldset>
+    
+                    <fieldset>
+                        <legend>Driver license</legend>
+                        <p class="form-item">
+                            <label for="driverLicenseState">Driver license state</label>
+                            <select name="driverLicenseState" id="driverLicenseState" required>
+                                <% for (const [k, v] of stateNames) { %>
+                                    <option value="<%= k %>"
+                                        <% if (k === "WA") { %> selected <% } %>
+                                    >
+                                        <%= v %>
+                                    </option>
+                                <% } %>
+                            </select>
+                        </p>
+                        <p class="form-item">
+                            <label for="driverLicenseNumber">Driver license number</label>
+                            <input type="text" name="driverLicenseNumber" id="driverLicenseNumber" required />
+                        </p>
+                    </fieldset>
+
+                    <fieldset>
+                        <legend>Documents</legend>
+                        <input type="file" name="documents" id="documents" multiple accept="image/*, .pdf" hidden />
+                        <div id="dropzone" class="dropzone">
+                            <p>Drag & drop documents here<br>or <span>click to upload</span></p>
+                        </div>
+                        <div id="previews" class="previews"></div>
+                    </fieldset>
+
+                    <p class="form-item">
+                        <label for="notes">Notes</label>
+                        <textarea name="notes" id="notes"></textarea>
+                    </p>
+    
+                    <div class="buttons">
+                        <button type="reset" id="cancelAddNew" class="color-button">Cancel</button>
+                        <button type="submit" id="submitAddNew" class="color-button -green">Submit</button>
+                    </div>
+    
+                </form>
+            </aside>
+        </div>
+
+
+        <menu type="toolbar">
+            <button type="button" id="toggleForm" class="color-button -green">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Add new
+            </button>
+        </menu>
+
+        <% if (drivers?.length) { %>
+        <ul id="existingDrivers">
+            <% for (const driver of drivers) { %>
+                <li><%= driver.firstName %></li>
+            <% } %>
+        </ul>
+        <% } else { %>
+            <p class="no-existing-drivers">There are no existing drivers yet.</p>
+        <% } %>
+
+
+    </main>
+
+
+    <!-- include("../__footer.ejs") -->
+
+
+    <script type="module" src="/drivers/drivers.js" defer></script>
+
+
+</body>
+</html>

@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
 
     firstName: String,
     lastName: String,
-    company: String,    //  використовується для юзера, щоб застосовувати дисконти
+    company: String,
 
     phone: String,
     allowUsePhone: Boolean,

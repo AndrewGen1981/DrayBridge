@@ -1,0 +1,133 @@
+main.drivers #asideWrapper {
+    position: fixed;
+
+    top: 0; left: 0;
+    width: 100dvw; height: 100dvh;
+    background-color: #25354fbd;
+
+    z-index: 9;
+}
+main.drivers #asideWrapper.-hidden {
+    display: none;
+    opacity: 0;
+}
+
+main.drivers aside#driverProfile {
+    padding: 2rem;
+    position: fixed;
+
+    top: 0; left: 0;
+    width: min(55rem, 95%);
+    height: 100dvh;
+
+    background-color: var(--main-color);
+    transition: opacity 0.2s; 
+
+    scrollbar-width: thin;
+    scroll-behavior: smooth;
+    overflow-y: auto;
+
+    border-right: 1px solid #1F2937;
+    z-index: 10;
+}
+
+main.drivers #asideWrapper.-hidden aside#driverProfile {
+    display: none;
+    opacity: 0;
+}
+
+main.drivers aside#driverProfile form {
+    display: grid;
+    gap: 2rem;
+}
+main.drivers aside#driverProfile form fieldset {
+    padding: 0.5rem 0.7rem;
+    border-radius: 3px;
+    background-color: var(--main-color1);
+    border: none;
+}
+main.drivers aside#driverProfile form fieldset legend {
+    padding: 2px 5px;
+    color: #ccc;
+
+    background-color: var(--main-color1);
+    border-radius: 2px;
+    
+}
+main.drivers aside#driverProfile form .form-item {
+    display: grid;
+    align-items: center;
+    grid-template-columns: 18rem 1fr;
+    margin-bottom: 5px;
+}
+main.drivers aside#driverProfile form .form-item * {
+    font-size: 1.35rem;
+}
+main.drivers aside#driverProfile form .form-item label {
+    color: var(--font-col-400);
+    text-transform: capitalize;
+}
+
+main.drivers aside#driverProfile form .form-item input,
+main.drivers aside#driverProfile form .form-item select,
+main.drivers aside#driverProfile form .form-item textarea {
+    padding: 4px 6px;
+    border: 1px solid #dbdbdb;
+    border-radius: 3px;
+}
+main.drivers aside#driverProfile form .form-item textarea {
+    height: 7rem;
+    resize: none;
+}
+
+/* Drag & Drop */
+
+main.drivers .dropzone {
+    padding: 32px;
+    text-align: center;
+    
+    border: 2px dashed #aaa;
+    border-radius: 10px;
+    
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+main.drivers .dropzone.active {
+    border-color: #4f46e5;
+    background: #f5f7ff;
+}
+
+main.drivers .dropzone span {
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+main.drivers .previews {
+    margin-top: 12px;
+    /* display: grid; */
+    display: none;
+    gap: 8px;
+}
+
+main.drivers .previews[data-active="true"] {
+    display: grid;
+}
+
+main.drivers .preview {
+    padding: 6px 10px;
+    
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+main.drivers .preview img {
+  width: 4rem;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+}

@@ -71,6 +71,9 @@ adminRouter.use("/containers", require("./containersRouter.js"))
 // робота з терміналами
 adminRouter.use("/terminals", require("./terminalsRouter.js"))
 
+// робота з водіями
+adminRouter.use("/drivers", require("./driversRouter.js"))
+
 
 // Інжект - перед рендером профайлу
 const beforeProfileRender = async (req, res, next) => {
