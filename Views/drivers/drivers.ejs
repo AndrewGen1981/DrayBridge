@@ -39,7 +39,8 @@
 
         <h1 class="main-title">Drivers</h1>
 
-        <div id="asideWrapper" class="<%= drivers.length ? '-hidden' : '' %>">
+        <div id="asideWrapper" <% if (drivers.length) { %> class="-hidden" <% } %> >
+
             <aside id="driverProfile">
                 <form action="/admin/drivers" method="post">
     

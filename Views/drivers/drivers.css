@@ -1,3 +1,4 @@
+/* Adding new driver modal dialog. Opened on default */
 main.drivers #asideWrapper {
     position: fixed;
 
@@ -12,6 +13,7 @@ main.drivers #asideWrapper.-hidden {
     opacity: 0;
 }
 
+/* Adding new driver ASIDE. */
 main.drivers aside#driverProfile {
     padding: 2rem;
     position: fixed;
@@ -36,10 +38,12 @@ main.drivers #asideWrapper.-hidden aside#driverProfile {
     opacity: 0;
 }
 
+/* Adding new driver FORM. */
 main.drivers aside#driverProfile form {
     display: grid;
     gap: 2rem;
 }
+
 main.drivers aside#driverProfile form fieldset {
     padding: 0.5rem 0.7rem;
     border-radius: 3px;
@@ -54,12 +58,14 @@ main.drivers aside#driverProfile form fieldset legend {
     border-radius: 2px;
     
 }
+
 main.drivers aside#driverProfile form .form-item {
     display: grid;
     align-items: center;
     grid-template-columns: 18rem 1fr;
     margin-bottom: 5px;
 }
+
 main.drivers aside#driverProfile form .form-item * {
     font-size: 1.35rem;
 }
@@ -126,8 +132,8 @@ main.drivers .preview {
 }
 
 main.drivers .preview img {
-  width: 4rem;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 4px;
+    width: 4rem;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 4px;
 }
