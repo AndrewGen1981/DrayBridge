@@ -1,17 +1,6 @@
 import { fetchWithHandler } from "/__errorHandler.js"
 
 
-export const { defaultMoneySign, MAX_FILES_ALLOWED_TO_UPLOAD, MAX_BYTES_PER_FILE } = await fetchWithHandler({ action: "/__config.json" }) || {}
-
-
-// Катаоги для скриптів шаблонів
-export const categoriesCatalog = await fetchWithHandler({ action: "/categoriesCatalog.json" }) || {}
-export const truckCatalog = await fetchWithHandler({ action: "/truckCatalog.json" }) || {}
-export const qualityCatalog = await fetchWithHandler({ action: "/qualityCatalog.json" }) || {}
-export const sideCatalog = await fetchWithHandler({ action: "/sideCatalog.json" }) || {}
-
-
-
 
 export function splitOnUpperCase(str = "") {
     return str
@@ -56,38 +45,71 @@ export function money(value) {
 }
 
 
-/**
- * Перетворює масив { name, value } у плоский об'єкт для тіла запиту
- * @param {Array<{ name: string, value: any }>} modified
- * @returns {Record<string, any>} 
- */
-export function modifiedToBody(modified = []) {
-    if (!Array.isArray(modified)) return {}
-
-    return modified.reduce((acc, item) => {
-        if (!item || typeof item.name !== 'string') return acc
-
-        const { name, value } = item
-
-        if (Object.hasOwn(acc, name)) {
-            acc[name] = Array.isArray(acc[name])
-                ? [...acc[name], value]
-                : [acc[name], value]
-        } else {
-            acc[name] = value
-        }
-
-        return acc
-    }, Object.create(null))
-}
-
-
-
 // Множина чи однина? для текстового виводу
 export function plural(item) {
     const number = Array.isArray(item) ? item.length : item
     return number > 1 ? "s" : ""
 }
+
+
+
+// --- Progress simulation
+
+
+// ⚙️ емуляція прогресу (візуально, не реального)
+function simulateProgress(op = "saving") {
+    const progress = document.getElementById('swal-progress')
+    const status = document.getElementById('swal-status')
+    const steps = op === "saving"
+        ? [
+            'Saving data to the database...',
+            'Converting and resizing images...',
+            'Finalizing upload...',
+            'Almost done...'
+        ]
+        : [
+            'Deleting data from database...',
+            'Deleting all the item images...',
+            'Finalizing deleting...',
+            'Almost done... 😅 More work than it seemed'
+        ]
+
+    let value = 0
+    let step = 0
+
+    const interval = setInterval(() => {
+        if (!progress) return clearInterval(interval)
+
+        value += 5 + Math.random() * 10
+        progress.value = Math.min(value, 100)
+
+        if (value > (step + 1) * 25 && step < steps.length - 1) {
+            step++
+            status.textContent = steps[step]
+        }
+
+        if (value >= 100) clearInterval(interval)
+    }, 500)
+}
+
+
+// 🔥 Swal із прогресом
+export function showProgressSimulation() {
+    Swal.fire({
+        title: '🔧 Processing your request...',
+        html: `
+            <p id="swal-status">We're working on your request.</p>
+            <progress id="swal-progress" value="0" max="100" style="width:100%;height:16px"></progress>
+        `,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading()
+            simulateProgress() // 🔁 емуляція активності
+        },
+    })
+}
+
 
 
 // Утиліта для compareStrings. Пояснення:

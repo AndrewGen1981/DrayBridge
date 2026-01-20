@@ -1,0 +1,58 @@
+/* Drag & Drop */
+
+#documents {
+    display: none;
+}
+#documents.modified + #dropzone {
+    border: 2px dashed #52b3f1;
+}
+
+.dropzone {
+    padding: 32px;
+    text-align: center;
+    
+    border: 2px dashed #aaa;
+    border-radius: 10px;
+    
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.dropzone.active {
+    border-color: #4f46e5;
+    background: #f5f7ff;
+}
+
+.dropzone span {
+    color: #4f46e5;
+    font-weight: 600;
+}
+
+.previews {
+    margin-top: 12px;
+    /* display: grid; */
+    display: none;
+    gap: 8px;
+}
+
+.previews[data-active="true"] {
+    display: grid;
+}
+
+.preview {
+    padding: 6px 10px;
+    
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.preview img {
+    width: 4rem;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 4px;
+}

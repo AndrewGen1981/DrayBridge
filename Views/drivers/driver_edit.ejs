@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" view-transition>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Drivers</title>
+
+    <link rel="shortcut icon" href="/favico.png">
+    <link rel="stylesheet" href="/drivers/driver_edit.css">
+
+</head>
+<body class="entire-page">
+
+    <%
+        const {
+            driver = {},
+            driverSchema = {},
+            DRIVER_STATES = {},
+            stateNames = new Map(),
+        } = locals
+    %>
+
+
+    <%- include("../__header.ejs") %>
+
+
+    <main class="standard-template driver">
+
+        <h1 class="main-title">Driver Info</h1>
+
+        <% if (driver._id) { %>
+
+            <form id="formEditADriver"
+                action="/admin/drivers/<%= driver._id %>"
+                method="post" enctype="multipart/form-data" >
+
+                <input type="text" name="modified" id="modified" hidden />
+                
+                <fieldset id="driverInfo">
+                    
+                    <legend>Driver Info</legend>
+
+                    <p class="form-item">
+                        <label for="status">Status</label>
+                        <select name="status" id="status" required>
+                            <% for (const state of Object.keys(DRIVER_STATES)) { %>
+                                <option value="<%= state %>"
+                                    <% if (DRIVER_STATES[state] === driver.state) { %> selected <% } %>
+                                >
+                                    <%= DRIVER_STATES[state].label?.toUpperCase() %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </p>
+
+                    <% for (const k of Object.keys(driverSchema)) { %>
+                        <p class="form-item">
+                            <label for="<%= k %>"><%= driverSchema[k].label %></label>
+                            <input type="<%= driverSchema[k].type || k %>"
+                                name="<%= k %>" id="<%= k %>"
+                                value="<%= driver[k]?.trim() || '' %>"
+                                <% if (driverSchema[k].required) { %> required <% } %>
+                            />
+                        </p>
+                    <% } %>
+
+                    <p class="form-item">
+                        <label for="driverLicenseState">Driver license state</label>
+                        <select name="driverLicenseState" id="driverLicenseState" required>
+    
+                            <% if (!driver.driverLicenseState?.trim()) { %>
+                                <option selected disabled>-- State --</option>
+                            <% } %>
+    
+                            <% for (const [k, v] of stateNames) { %>
+                                <option value="<%= k %>"
+                                    <% if (k === driver.driverLicenseState) { %>
+                                        selected
+                                    <% }%>
+                                >
+                                    <%= v %>
+                                </option>
+                            <% } %>
+    
+                        </select>
+                    </p>
+
+                    <p class="form-item">
+                        <label for="driverLicenseNumber">Driver license number</label>
+                        <input type="text" name="driverLicenseNumber" id="driverLicenseNumber" value="<%= driver.driverLicenseNumber %>" required />
+                    </p>
+
+                </fieldset>
+
+
+                <fieldset>
+                    <legend>Documents</legend>
+                    <%- include("../__components/DocsDragNDrop/DocsDragNDrop.ejs") %>
+
+                    <% if (driver.documents?.length) { %>
+                        <ul class="docs">
+
+                            <% for (const doc of driver.documents) {
+                                const previewUrl = doc.endsWith(".pdf")
+                                    ? doc.replace("/upload/", "/upload/pg_1,w_300,f_webp/")
+                                    : doc
+                            %>
+                                <li class="doc" data-pdf="<%= doc %>" onclick="window.open('<%= doc %>', '_blank')">
+                                    <img src="<%= previewUrl %>" loading="lazy" alt="Driver document" />
+                                </li>
+                            <% } %>
+
+                        </ul>
+                    <% } %>
+                </fieldset>
+
+                <p class="form-item">
+                    <label for="notes">Notes</label>
+                    <textarea name="notes" id="notes"><%= driver.notes %></textarea>
+                </p>
+
+                <div class="buttons">
+                    <button type="reset" id="cancelAddNew" class="color-button">Cancel</button>
+                    <button type="submit" id="submitAddNew" class="color-button -green">Submit</button>
+                </div>
+
+            </form>
+
+        <% } else { %>
+            <p class="issue">Issue. Driver ID is required</p>
+        <% } %>
+
+    </main>
+
+
+    <!-- include("../__footer.ejs") -->
+
+
+    <script type="module" src="/drivers/driver_edit.js" defer></script>
+
+
+</body>
+</html>

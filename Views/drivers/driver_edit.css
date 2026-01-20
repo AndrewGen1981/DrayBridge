@@ -1,0 +1,24 @@
+main.driver form#formEditADriver {
+    display: grid;
+    gap: 3rem;
+}
+
+main.driver fieldset {
+    padding: 0.5rem 1rem 1rem;
+    
+    box-shadow: var(--shadow-s);
+    
+    border: unset;
+    border-bottom: 1px solid #e6ebef;
+    border-radius: 5px;
+}
+main.driver fieldset legend {
+    padding-top: 5px;
+    padding-inline: 1rem;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+main.driver fieldset,
+main.driver fieldset legend {
+    background-color: var(--main-color1);
+}

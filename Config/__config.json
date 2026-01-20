@@ -10,7 +10,7 @@
     "Phone": "+1 (253) 600-1351",
     "PhoneLink": "+12536001351",
 
-    "appDomain": "https://partstop-e8e918ee7b4f.herokuapp.com/",
+    "appDomain": "https://draybridge-b225289d7cfe.herokuapp.com/",
 
     "MAX_FILES_ALLOWED_TO_UPLOAD": 10,
     "MAX_BYTES_PER_FILE": 5242880,

@@ -13,22 +13,12 @@
 <body class="entire-page">
 
     <%
-        const { drivers = [], DRIVER_STATES = {}, stateNames = new Map() } = locals
-
-        const driverSchema = {
-            "firstName": { label: "First name", type: "text", required: true },
-            "lastName": { label: "Last name", type: "text", required: true },
-
-            "phone": { label: "Phone", required: true },
-            "email": { label: "Email", required: true },
-            "password": { label: "Password", required: true },
-
-            "dateOfBirth": { label: "Date of birth", type: "date" },
-            "dateOfHire": { label: "Date of hire", type: "date" },
-
-            "drivingTruck": { label: "Driving truck" },
-            "drivingTrailer": { label: "Driving trailer" },
-        }
+        const {
+            drivers = [],
+            driverSchema = {},
+            DRIVER_STATES = {},
+            stateNames = new Map(),
+        } = locals
     %>
 
 
@@ -42,7 +32,9 @@
         <div id="asideWrapper" <% if (drivers.length) { %> class="-hidden" <% } %> >
 
             <aside id="driverProfile">
-                <form action="/admin/drivers" method="post">
+                <form id="formAddNewDriver" action="/admin/drivers" method="post" enctype="multipart/form-data">
+
+                    <input type="text" name="modified" id="modified" hidden />
     
                     <p class="form-item">
                         <label for="status">Status</label>
@@ -76,13 +68,13 @@
                         <p class="form-item">
                             <label for="driverLicenseState">Driver license state</label>
                             <select name="driverLicenseState" id="driverLicenseState" required>
+
+                                <option selected disabled>-- State --</option>
+
                                 <% for (const [k, v] of stateNames) { %>
-                                    <option value="<%= k %>"
-                                        <% if (k === "WA") { %> selected <% } %>
-                                    >
-                                        <%= v %>
-                                    </option>
+                                    <option value="<%= k %>"><%= v %></option>
                                 <% } %>
+
                             </select>
                         </p>
                         <p class="form-item">
@@ -93,11 +85,7 @@
 
                     <fieldset>
                         <legend>Documents</legend>
-                        <input type="file" name="documents" id="documents" multiple accept="image/*, .pdf" hidden />
-                        <div id="dropzone" class="dropzone">
-                            <p>Drag & drop documents here<br>or <span>click to upload</span></p>
-                        </div>
-                        <div id="previews" class="previews"></div>
+                        <%- include("../__components/DocsDragNDrop/DocsDragNDrop.ejs") %>
                     </fieldset>
 
                     <p class="form-item">
@@ -128,7 +116,27 @@
         <% if (drivers?.length) { %>
         <ul id="existingDrivers">
             <% for (const driver of drivers) { %>
-                <li><%= driver.firstName %></li>
+                <li>
+                    <a href="/admin/drivers/<%= driver._id %>" class="color-button">edit</a>
+
+                    <span class="fln"><%= driver.firstName[0] %><%= driver.lastName[0] %></span>
+                    <span class="name"><%= driver.firstName %> <%= driver.lastName %></span>
+                    <span class="status"><%= driver.status %></span>
+
+                    <a href="tel:+<%= driver.phone %>"><%= driver.phone %></a>
+                    <a href="mailto:<%= driver.email %>"><%= driver.email %></a>
+
+                    <dl class="truck_trailer">
+                        <dt><%= driver.drivingTruck || "TRK" %></dt>
+                        <span>/</span>
+                        <dd><%= driver.drivingTrailer || "TRL" %></dd>
+                    </dl>
+
+                    <dl class="docs">
+                        <dt>docs uploaded:</dt>
+                        <dd><%= (driver.documents || []).length %></dd>
+                    </dl>
+                </li>
             <% } %>
         </ul>
         <% } else { %>

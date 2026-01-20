@@ -1,0 +1,23 @@
+<%
+    const {
+        MAX_FILES_ALLOWED_TO_UPLOAD = 10,
+        MAX_BYTES_PER_FILE = 5242880
+    } = locals.config || {}
+%>
+
+
+<link rel="stylesheet" href="/__components/DocsDragNDrop/DocsDragNDrop.css">
+
+
+<input type="number" id="MAX_FILES_ALLOWED_TO_UPLOAD" value="<%= MAX_FILES_ALLOWED_TO_UPLOAD %>" hidden />
+<input type="number" id="MAX_BYTES_PER_FILE" value="<%= MAX_BYTES_PER_FILE %>" hidden />
+
+
+<input type="file" name="documents" id="documents" multiple accept="image/*, .pdf" />
+<div id="dropzone" class="dropzone">
+    <p>Drag & drop documents here<br>or <span>click to upload</span></p>
+</div>
+<div id="previews" class="previews"></div>
+
+
+<script src="/__components/DocsDragNDrop/DocsDragNDrop.js" defer></script>

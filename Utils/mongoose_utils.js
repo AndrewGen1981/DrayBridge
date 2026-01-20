@@ -7,12 +7,12 @@ const STANDART_SCHEMA_FIELDS_TO_EXCLUDE = ['_id', '__v', 'createdAt', 'updatedAt
 
 // 🔥 Повертає масив ключів Моделі по схемі schema
 function extractSchemaFields(schemaOrModel, exclude = STANDART_SCHEMA_FIELDS_TO_EXCLUDE) {
-  const schema = schemaOrModel?.schema || schemaOrModel     // Можна передавати Модель або Схему
-  const tree = schema?.tree
+    const schema = schemaOrModel?.schema || schemaOrModel     // Можна передавати Модель або Схему
+    const tree = schema?.tree
 
-  if (!tree || typeof tree !== 'object') return []
+    if (!tree || typeof tree !== 'object') return []
 
-  return Object.keys(tree).filter(key => !exclude.includes(key))
+    return Object.keys(tree).filter(key => !exclude.includes(key))
 }
 
 

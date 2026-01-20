@@ -28,12 +28,17 @@ cloudinary.config({
 
 
 // ***  Models
-const { Item } = require("../Models/containerModel")
+const { Driver } = require("../Models/driverModel.js")
+
+
+
+const isImage = file => file.mimetype.startsWith("image/")
+const isPdf = file => file.mimetype === "application/pdf"
 
 
 
 // 🔧 Обробка зображення SHARP (resize тільки якщо потрібно)
-const processFileUpload = async (filePath) => {
+const processFileUpload = async (filePath, folder = "images") => {
 
     // Sharp теж працює через диск, а не через пам*ять. Виходить, що кожного файлу на диску створюється 2 примірники: 
     // один створює мультер для завантаження з форми, а інший - Sharp для роботи із зображенням (ресайз, компресія)
@@ -56,7 +61,10 @@ const processFileUpload = async (filePath) => {
 
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: "items", resource_type: "image" },
+            {
+                folder,
+                resource_type: "image"
+            },
             async (err, result) => {
                 try {
                     // 🧹 Примусово знищуємо об'єкти sharp після завершення
@@ -80,6 +88,30 @@ const processFileUpload = async (filePath) => {
 
         const readStream = fs.createReadStream(tempOutput)
         readStream.pipe(uploadStream).on("finish", () => readStream.destroy())
+    })
+}
+
+
+
+// Завантажую PDF в Cloudinary
+const uploadPdfToCloudinary = (filePath, folder = "documents") => {
+    return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload(
+            filePath,
+            {
+                folder,
+                // resource_type: "raw"
+                resource_type: "image"
+            },
+            (err, result) => {
+                try {
+                    fs.unlinkSync(filePath)
+                } catch {}
+
+                if (err) return reject(err)
+                resolve(result.secure_url)
+            }
+        )
     })
 }
 
@@ -138,8 +170,8 @@ const cloudinaryMonitoring = async (req, res, next) => {
 
         const allUrls = allResources.map(r => r.secure_url);
 
-        const dbImages = await Item.find({}, "images").lean();
-        const flatDbImages = dbImages.flatMap(i => i.images);
+        const dbImages = await Driver.find({}, "documents").lean();
+        const flatDbImages = dbImages.flatMap(i => i.documents);
 
         // Шукаю "розсинхрон"
         const cloudUrlsSet = new Set(allUrls)
@@ -147,7 +179,7 @@ const cloudinaryMonitoring = async (req, res, next) => {
         const extraInCloudinary = allUrls.filter(url => !flatDbImages.includes(url))
 
         for (let extraInDb_URL of extraInDb) {
-            const id = dbImages.find(item => (item.images || []).some(imgurl => imgurl === extraInDb_URL))?._id || null
+            const id = dbImages.find(item => (item.documents || []).some(imgurl => imgurl === extraInDb_URL))?._id || null
             if (id) console.warn(`Лишній малюнок ${ extraInDb_URL } виявнеий в базі, елемент ${ id }`)
         }
 
@@ -173,7 +205,7 @@ const cloudinaryMonitoring = async (req, res, next) => {
             bytes: `${ Math.round(r.bytes * 10 / 1024) / 10 }Kb`,
             format: r.format.toUpperCase(),
             created_at: r.created_at,
-            dbItem: dbImages.find(item => (item.images || []).some(imgurl => imgurl === r.secure_url))?._id || null
+            dbItem: dbImages.find(item => (item.documents || []).some(imgurl => imgurl === r.secure_url))?._id || null
         }));
 
         const topLatest = latest.resources.map(r => ({
@@ -182,7 +214,7 @@ const cloudinaryMonitoring = async (req, res, next) => {
             bytes: `${ Math.round(r.bytes *10 / 1024) / 10 }Kb`,
             format: r.format.toUpperCase(),
             created_at: r.created_at,
-            dbItem: dbImages.find(item => (item.images || []).some(imgurl => imgurl === r.secure_url))?._id || null
+            dbItem: dbImages.find(item => (item.documents || []).some(imgurl => imgurl === r.secure_url))?._id || null
         }));
 
 
@@ -234,7 +266,10 @@ const deleteFromCloudinary = async(req, res, next) => {
 
 
 module.exports = {
+    isImage, isPdf,
+
     processFileUpload,
+    uploadPdfToCloudinary,
     deleteImagesFromCloudinary,
 
     // Cloudinary Admin API

@@ -1,3 +1,54 @@
+/* Drivers data list */
+main.drivers ul#existingDrivers {
+    margin-block: 3rem;
+
+    display: grid;
+    gap: 5px;
+}
+
+main.drivers ul#existingDrivers li {
+    min-height: 5rem;
+
+    display: grid;
+    grid-template-columns: 5rem 5rem repeat(6, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 3px;
+
+    background-color: #e6ecf3;
+    border-bottom: 1px solid #dce1e8;
+}
+main.drivers ul#existingDrivers li:nth-of-type(odd) {
+    background-color: #d1d5db;
+}
+main.drivers ul#existingDrivers li > * {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+main.drivers ul#existingDrivers li * {
+    font-size: 1.35rem;
+}
+
+main.drivers ul#existingDrivers li a {
+    margin-block: auto;
+
+    width: 5rem;
+    aspect-ratio: 1;
+}
+main.drivers ul#existingDrivers li .fln {
+    width: 4.5rem;
+    aspect-ratio: 1;
+
+    font-size: 1.5rem;
+    color: #fff;
+    background-color: mediumorchid;
+    border-radius: 50%;
+}
+
+
 /* Adding new driver modal dialog. Opened on default */
 main.drivers #asideWrapper {
     position: fixed;
@@ -84,56 +135,4 @@ main.drivers aside#driverProfile form .form-item textarea {
 main.drivers aside#driverProfile form .form-item textarea {
     height: 7rem;
     resize: none;
-}
-
-/* Drag & Drop */
-
-main.drivers .dropzone {
-    padding: 32px;
-    text-align: center;
-    
-    border: 2px dashed #aaa;
-    border-radius: 10px;
-    
-    transition: 0.2s;
-    cursor: pointer;
-}
-
-main.drivers .dropzone.active {
-    border-color: #4f46e5;
-    background: #f5f7ff;
-}
-
-main.drivers .dropzone span {
-    color: #4f46e5;
-    font-weight: 600;
-}
-
-main.drivers .previews {
-    margin-top: 12px;
-    /* display: grid; */
-    display: none;
-    gap: 8px;
-}
-
-main.drivers .previews[data-active="true"] {
-    display: grid;
-}
-
-main.drivers .preview {
-    padding: 6px 10px;
-    
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    border: 1px solid #ddd;
-    border-radius: 5px;
-}
-
-main.drivers .preview img {
-    width: 4rem;
-    aspect-ratio: 1;
-    object-fit: cover;
-    border-radius: 4px;
 }

@@ -12,7 +12,7 @@ const driverSchema = new mongoose.Schema({
     status: {
         type: String,
         enum: DRIVER_STATUSES,
-        lowercase: true,
+        uppercase: true,
         require: true,
         index: true,
         default: DEFAULT_STATUS
