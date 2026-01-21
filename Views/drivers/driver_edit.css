@@ -166,3 +166,13 @@ main.driver textarea#notes {
 main.driver fieldset#notesBox {
     max-block-size: 15rem;
 }
+
+
+/* Danger Zone */
+main.driver .danger {
+    margin-block: 5rem;
+    padding: 1rem;
+
+    border: 1px solid var(--accent-red-border);
+    border-radius: 3px;
+}

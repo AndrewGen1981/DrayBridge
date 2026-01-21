@@ -144,10 +144,20 @@
                 </div>
 
                 <div class="buttons">
-                    <button type="submit" id="submitUpdates" class="color-button -green">Submit</button>
+                    <button type="submit" id="submitUpdates" class="color-button -green">Save Updates</button>
                 </div>
 
             </form>
+
+            <section class="danger">
+                <button type="button" id="removeDriver"
+                    class="color-button -red"
+                    title="Remove driver data permanently"
+                    data-driverId="<%= driver._id %>"
+                >
+                    Remove Driver
+                </button>
+            </section>
 
         <% } else { %>
             <p class="issue">Issue. Driver ID is required</p>

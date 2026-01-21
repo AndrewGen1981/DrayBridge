@@ -55,9 +55,12 @@ if (docsList) docsList.querySelectorAll("li.doc")
                 if (!isConfirmed) return
 
                 const { result } = await fetchWithHandler({
-                    action: `/admin/drivers/${ driverid }`,
-                    method: "delete",
-                    body: { url }
+                    action: `/admin/drivers/remove-doc`,
+                    method: "post",
+                    body: {
+                        url,
+                        driverId: driverid,
+                    }
                 }) || {}
 
                 if (result) {
@@ -181,3 +184,72 @@ if (formEditADriver) formEditADriver.addEventListener("submit", async (e) => {
         if (btnSubmitUpdates) btnSubmitUpdates.disable = false
     }
 })
+
+
+
+// Delete driver
+const btnRemoveDriver = document.getElementById("removeDriver")
+
+
+if (btnRemoveDriver) {
+    btnRemoveDriver.addEventListener("click", async (e) => {
+        try {
+            btnRemoveDriver.disabled = true
+            const { driverid } = btnRemoveDriver.dataset || {}
+            if (!driverid.trim()) throw new Error("Driver ID required for removing")
+
+            const confirmCode = driverid.slice(0, 4).toUpperCase()
+
+            const { isConfirmed, value } = await Swal.fire({
+                icon: "warning",
+                title: "Delete driver?",
+                html: `
+                    <p><b>This action is irreversible.</b></p>
+                    <p>The driver record and all related documents will be permanently deleted.</p>
+                    <p style="margin-top:12px;">
+                        To confirm deletion, type the following code:<br>
+                        <b style="font-size:18px;letter-spacing:2px;">${ confirmCode }</b>
+                    </p>
+                `,
+                input: "text",
+                inputPlaceholder: "Enter confirmation code",
+                inputAttributes: {
+                    autocapitalize: "characters",
+                    autocomplete: "off"
+                },
+                confirmButtonText: "Delete driver",
+                cancelButtonText: "Cancel",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                preConfirm: (value) => {
+                    if (!value || value.toUpperCase() !== confirmCode) {
+                        Swal.showValidationMessage("Confirmation code does not match")
+                        return false
+                    }
+                    return true
+                }
+            })
+
+            if (!isConfirmed || !value) return
+
+            const { result } = await fetchWithHandler({
+                action: `/admin/drivers/${ driverid }`,
+                method: "DELETE"
+            }) || {}
+
+            if (result) {
+                await Swal.fire({ icon: "success", title: "Successfully removed!",
+                    toast: true, timer: 1500, timerProgressBar: true })
+
+                location.replace("/admin/drivers")
+            }
+
+        } catch (error) {
+            console.log("❌ Remove issue: ", error.message || error)
+            await Swal.fire({ icon: "error", title: "Request failed",
+                text: error?.message || "An unexpected error occurred." })
+        } finally {
+            btnRemoveDriver.disabled = false
+        }
+    })
+}

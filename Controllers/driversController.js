@@ -184,6 +184,41 @@ exports.addNewOrUpdateDriver = async (req, res, next) => {
 
 
 
+exports.removeDriver = async (req, res, next) => {
+    try {
+        const { driverId } = req.params
+        if (!driverId) throw new AppError("Driver ID is required", 400)
+
+        const driver = await Driver
+            .findByIdAndDelete(driverId)
+            .select("documents")
+            .lean()
+
+        if (!driver)
+            throw new AppError(`Driver "${ driverId }" was not found`, 404)
+
+        const imagesToRemove = driver.documents.map(d => d.url)
+
+        if (imagesToRemove.length) {
+            try {
+                await deleteImagesFromCloudinary(imagesToRemove)
+            } catch (e) {
+                console.warn(`Cloudinary cleanup failed for driver ${ driverId }:`, e.message)
+            }
+        }
+
+        res.json({ result: true })
+
+    } catch (error) {
+        console.error(error)
+        const status = error.status || 500
+        const message = error.message || String(error)
+        res.status(status).json({ result: false, issue: message })
+    }
+}
+
+
+
 exports.setDocLabel = async (req, res, next) => {
     try {
         const { url, driverId, label } = req.body
@@ -221,11 +256,9 @@ exports.setDocLabel = async (req, res, next) => {
 
 exports.removeDriverDocument = async (req, res, next) => {
     try {
-        const { driverId } = req.params
-        if (!driverId) throw new AppError("Driver ID is required", 400)
-
-        const { url } = req.body
+        const { url, driverId } = req.body
         if (!url) throw new AppError("Document URL is required", 400)
+        if (!driverId) throw new AppError("Driver ID is required", 400)
 
         const driver = await Driver
             .findById(driverId)

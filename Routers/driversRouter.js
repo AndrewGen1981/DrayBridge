@@ -23,12 +23,11 @@ const driversController = require("../Controllers/driversController.js")
 driversRouter.get("/", driversController.index)
 driversRouter.post("/email", driversController.getDriverByEmail)
 
-driversRouter.post("/set-doc-label", driversController.setDocLabel)
 
-// driversRouter.post("/",
-//     upload.array("documents", global.MAX_FILES_ALLOWED_TO_UPLOAD),
-//     driversController.addNew
-// )
+driversRouter.post("/set-doc-label", driversController.setDocLabel)
+driversRouter.post("/remove-doc", driversController.removeDriverDocument)
+
+
 driversRouter.post("/{:driverId}",
     upload.array("documents", global.MAX_FILES_ALLOWED_TO_UPLOAD),
     driversController.addNewOrUpdateDriver
@@ -37,7 +36,7 @@ driversRouter.post("/{:driverId}",
 
 // Should be at the bottom
 driversRouter.get("/:driverId", driversController.getDriver)
-driversRouter.delete("/:driverId", driversController.removeDriverDocument)
+driversRouter.delete("/:driverId", driversController.removeDriver)
 
 
 module.exports = driversRouter
