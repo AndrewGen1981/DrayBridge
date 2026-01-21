@@ -29,6 +29,7 @@ cloudinary.config({
 
 // ***  Models
 const { Driver } = require("../Models/driverModel.js")
+const { AppError } = require("../Utils/AppError.js")
 
 
 
@@ -113,6 +114,77 @@ const uploadPdfToCloudinary = (filePath, folder = "documents") => {
             }
         )
     })
+}
+
+
+
+async function checkAndUploadFilesToCloudinary(files, folder = "") {
+    // За один раз можна завантажити не більше, ніж MAX_FILES_ALLOWED_TO_UPLOAD файлів
+    if (files.length > global.MAX_FILES_ALLOWED_TO_UPLOAD)
+        throw new AppError( `Upload limit exceeded — maximum ${ global.MAX_FILES_ALLOWED_TO_UPLOAD } files allowed.`, 422)
+
+    // 🔥 Обробка зображень
+    const newDocs = []
+    
+    // Якщо є нові файли, то обробляємо через sharp + cloudinary
+    if (Array.isArray(files) && files.length > 0) {
+
+        // ***  Гібридний варіант, нарізаю по 3шт і запускаю паралельну обробку всіх 3х
+        const chunkSize = 3
+        const chunks = []
+
+        for (let i = 0; i < files.length; i += chunkSize) {
+            chunks.push(files.slice(i, i + chunkSize))
+        }
+
+        // 🔁 Обробляємо батчі послідовно (щоб не перевантажити RAM)
+        for (const chunk of chunks) {
+            // 🧩 Але кожен батч виконується паралельно (до 3 файлів)
+            await Promise.all(
+                chunk.map(async(file) => {
+                    try {
+                        const type = isImage(file)
+                            ? "image"
+                            : isPdf(file)
+                                ? "pdf"
+                                : null
+
+                        if (!type) return
+
+                        const url = type === "image"
+                            ? await processFileUpload(file.path, folder)
+                            : await uploadPdfToCloudinary(file.path, folder)
+
+                        if (url) {
+                            const { name: label } = path.parse(file.originalname)
+                            newDocs.push({ url, type, label })
+                        }
+                    } catch (err) {
+                        console.error(`Upload failed for ${ file.originalname }:`, err.message)
+                    } finally {
+                        try {
+                            if (fs.existsSync(file.path))
+                                fs.unlinkSync(file.path)
+                        } catch (e) {
+                            console.warn(`Failed to delete temp file ${ file.path }:`, e.message)
+                        }
+                    }
+                })
+            )
+        }
+
+    }
+
+    // Check heap usage - 1,048,576 bytes = 1 Mb (1024*1024)
+    const usedHeap = Math.ceil(process.memoryUsage().heapUsed / 1048576)
+    console.log(`🧩 Heap usage (${ new Date().toISOString() }): ${ usedHeap }`)
+
+    if (usedHeap > 85 && global.isProduction) {
+        console.log('♻️ Restarting due to high memory load...')
+        process.exit(0)
+    }
+
+    return newDocs
 }
 
 
@@ -271,6 +343,7 @@ module.exports = {
     processFileUpload,
     uploadPdfToCloudinary,
     deleteImagesFromCloudinary,
+    checkAndUploadFilesToCloudinary,
 
     // Cloudinary Admin API
     cloudinaryMonitoring,

@@ -4,7 +4,7 @@ main.driver form#formEditADriver {
 }
 
 main.driver fieldset {
-    padding: 0.5rem 1rem 1rem;
+    padding: 1rem 1.5rem 1.5rem;
     
     box-shadow: var(--shadow-s);
     
@@ -21,4 +21,148 @@ main.driver fieldset legend {
 main.driver fieldset,
 main.driver fieldset legend {
     background-color: var(--main-color1);
+}
+
+/* Driver info */
+main.driver fieldset#driverInfo {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr));
+    gap: 1.5rem;
+}
+main.driver fieldset#driverInfo .form-item {
+    display: grid;
+    gap: 2px;
+}
+
+main.driver fieldset#driverInfo .form-item label {
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    opacity: 0.5;
+}
+main.driver fieldset#driverInfo .form-item:has(input:required) label::after {
+    content: "*";
+    color: crimson;
+    margin-left: 3px;
+}
+main.driver fieldset#driverInfo .form-item:has(input:required:not(:placeholder-shown)) label::after {
+    color: var(--font-col-300);
+}
+
+main.driver fieldset#driverInfo .form-item input,
+main.driver fieldset#driverInfo .form-item select,
+main.driver textarea#notes {
+    padding: 7px;
+    width: 100%;
+    
+    background-color: #fff;
+    border: 1px solid var(--main-color2);
+    border-radius: 3px;
+
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.5rem;
+    color: var(--font-col-500);
+}
+
+/* Existing Documents */
+
+main.driver fieldset ul.docs {
+    list-style-type: none;
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+main.driver fieldset ul.docs li {
+    width: min(28.2rem, 100%);
+    aspect-ratio: 1 / 1;
+
+    background-color: #fff;
+    border: 1px solid var(--main-color2);
+    border-radius: 3px;
+
+    overflow: hidden;
+    cursor: pointer;
+
+    position: relative;
+}
+main.driver fieldset ul.docs li p.doc-header {
+    padding: 2px;
+
+    font-size: 0.9rem;
+    text-align: right;
+    color: var(--font-col-300);
+}
+main.driver fieldset ul.docs li.-remove {
+    border: 1px solid var(--accent-red-border);
+}
+
+main.driver fieldset ul.docs li img {
+    /* width: 100%; */
+    max-width: 100%;
+    object-fit: contain;
+    object-position: center;
+}
+
+main.driver fieldset ul.docs li .doc-footer {
+    position: absolute;
+    bottom: 3px; left: 0;
+    width: calc(100% - 3px); height: 3rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    z-index: 1;
+}
+
+main.driver fieldset ul.docs li .doc-footer input.doc-title {
+    margin-left: -3px;
+    padding-block: 3px;
+    padding-left: 1rem;
+
+    flex: 1;
+    width: 100%;
+
+    display: block;
+    background-color: var(--main-color1);
+    border-bottom-right-radius: 1rem;
+    border-top-right-radius: 1rem;
+
+    border: 1px solid var(--main-color);
+
+    font-weight: 500;
+    text-wrap: nowrap;
+    overflow-x: hidden;
+}
+
+main.driver fieldset ul.docs li button.delete-btn {
+    width: 30px;
+    aspect-ratio: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+main.driver fieldset ul.docs li button.delete-btn svg {
+    width: 16px; aspect-ratio: 1;
+    stroke: #ab0424;
+}
+
+/* Form footer */
+main.driver .form-footer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(50rem, 100%), 1fr));
+    gap: 3rem;
+}
+
+main.driver textarea#notes {
+    height: 100%;
+    resize: none;
+}
+main.driver fieldset#notesBox {
+    max-block-size: 15rem;
 }

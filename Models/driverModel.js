@@ -51,7 +51,26 @@ const driverSchema = new mongoose.Schema({
     drivingTruck: String,
     drivingTrailer: String,
 
-    documents: [ String ],
+    documents: [{
+        url: {
+            type: String,
+            required: true,
+        },
+        label: {
+            type: String,
+            trim: true,
+            default: "",
+        },
+        type: {
+            type: String,
+            enum: ["image", "pdf"],
+            required: true,
+        },
+        uploadedAt: {
+            type: Date,
+            default: Date.now,
+        },
+    }],
 
     notes: String,
 

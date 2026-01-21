@@ -1,6 +1,7 @@
 {
   "ignore": [
     "Cookies/*",
-    "test_terminals.html"
+    "test_terminals.html",
+    "tmp_uploads/*"
   ]
 }

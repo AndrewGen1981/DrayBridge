@@ -19,7 +19,7 @@
 }
 
 .dropzone.active {
-    border-color: #4f46e5;
+    border-color: #4f46e5 !important;
     background: #f5f7ff;
 }
 

@@ -13,6 +13,8 @@ const btnCancelAddNew = document.getElementById("cancelAddNew")
 const btnSubmitAddNew = document.getElementById("submitAddNew")
 const formAddNewDriver = document.getElementById("formAddNewDriver")
 
+const email = document.getElementById("email")
+
 
 
 let tracker = formAddNewDriver
@@ -43,8 +45,8 @@ if (formAddNewDriver) formAddNewDriver.addEventListener("submit", async (e) => {
         if (!modifiedInputs.length) {
             await Swal.fire({
                 icon: "warning",
-                title: "Cannot update",
-                html: "Looks like nothing was changed. <b>Please modify something before saving</b>."
+                title: "Cannot submit",
+                html: "Please fill in at least required fields to submit."
             })
             return
         }
@@ -53,6 +55,22 @@ if (formAddNewDriver) formAddNewDriver.addEventListener("submit", async (e) => {
             modified.value = modifiedInputs.map(inp => inp.name).join(",")
         } else {
             Swal.fire({ icon: "warning", title: "Input for modified is missed" })
+        }
+
+        if (!email?.value?.trim()) {
+            Swal.fire({ icon: "warning", title: "Email is required" })
+            return
+        }
+
+        const { result } = await fetchWithHandler({
+            action: `/admin/drivers/email`,
+            method: "post",
+            body: { email: email.value }
+        }) || {}
+
+        if (result) {
+            Swal.fire({ icon: "error", title: `Driver with email "${ email.value }" already exists` })
+            return
         }
 
         const { isConfirmed } = await Swal.fire({
