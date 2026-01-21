@@ -198,7 +198,7 @@ if (btnRemoveDriver) {
             const { driverid } = btnRemoveDriver.dataset || {}
             if (!driverid.trim()) throw new Error("Driver ID required for removing")
 
-            const confirmCode = driverid.slice(0, 4).toUpperCase()
+            const confirmCode = driverid.slice(-4).toUpperCase()
 
             const { isConfirmed, value } = await Swal.fire({
                 icon: "warning",
